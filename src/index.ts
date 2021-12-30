@@ -38,6 +38,21 @@ var isDragging: boolean = false;
 var mouseDragStart: Position | undefined;
 var isMouseDragComplete = false;
 
+var tg: TileGrid | undefined = undefined;
+
+const tgRes = TileGrid.empty().place(
+  Set.of(
+    new PositionedTile(
+      new Tile(TileColour.Blue, TileShape.Four),
+      new Position(0, 0)
+    )
+  )
+);
+
+if (tgRes.type == "Success") {
+  tg = tgRes.tileGrid;
+}
+
 function updateMousePosition(mouseEvent: MouseEvent): any {
   mousePosition = new Position(mouseEvent.pageX, mouseEvent.pageY);
 
@@ -74,19 +89,13 @@ document.addEventListener("mousemove", updateMousePosition);
 
 var [hand, tileBag] = TileBag.full().take(6);
 
-var tileGridGraphics: TileGridGraphics | undefined;
-
 function doPlacement(placements: Set<PositionedTile>): boolean {
-  const newTg = tileGridGraphics?.tilegrid.place(placements);
+  const newTg = tg?.place(placements);
 
-  if (newTg && tileGridGraphics) {
+  if (newTg) {
     switch (newTg.type) {
       case "Success":
-        tileGridGraphics = new TileGridGraphics(
-          newTg.tileGrid,
-          tileGridGraphics.canvasRect,
-          tileGridGraphics.mid
-        );
+        tg = newTg.tileGrid;
         return true;
       default:
         console.log(`oh no, can't do that: ${prettyPrint(newTg)}`);
@@ -143,34 +152,10 @@ function gameLoop(context: CanvasRenderingContext2D) {
     }
   }
 
-  const tgRes = TileGrid.empty().place(
-    Set.of(
-      new PositionedTile(
-        new Tile(TileColour.Blue, TileShape.Four),
-        new Position(0, 0)
-      )
-    )
-  );
-
-  var tg: TileGrid | undefined = undefined;
-
-  if (tgRes.type == "Success") {
-    tg = tgRes.tileGrid;
-  }
-
-  if (!tileGridGraphics && tg) {
-    tileGridGraphics = new TileGridGraphics(tg, tileGridRect, effectiveMid);
-  }
-
-  if (tileGridGraphics) {
-    tileGridGraphics = tileGridGraphics.nextTileGrid(
-      tileGridRect,
-      effectiveMid
-    );
-    tileGridGraphics.draw(context);
-  }
-
   panel.draw(context);
+  if (tg) {
+    TileGridGraphics.draw(context, effectiveMid, tg);
+  }
 
   requestAnimationFrame(() => gameLoop(context));
 }
