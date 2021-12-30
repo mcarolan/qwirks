@@ -15,26 +15,57 @@ const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const offset = 3;
-const padding = 3;
+const canvasRect = new Rect(new Position(0, 0), canvas.width, canvas.height);
 
-var center = new Position(0, 0);
+const tileGridRect = new Rect(
+  new Position(10, 10),
+  canvasRect.width,
+  canvasRect.height - PANEL_HEIGHT - 10
+);
+
+var mid = canvasRect.middle();
 
 var mousePosition: Position | undefined;
 var mouseDown: number | undefined;
 
 var panel: PanelGraphics | undefined;
 
+function isMouseDown(): boolean {
+  return mouseDown != undefined && mouseDown != 0;
+}
+
+var isDragging: boolean = false;
+var mouseDragStart: Position | undefined;
+var isMouseDragComplete = false;
+
 function updateMousePosition(mouseEvent: MouseEvent): any {
   mousePosition = new Position(mouseEvent.pageX, mouseEvent.pageY);
+
+  if (isMouseDown() && mouseDragStart && mousePosition && !isDragging) {
+    const dx = Math.abs(mouseDragStart.x - mousePosition.x);
+    const dy = Math.abs(mouseDragStart.y - mousePosition.y);
+
+    if (dx > 5 || dy > 5) {
+      isDragging = true;
+    }
+  }
 }
 
 function updateMouseDown(mouseEvent: MouseEvent): any {
+  const downBefore = isMouseDown();
   mouseDown = (mouseDown ?? 0) + 1;
+  if (!downBefore && isMouseDown() && mouseDragStart == undefined) {
+    mouseDragStart = mousePosition;
+  }
 }
 
 function updateMouseUp(mouseEvent: MouseEvent): any {
+  const downBefore = isMouseDown();
   mouseDown = (mouseDown ?? 0) - 1;
+  if (isDragging && downBefore && !isMouseDown()) {
+    isMouseDragComplete = true;
+    isDragging = false;
+  }
 }
 
 document.addEventListener("mousedown", updateMouseDown);
@@ -53,7 +84,8 @@ function doPlacement(placements: Set<PositionedTile>): boolean {
       case "Success":
         tileGridGraphics = new TileGridGraphics(
           newTg.tileGrid,
-          tileGridGraphics.canvasRect
+          tileGridGraphics.canvasRect,
+          tileGridGraphics.mid
         );
         return true;
       default:
@@ -70,33 +102,39 @@ function gameLoop(context: CanvasRenderingContext2D) {
   context.fillStyle = "red";
   context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 
-  const canvasRect = new Rect(new Position(0, 0), canvas.width, canvas.height);
-
-  const isMouseDown: boolean = mouseDown != undefined && mouseDown != 0;
-
   if (!panel) {
     panel = new PanelGraphics(canvasRect, hand, undefined, undefined);
   }
-  panel = panel.nextPanel(canvasRect, mousePosition, isMouseDown);
-  panel.draw(context);
+  panel = panel.nextPanel(canvasRect, mousePosition, isMouseDown());
 
-  const tileGridRect = new Rect(
-    new Position(10, 10),
-    canvasRect.width,
-    canvasRect.height - PANEL_HEIGHT - 10
+  var draggingOffset = new Position(0, 0);
+
+  if (isDragging && mouseDragStart && mousePosition) {
+    const dx = mouseDragStart.x - mousePosition.x;
+    const dy = mouseDragStart.y - mousePosition.y;
+    draggingOffset = new Position(dx, dy);
+  } else if (isMouseDragComplete && mouseDragStart && mousePosition) {
+    const dx = mouseDragStart.x - mousePosition.x;
+    const dy = mouseDragStart.y - mousePosition.y;
+    mid = new Position(mid.x - dx, mid.y - dy);
+    draggingOffset = new Position(0, 0);
+    isMouseDragComplete = false;
+    mouseDragStart = undefined;
+  }
+
+  const effectiveMid = new Position(
+    mid.x - draggingOffset.x,
+    mid.y - draggingOffset.y
   );
 
   if (
-    isMouseDown &&
+    isMouseDown() &&
     mousePosition &&
     tileGridRect.contains(mousePosition) &&
     panel.active != undefined &&
     panel.activeTile
   ) {
-    const xy = TileGraphics.positionFromScreen(
-      mousePosition,
-      tileGridRect.middle()
-    );
+    const xy = TileGraphics.positionFromScreen(mousePosition, effectiveMid);
     if (doPlacement(Set.of(new PositionedTile(panel.activeTile, xy)))) {
       const [took, newTg] = tileBag.take(1);
       tileBag = newTg;
@@ -121,13 +159,18 @@ function gameLoop(context: CanvasRenderingContext2D) {
   }
 
   if (!tileGridGraphics && tg) {
-    tileGridGraphics = new TileGridGraphics(tg, tileGridRect);
+    tileGridGraphics = new TileGridGraphics(tg, tileGridRect, effectiveMid);
   }
 
   if (tileGridGraphics) {
-    tileGridGraphics = tileGridGraphics.nextPanel(tileGridRect);
+    tileGridGraphics = tileGridGraphics.nextTileGrid(
+      tileGridRect,
+      effectiveMid
+    );
     tileGridGraphics.draw(context);
   }
+
+  panel.draw(context);
 
   requestAnimationFrame(() => gameLoop(context));
 }

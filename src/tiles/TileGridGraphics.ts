@@ -7,11 +7,12 @@ const PADDING = 10;
 
 export class TileGridGraphics {
   private tileRects: Map<Position, Tile>;
-  private mid: Position;
 
-  constructor(readonly tilegrid: TileGrid, readonly canvasRect: Rect) {
-    this.mid = canvasRect.middle();
-
+  constructor(
+    readonly tilegrid: TileGrid,
+    readonly canvasRect: Rect,
+    readonly mid: Position
+  ) {
     const elems: Array<[Position, Tile]> = new Array(tilegrid.size);
 
     for (const pt of tilegrid.values) {
@@ -21,9 +22,9 @@ export class TileGridGraphics {
     this.tileRects = Map<Position, Tile>(elems);
   }
 
-  nextPanel(newCanvasRect: Rect): TileGridGraphics {
-    if (!is(this.canvasRect, newCanvasRect)) {
-      return new TileGridGraphics(this.tilegrid, newCanvasRect);
+  nextTileGrid(newCanvasRect: Rect, newMid: Position): TileGridGraphics {
+    if (!is(this.canvasRect, newCanvasRect) || !is(this.mid, newMid)) {
+      return new TileGridGraphics(this.tilegrid, newCanvasRect, newMid);
     } else {
       return this;
     }
