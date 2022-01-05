@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "start": "parcel serve src/index.html images/*.png",
-    "watch": "parcel watch src/index.html images/*.png"
+    "start": "parcel serve --no-cache src/index.html images/*.png",
+    "watch": "parcel watch src/index.html images/*.png",
+    "build": "parcel build src/index.html images/*.png"
   },
   "author": "",
   "license": "ISC",

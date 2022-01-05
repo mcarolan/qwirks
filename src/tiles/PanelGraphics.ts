@@ -2,6 +2,7 @@ import { Position, Rect, Tile } from "./domain";
 import { TileGraphics } from "./TileGraphics";
 import { loadImage } from "./utility";
 import { is, List, Map } from "immutable";
+import { GameState } from "./GameState";
 
 const panelStartImage = loadImage("./images/panel-start.png");
 const PANEL_START_IMAGE_WIDTH = 26;
@@ -24,28 +25,20 @@ const PANEL_REPEAT_IMAGE_WIDTH =
   PANEL_WIDTH - PANEL_START_IMAGE_WIDTH - PANEL_END_IMAGE_WIDTH;
 
 export class PanelGraphics {
-  private tileRects: Map<number, Rect>;
+  private position: Position;
 
-  readonly position: Position;
-
-  get activeTile(): Tile | undefined {
-    if (this.active != undefined) {
-      return this.hand.get(this.active, undefined);
-    }
-    return undefined;
+  private newPosition(state: GameState) {
+    return new Position(
+      state.canvasRect.width / 2 - PANEL_WIDTH / 2,
+      state.canvasRect.height - PADDING - PANEL_HEIGHT
+    );
   }
 
-  constructor(
-    readonly canvasRect: Rect,
-    readonly hand: List<Tile> = List(),
-    readonly hover: number | undefined,
-    readonly active: number | undefined
-  ) {
-    this.position = new Position(
-      canvasRect.width / 2 - PANEL_WIDTH / 2,
-      canvasRect.height - PADDING - PANEL_HEIGHT
-    );
+  constructor(state: GameState) {
+    this.position = this.newPosition(state);
+  }
 
+  private tileRects(state: GameState): Map<number, Rect> {
     const tileY =
       this.position.y +
       panelStartImage.height / 2 -
@@ -53,8 +46,8 @@ export class PanelGraphics {
 
     const startTileX = this.position.x + panelStartImage.width + PADDING;
 
-    this.tileRects = Map<number, Rect>(
-      hand.map((_, i) => {
+    return Map<number, Rect>(
+      state.hand.map((_, i) => {
         const tileX = startTileX + i * TileGraphics.tileWidth + i * PADDING;
         const tilePosition = new Position(tileX, tileY);
         return [
@@ -69,49 +62,55 @@ export class PanelGraphics {
     );
   }
 
-  clearActiveAndSetHand(hand: List<Tile>): PanelGraphics {
-    return new PanelGraphics(this.canvasRect, hand, undefined, undefined);
-  }
+  updateGameState(state: GameState): void {
+    this.position = this.newPosition(state);
+    const tileRects = this.tileRects(state);
 
-  nextPanel(
-    newCanvasRect: Rect,
-    mousePosition: Position | undefined,
-    isMouseDown: boolean
-  ): PanelGraphics {
     var newHover: number | undefined;
-    var newActive: number | undefined = this.active;
+    var newActive: number | undefined = state.panelActiveTileIndex;
 
-    if (mousePosition != undefined) {
-      this.tileRects.forEach((rect, i) => {
+    const mousePosition = state.mousePosition;
+    if (mousePosition) {
+      tileRects.forEach((rect, i) => {
         if (rect.contains(mousePosition)) {
           newHover = i;
-          if (isMouseDown != undefined && isMouseDown) {
-            newActive = i;
-          }
           return false;
         }
       });
     }
 
-    if (
-      !is(this.canvasRect, newCanvasRect) ||
-      !is(this.hover, newHover) ||
-      !is(this.active, newActive)
-    ) {
-      return new PanelGraphics(newCanvasRect, this.hand, newHover, newActive);
-    } else {
-      return this;
-    }
+    state.mouseEvents.forEach((e) => {
+      if (e.type == "MouseClick") {
+        console.log("found a mouse click");
+        tileRects.forEach((rect, i) => {
+          if (rect.contains(e.position)) {
+            newActive = i;
+            return false;
+          }
+        });
+      }
+    });
+
+    state.panelActiveTileIndex = newActive;
+    state.panelHoverTileIndex = newHover;
   }
 
-  draw(context: CanvasRenderingContext2D): void {
+  draw(context: CanvasRenderingContext2D, state: GameState): void {
     this.drawPanel(context);
-    this.hand.map((tile, i) => {
-      const rect = this.tileRects.get(i);
+    const tileRects = this.tileRects(state);
+
+    state.hand.map((tile, i) => {
+      const rect = tileRects.get(i);
       if (rect) {
-        if (this.active != undefined && is(this.active, i)) {
+        if (
+          state.panelActiveTileIndex != undefined &&
+          is(state.panelActiveTileIndex, i)
+        ) {
           TileGraphics.drawActiveTile(context, rect.position, tile);
-        } else if (this.hover != undefined && is(this.hover, i)) {
+        } else if (
+          state.panelHoverTileIndex != undefined &&
+          is(state.panelHoverTileIndex, i)
+        ) {
           TileGraphics.drawHoverTile(context, rect.position, tile);
         } else {
           TileGraphics.drawInactiveTile(context, rect.position, tile);
@@ -121,26 +120,28 @@ export class PanelGraphics {
   }
 
   private drawPanel(context: CanvasRenderingContext2D): void {
+    const position = this.position;
+
     context.drawImage(
       panelStartImage,
-      this.position.x,
-      this.position.y - PADDING,
+      position.x,
+      position.y - PADDING,
       PANEL_START_IMAGE_WIDTH,
       PANEL_HEIGHT
     );
 
     context.drawImage(
       panelEndImage,
-      this.position.x + PANEL_WIDTH - PANEL_END_IMAGE_WIDTH,
-      this.position.y - PADDING,
+      position.x + PANEL_WIDTH - PANEL_END_IMAGE_WIDTH,
+      position.y - PADDING,
       PANEL_END_IMAGE_WIDTH,
       PANEL_HEIGHT
     );
 
     context.drawImage(
       panelRepaet,
-      this.position.x + PANEL_START_IMAGE_WIDTH,
-      this.position.y - PADDING,
+      position.x + PANEL_START_IMAGE_WIDTH,
+      position.y - PADDING,
       PANEL_REPEAT_IMAGE_WIDTH,
       PANEL_HEIGHT
     );

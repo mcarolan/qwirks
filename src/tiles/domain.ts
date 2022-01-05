@@ -52,6 +52,8 @@ class PositionedTile {
 }
 
 class Position {
+  public static ZERO: Position = new Position(0, 0);
+
   constructor(readonly x: number, readonly y: number) {}
 
   public static below(pos: Position): Position {
@@ -68,6 +70,10 @@ class Position {
 
   public static right(pos: Position): Position {
     return new Position(pos.x + 1, pos.y);
+  }
+
+  minus(other: Position): Position {
+    return new Position(this.x - other.x, this.y - other.y);
   }
 
   toString(): string {
