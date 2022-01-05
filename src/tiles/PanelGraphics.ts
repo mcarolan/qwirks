@@ -81,7 +81,6 @@ export class PanelGraphics {
 
     state.mouseEvents.forEach((e) => {
       if (e.type == "MouseClick") {
-        console.log("found a mouse click");
         tileRects.forEach((rect, i) => {
           if (rect.contains(e.position)) {
             newActive = i;
