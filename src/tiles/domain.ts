@@ -76,6 +76,10 @@ class Position {
     return new Position(this.x - other.x, this.y - other.y);
   }
 
+  plus(other: Position): Position {
+    return new Position(this.x + other.x, this.y + other.y);
+  }
+
   toString(): string {
     return `(${this.x}, ${this.y})`;
   }

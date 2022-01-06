@@ -1,6 +1,7 @@
 import { PositionedTile, prettyPrint } from "./domain";
 import { GameState } from "./GameState";
 import { Set } from "immutable";
+import { acceptButton, swapButton } from "../index";
 
 function isValidPlacement(
   gameState: GameState,
@@ -25,7 +26,7 @@ function isValidPlacement(
 
 export class GameLogic {
   public static updateGameState(gameState: GameState): void {
-    if (gameState.panelActiveTileIndex) {
+    if (gameState.panelActiveTileIndex != undefined) {
       const activeTileIndex = gameState.panelActiveTileIndex;
       const activeTile = gameState.hand.get(gameState.panelActiveTileIndex);
       if (activeTile) {
@@ -40,11 +41,44 @@ export class GameLogic {
             gameState.currentPlacementSet = newPlacement;
           }
         });
-
-        gameState.tileGrid = gameState.currentPlacementSet.isEmpty()
-          ? gameState.tileGridApplied
-          : gameState.tileGridInProgress;
       }
     }
+
+    if (gameState.pressedButtonTags.contains(acceptButton.tag)) {
+      gameState.tileGridApplied = gameState.tileGridInProgress;
+
+      const toTake = gameState.currentPlacementSet.size;
+
+      const [toAdd, newBag] = gameState.tileBag.take(toTake);
+      gameState.hand = gameState.hand.concat(toAdd);
+      gameState.tileBag = newBag;
+
+      gameState.currentPlacementSet = Set.of();
+    } else if (
+      gameState.pressedButtonTags.contains(swapButton.tag) &&
+      gameState.panelActiveTileIndex != undefined
+    ) {
+      const [toAdd, newBag] = gameState.tileBag.take(1);
+      const newHand = gameState.hand
+        .remove(gameState.panelActiveTileIndex)
+        .concat(toAdd);
+      gameState.hand = newHand;
+      gameState.tileBag = newBag;
+      gameState.panelActiveTileIndex = undefined;
+    }
+
+    gameState.setButtonEnabled(
+      acceptButton.tag,
+      !gameState.currentPlacementSet.isEmpty()
+    );
+    gameState.setButtonEnabled(
+      swapButton.tag,
+      gameState.panelActiveTileIndex != undefined &&
+        gameState.currentPlacementSet.isEmpty()
+    );
+
+    gameState.tileGrid = gameState.currentPlacementSet.isEmpty()
+      ? gameState.tileGridApplied
+      : gameState.tileGridInProgress;
   }
 }

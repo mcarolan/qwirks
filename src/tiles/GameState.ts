@@ -24,10 +24,22 @@ export class GameState {
     public mouseEvents: Array<MouseClickOrDrag>,
     public tilePositionsPressed: Array<Position>,
     public currentPlacementSet: Set<PositionedTile>,
+    public pressedButtonTags: Set<string>,
+    public enabledButtonTags: Set<string>,
     public mouseDragInProgress: MouseDrag | undefined,
     public panelActiveTileIndex: number | undefined,
     public panelHoverTileIndex: number | undefined
   ) {}
+
+  setButtonEnabled(tag: string, isEnabled: boolean): void {
+    if (isEnabled) this.enabledButtonTags = this.enabledButtonTags.add(tag);
+    else this.enabledButtonTags = this.enabledButtonTags.remove(tag);
+  }
+
+  setButtonPressed(tag: string, isPressed: boolean): void {
+    if (isPressed) this.pressedButtonTags = this.pressedButtonTags.add(tag);
+    else this.pressedButtonTags = this.pressedButtonTags.remove(tag);
+  }
 
   static initial(canvasRect: Rect): GameState {
     const tgResult = TileGrid.empty().place(
@@ -51,6 +63,8 @@ export class GameState {
       new Position(0, 0),
       [],
       [],
+      Set.of(),
+      Set.of(),
       Set.of(),
       undefined,
       undefined,
