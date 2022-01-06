@@ -2,16 +2,16 @@ import { PositionedTile, prettyPrint } from "./domain";
 import { GameState } from "./GameState";
 import { Set } from "immutable";
 
-function doPlacement(
+function isValidPlacement(
   gameState: GameState,
   placements: Set<PositionedTile>
 ): boolean {
-  const newTg = gameState.tileGrid.place(placements);
+  const newTg = gameState.tileGridApplied.place(placements);
 
   if (newTg) {
     switch (newTg.type) {
       case "Success":
-        gameState.tileGrid = newTg.tileGrid;
+        gameState.tileGridInProgress = newTg.tileGrid;
         return true;
       default:
         console.log(`oh no, can't do that: ${prettyPrint(newTg)}`);
@@ -30,16 +30,20 @@ export class GameLogic {
       const activeTile = gameState.hand.get(gameState.panelActiveTileIndex);
       if (activeTile) {
         gameState.tilePositionsPressed.forEach((p) => {
-          if (
-            doPlacement(gameState, Set.of(new PositionedTile(activeTile, p)))
-          ) {
-            const [took, newTg] = gameState.tileBag.take(1);
-            gameState.tileBag = newTg;
-            const newHand = gameState.hand.remove(activeTileIndex).concat(took);
+          const newPlacement = gameState.currentPlacementSet.add(
+            new PositionedTile(activeTile, p)
+          );
+          if (isValidPlacement(gameState, newPlacement)) {
+            const newHand = gameState.hand.remove(activeTileIndex);
             gameState.panelActiveTileIndex = undefined;
             gameState.hand = newHand;
+            gameState.currentPlacementSet = newPlacement;
           }
         });
+
+        gameState.tileGrid = gameState.currentPlacementSet.isEmpty()
+          ? gameState.tileGridApplied
+          : gameState.tileGridInProgress;
       }
     }
   }
