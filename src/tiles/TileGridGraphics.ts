@@ -1,29 +1,7 @@
-import { Position, PositionedTile, prettyPrint, Rect, Tile } from "./domain";
+import { Position, Rect } from "./domain";
 import { GameState } from "./GameState";
 import { MouseDrag } from "./Mouse";
 import { TileGraphics } from "./TileGraphics";
-import { Set } from "immutable";
-
-function doPlacement(
-  gameState: GameState,
-  placements: Set<PositionedTile>
-): boolean {
-  const newTg = gameState.tileGrid.place(placements);
-
-  if (newTg) {
-    switch (newTg.type) {
-      case "Success":
-        gameState.tileGrid = newTg.tileGrid;
-        return true;
-      default:
-        console.log(`oh no, can't do that: ${prettyPrint(newTg)}`);
-        break;
-    }
-  } else {
-    console.log("newTg or tileGridGraphics is null");
-  }
-  return false;
-}
 
 export class TileGridGraphics {
   private mid: Position;
@@ -49,38 +27,26 @@ export class TileGridGraphics {
     }
   }
 
-  private updatePlacements(gameState: GameState): void {
+  private updatePressedPositions(gameState: GameState): void {
+    const tilePositionsPressed = new Array<Position>();
     gameState.mouseEvents.forEach((e) => {
       if (e.type == "MouseClick") {
-        if (
-          this.tileGridRect.contains(e.position) &&
-          gameState.panelActiveTileIndex != undefined
-        ) {
+        if (this.tileGridRect.contains(e.position)) {
           const xy = TileGraphics.positionFromScreen(
             e.position,
             this.effectiveMid
           );
-          const activeTile = gameState.hand.get(gameState.panelActiveTileIndex);
-          if (
-            activeTile &&
-            doPlacement(gameState, Set.of(new PositionedTile(activeTile, xy)))
-          ) {
-            const [took, newTg] = gameState.tileBag.take(1);
-            gameState.tileBag = newTg;
-            const newHand = gameState.hand
-              .remove(gameState.panelActiveTileIndex)
-              .concat(took);
-            gameState.panelActiveTileIndex = undefined;
-            gameState.hand = newHand;
-          }
+          tilePositionsPressed.push(xy);
         }
       }
     });
+
+    gameState.tilePositionsPressed = tilePositionsPressed;
   }
 
   updateGameState(state: GameState): void {
     this.updateDragging(state);
-    this.updatePlacements(state);
+    this.updatePressedPositions(state);
   }
 
   draw(context: CanvasRenderingContext2D, state: GameState): void {

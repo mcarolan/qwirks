@@ -20,6 +20,7 @@ export class GameState {
     public tileGrid: TileGrid,
     public mousePosition: Position | undefined,
     public mouseEvents: Array<MouseClickOrDrag>,
+    public tilePositionsPressed: Array<Position>,
     public mouseDragInProgress: MouseDrag | undefined,
     public panelActiveTileIndex: number | undefined,
     public panelHoverTileIndex: number | undefined
@@ -43,6 +44,7 @@ export class GameState {
       canvasRect,
       tgResult.tileGrid,
       new Position(0, 0),
+      [],
       [],
       undefined,
       undefined,

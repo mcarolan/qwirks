@@ -6,6 +6,7 @@ import { PanelGraphics, PANEL_HEIGHT } from "./tiles/PanelGraphics";
 import { TileGridGraphics } from "./tiles/TileGridGraphics";
 import { GameState } from "./tiles/GameState";
 import { Mouse } from "./tiles/Mouse";
+import { GameLogic } from "./tiles/GameLogic";
 
 const canvas = document.querySelector("#game") as HTMLCanvasElement;
 const context = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -47,6 +48,7 @@ function gameLoop(context: CanvasRenderingContext2D) {
   mouse.updateGameState(gameState);
   panel.updateGameState(gameState);
   tileGrid.updateGameState(gameState);
+  GameLogic.updateGameState(gameState);
 
   panel.draw(context, gameState);
   tileGrid.draw(context, gameState);
