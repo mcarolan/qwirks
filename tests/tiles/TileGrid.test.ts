@@ -44,6 +44,7 @@ describe("basic", () => {
     expectSuccess(result, (s) => {
       expect(s.tileGrid.size).toEqual(1);
       expect(s.tileGrid.at(pos)).toEqual(t);
+      expect(s.score).toEqual(1);
     });
   });
 
@@ -132,6 +133,7 @@ describe("neighbourhood size 2", () => {
             expect(s.tileGrid.size).toEqual(2);
             expect(s.tileGrid.at(position1)).toEqual(pt1);
             expect(s.tileGrid.at(position2)).toEqual(pt2);
+            expect(s.score).toEqual(2);
           });
         } else {
           expect(res.type).not.toEqual("Success");
@@ -256,6 +258,7 @@ describe("neighbourhood size 3", () => {
               expect(s2.tileGrid.at(position1)).toEqual(pt1);
               expect(s2.tileGrid.at(position.position2)).toEqual(pt2);
               expect(s2.tileGrid.at(position.position3)).toEqual(pt3);
+              expect(s2.score).toEqual(3);
             });
           } else {
             expect(res2.type).not.toEqual("Success");
@@ -267,6 +270,86 @@ describe("neighbourhood size 3", () => {
 });
 
 describe("advanced", () => {
+  test("bonus for a full set in a line", () => {
+    const pt1: PositionedTile = PositionedTile.from(
+      new Position(0, 0),
+      TileColour.Red,
+      TileShape.One
+    );
+    const pt2: PositionedTile = PositionedTile.from(
+      new Position(0, 1),
+      TileColour.Red,
+      TileShape.Two
+    );
+    const pt3: PositionedTile = PositionedTile.from(
+      new Position(0, 2),
+      TileColour.Red,
+      TileShape.Three
+    );
+    const pt4: PositionedTile = PositionedTile.from(
+      new Position(0, 3),
+      TileColour.Red,
+      TileShape.Four
+    );
+    const pt5: PositionedTile = PositionedTile.from(
+      new Position(0, 4),
+      TileColour.Red,
+      TileShape.Five
+    );
+    const pt6: PositionedTile = PositionedTile.from(
+      new Position(0, 5),
+      TileColour.Red,
+      TileShape.Six
+    );
+
+    const tg = TileGrid.empty();
+
+    const res1 = tg.place(Set.of(pt1, pt2, pt3, pt4, pt5));
+
+    expectSuccess(res1, (s1) => {
+      expect(s1.score).toBe(5);
+      const res2 = s1.tileGrid.place(Set.of(pt6));
+      expectSuccess(res2, (s2) => {
+        expect(s2.score).toBe(12);
+      });
+    });
+  });
+
+  test("scores across multiple lines", () => {
+    const pt1: PositionedTile = PositionedTile.from(
+      new Position(0, 0),
+      TileColour.Red,
+      TileShape.One
+    );
+    const pt2: PositionedTile = PositionedTile.from(
+      new Position(0, 1),
+      TileColour.Red,
+      TileShape.Two
+    );
+    const pt3: PositionedTile = PositionedTile.from(
+      new Position(1, 0),
+      TileColour.Blue,
+      TileShape.One
+    );
+    const pt4: PositionedTile = PositionedTile.from(
+      new Position(1, 1),
+      TileColour.Blue,
+      TileShape.Two
+    );
+
+    const tg = TileGrid.empty();
+
+    const res1 = tg.place(Set.of(pt1, pt2));
+
+    expectSuccess(res1, (s1) => {
+      expect(s1.score).toBe(2);
+      const res2 = s1.tileGrid.place(Set.of(pt3, pt4));
+      expectSuccess(res2, (s2) => {
+        expect(s2.score).toBe(6);
+      });
+    });
+  });
+
   test("ensures all neighbourhoods are valid", () => {
     const pt1: PositionedTile = PositionedTile.from(
       new Position(0, 0),

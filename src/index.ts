@@ -9,6 +9,7 @@ import { Mouse } from "./tiles/Mouse";
 import { GameLogic } from "./tiles/GameLogic";
 import { loadImage } from "./tiles/utility";
 import { Button } from "./tiles/Button";
+import { Score } from "./tiles/Score";
 
 const canvas = document.querySelector("#game") as HTMLCanvasElement;
 const context = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -66,6 +67,8 @@ export const cancelButton = new Button(
   "cancel"
 );
 
+const score: Score = new Score(new Position(10, 10));
+
 function gameLoop(context: CanvasRenderingContext2D) {
   context.fillStyle = "red";
   context.clearRect(0, 0, context.canvas.width, context.canvas.height);
@@ -90,6 +93,7 @@ function gameLoop(context: CanvasRenderingContext2D) {
   acceptButton.draw(context, gameState);
   swapButton.draw(context, gameState);
   cancelButton.draw(context, gameState);
+  score.draw(context, gameState);
 
   requestAnimationFrame(() => gameLoop(context));
 }

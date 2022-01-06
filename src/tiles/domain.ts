@@ -164,6 +164,7 @@ interface AllPlacedTilesMustBeInALine {
 interface Success {
   type: "Success";
   tileGrid: TileGrid;
+  score: number;
 }
 
 type PlacementResult =

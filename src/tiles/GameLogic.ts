@@ -13,6 +13,7 @@ function isValidPlacement(
     switch (newTg.type) {
       case "Success":
         gameState.tileGridInProgress = newTg.tileGrid;
+        gameState.currentPlacementScore = newTg.score;
         return true;
       default:
         console.log(`oh no, can't do that: ${prettyPrint(newTg)}`);
@@ -54,7 +55,8 @@ export class GameLogic {
       const [toAdd, newBag] = gameState.tileBag.take(toTake);
       gameState.hand = gameState.hand.concat(toAdd);
       gameState.tileBag = newBag;
-
+      gameState.score = gameState.score + gameState.currentPlacementScore;
+      gameState.currentPlacementScore = 0;
       gameState.currentPlacementSet = Set.of();
     } else if (
       gameState.pressedButtonTags.contains(swapButton.tag) &&

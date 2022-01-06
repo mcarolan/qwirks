@@ -27,6 +27,8 @@ export class GameState {
     public pressedButtonTags: Set<string>,
     public enabledButtonTags: Set<string>,
     public panelActiveTileIndicies: Set<number>,
+    public score: number,
+    public currentPlacementScore: number,
     public mouseDragInProgress: MouseDrag | undefined,
     public panelHoverTileIndex: number | undefined
   ) {}
@@ -74,6 +76,8 @@ export class GameState {
       Set.of(),
       Set.of(),
       Set.of(),
+      1,
+      0,
       undefined,
       undefined
     );

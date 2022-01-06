@@ -81,6 +81,22 @@ export function allLines(
     .toSet();
 }
 
+function scoreLine(line: Set<PositionedTile>): number {
+  if (line.size === 6) {
+    return 12;
+  } else {
+    return line.size;
+  }
+}
+
+function scoreLines(lines: Set<List<PositionedTile>>): number {
+  const deduped = lines.map((l) => l.toSet());
+  return deduped
+    .toList()
+    .map(scoreLine)
+    .reduce((acc, n) => acc + n, 0);
+}
+
 export class TileGrid {
   private elems: Map<string, PositionedTile>;
 
@@ -146,7 +162,9 @@ export class TileGrid {
       return { type: "AllPlacedTilesMustBeInALine" };
     }
 
-    return { type: "Success", tileGrid: res };
+    const score = singleTilePlacedOnEmpty ? 1 : scoreLines(lines);
+
+    return { type: "Success", tileGrid: res, score: score };
   }
 
   at(pos: Position): PositionedTile | undefined {
