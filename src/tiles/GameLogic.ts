@@ -1,7 +1,7 @@
 import { PositionedTile, prettyPrint } from "./domain";
 import { GameState } from "./GameState";
 import { Set } from "immutable";
-import { acceptButton, swapButton } from "../index";
+import { acceptButton, cancelButton, swapButton } from "../index";
 
 function isValidPlacement(
   gameState: GameState,
@@ -70,12 +70,22 @@ export class GameLogic {
       gameState.hand = newHand;
       gameState.tileBag = newBag;
       gameState.panelActiveTileIndicies = Set.of();
+    } else if (
+      gameState.pressedButtonTags.contains(cancelButton.tag) &&
+      !gameState.currentPlacementSet.isEmpty()
+    ) {
+      const newHand = gameState.hand.concat(
+        gameState.currentPlacementSet.map((p) => p.tile)
+      );
+      gameState.hand = newHand;
+      gameState.tileGridInProgress = gameState.tileGridApplied;
+      gameState.currentPlacementSet = Set.of();
     }
 
-    gameState.setButtonEnabled(
-      acceptButton.tag,
-      !gameState.currentPlacementSet.isEmpty()
-    );
+    const placementButtonsEnabled = !gameState.currentPlacementSet.isEmpty();
+
+    gameState.setButtonEnabled(acceptButton.tag, placementButtonsEnabled);
+    gameState.setButtonEnabled(cancelButton.tag, placementButtonsEnabled);
     gameState.setButtonEnabled(
       swapButton.tag,
       !gameState.panelActiveTileIndicies.isEmpty() &&

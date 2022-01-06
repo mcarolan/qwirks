@@ -42,6 +42,9 @@ const acceptHover = loadImage("./images/accept-hover.png");
 const swapInactive = loadImage("./images/swap-inactive.png");
 const swapHover = loadImage("./images/swap-hover.png");
 
+const cancelInactive = loadImage("./images/cancel-inactive.png");
+const cancelHover = loadImage("./images/cancel-hover.png");
+
 export const acceptButton = new Button(
   new Position(canvasRect.width - acceptInactive.width - 10, 10),
   acceptInactive,
@@ -54,6 +57,13 @@ export const swapButton = new Button(
   swapInactive,
   swapHover,
   "swap"
+);
+
+export const cancelButton = new Button(
+  swapButton.position.plus(new Position(0, swapInactive.height + 10)),
+  cancelInactive,
+  cancelHover,
+  "cancel"
 );
 
 function gameLoop(context: CanvasRenderingContext2D) {
@@ -72,12 +82,14 @@ function gameLoop(context: CanvasRenderingContext2D) {
   tileGrid.updateGameState(gameState);
   acceptButton.updateGameState(gameState);
   swapButton.updateGameState(gameState);
+  cancelButton.updateGameState(gameState);
   GameLogic.updateGameState(gameState);
 
   tileGrid.draw(context, gameState);
   panel.draw(context, gameState);
   acceptButton.draw(context, gameState);
   swapButton.draw(context, gameState);
+  cancelButton.draw(context, gameState);
 
   requestAnimationFrame(() => gameLoop(context));
 }
