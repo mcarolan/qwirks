@@ -3,6 +3,7 @@ import { TileGraphics } from "./TileGraphics";
 import { loadImage } from "./utility";
 import { is, List, Map } from "immutable";
 import { GameState } from "./GameState";
+import { LiteralUnion } from "prettier";
 
 const panelStartImage = loadImage("./images/panel-start.png");
 const PANEL_START_IMAGE_WIDTH = 26;
@@ -67,7 +68,6 @@ export class PanelGraphics {
     const tileRects = this.tileRects(state);
 
     var newHover: number | undefined;
-    var newActive: number | undefined = state.panelActiveTileIndex;
 
     const mousePosition = state.mousePosition;
     if (mousePosition) {
@@ -83,14 +83,16 @@ export class PanelGraphics {
       if (e.type == "MouseClick") {
         tileRects.forEach((rect, i) => {
           if (rect.contains(e.position)) {
-            newActive = i;
+            state.setPanelTileActive(
+              i,
+              !state.panelActiveTileIndicies.contains(i)
+            );
             return false;
           }
         });
       }
     });
 
-    state.panelActiveTileIndex = newActive;
     state.panelHoverTileIndex = newHover;
   }
 
@@ -101,10 +103,7 @@ export class PanelGraphics {
     state.hand.map((tile, i) => {
       const rect = tileRects.get(i);
       if (rect) {
-        if (
-          state.panelActiveTileIndex != undefined &&
-          is(state.panelActiveTileIndex, i)
-        ) {
+        if (state.panelActiveTileIndicies.contains(i)) {
           TileGraphics.drawActiveTile(context, rect.position, tile);
         } else if (
           state.panelHoverTileIndex != undefined &&

@@ -26,8 +26,8 @@ export class GameState {
     public currentPlacementSet: Set<PositionedTile>,
     public pressedButtonTags: Set<string>,
     public enabledButtonTags: Set<string>,
+    public panelActiveTileIndicies: Set<number>,
     public mouseDragInProgress: MouseDrag | undefined,
-    public panelActiveTileIndex: number | undefined,
     public panelHoverTileIndex: number | undefined
   ) {}
 
@@ -39,6 +39,13 @@ export class GameState {
   setButtonPressed(tag: string, isPressed: boolean): void {
     if (isPressed) this.pressedButtonTags = this.pressedButtonTags.add(tag);
     else this.pressedButtonTags = this.pressedButtonTags.remove(tag);
+  }
+
+  setPanelTileActive(index: number, isActive: boolean): void {
+    if (isActive)
+      this.panelActiveTileIndicies = this.panelActiveTileIndicies.add(index);
+    else
+      this.panelActiveTileIndicies = this.panelActiveTileIndicies.remove(index);
   }
 
   static initial(canvasRect: Rect): GameState {
@@ -66,7 +73,7 @@ export class GameState {
       Set.of(),
       Set.of(),
       Set.of(),
-      undefined,
+      Set.of(),
       undefined,
       undefined
     );

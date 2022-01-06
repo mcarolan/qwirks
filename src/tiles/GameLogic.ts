@@ -26,17 +26,19 @@ function isValidPlacement(
 
 export class GameLogic {
   public static updateGameState(gameState: GameState): void {
-    if (gameState.panelActiveTileIndex != undefined) {
-      const activeTileIndex = gameState.panelActiveTileIndex;
-      const activeTile = gameState.hand.get(gameState.panelActiveTileIndex);
+    const singleActiveTile:
+      | number
+      | undefined = gameState.panelActiveTileIndicies.first();
+    if (singleActiveTile != undefined) {
+      const activeTile = gameState.hand.get(singleActiveTile);
       if (activeTile) {
         gameState.tilePositionsPressed.forEach((p) => {
           const newPlacement = gameState.currentPlacementSet.add(
             new PositionedTile(activeTile, p)
           );
           if (isValidPlacement(gameState, newPlacement)) {
-            const newHand = gameState.hand.remove(activeTileIndex);
-            gameState.panelActiveTileIndex = undefined;
+            const newHand = gameState.hand.remove(singleActiveTile);
+            gameState.panelActiveTileIndicies = Set.of();
             gameState.hand = newHand;
             gameState.currentPlacementSet = newPlacement;
           }
@@ -56,15 +58,18 @@ export class GameLogic {
       gameState.currentPlacementSet = Set.of();
     } else if (
       gameState.pressedButtonTags.contains(swapButton.tag) &&
-      gameState.panelActiveTileIndex != undefined
+      !gameState.panelActiveTileIndicies.isEmpty()
     ) {
-      const [toAdd, newBag] = gameState.tileBag.take(1);
+      const [toAdd, newBag] = gameState.tileBag.take(
+        gameState.panelActiveTileIndicies.size
+      );
+
       const newHand = gameState.hand
-        .remove(gameState.panelActiveTileIndex)
+        .filterNot((_, i) => gameState.panelActiveTileIndicies.contains(i))
         .concat(toAdd);
       gameState.hand = newHand;
       gameState.tileBag = newBag;
-      gameState.panelActiveTileIndex = undefined;
+      gameState.panelActiveTileIndicies = Set.of();
     }
 
     gameState.setButtonEnabled(
@@ -73,7 +78,7 @@ export class GameLogic {
     );
     gameState.setButtonEnabled(
       swapButton.tag,
-      gameState.panelActiveTileIndex != undefined &&
+      !gameState.panelActiveTileIndicies.isEmpty() &&
         gameState.currentPlacementSet.isEmpty()
     );
 
