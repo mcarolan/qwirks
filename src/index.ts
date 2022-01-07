@@ -10,6 +10,7 @@ import { GameLogic } from "./tiles/GameLogic";
 import { loadImage } from "./tiles/utility";
 import { Button } from "./tiles/Button";
 import { Score } from "./tiles/Score";
+import { Sounds } from "./tiles/Sounds";
 
 const canvas = document.querySelector("#game") as HTMLCanvasElement;
 const context = canvas.getContext("2d") as CanvasRenderingContext2D;

@@ -3,3 +3,8 @@ export function loadImage(src: string): HTMLImageElement {
   img.src = src;
   return img;
 }
+
+export function loadSound(src: string): HTMLAudioElement {
+  const audio = new Audio(src);
+  return audio;
+}

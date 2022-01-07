@@ -52,7 +52,11 @@ export class TileGridGraphics {
   draw(context: CanvasRenderingContext2D, state: GameState): void {
     for (const pt of state.tileGrid.values) {
       const coords = TileGraphics.screenCoords(pt.position, this.effectiveMid);
-      TileGraphics.drawInactiveTile(context, coords, pt.tile);
+      if (state.currentPlacementSet.contains(pt)) {
+        TileGraphics.drawHoverTile(context, coords, pt.tile);
+      } else {
+        TileGraphics.drawInactiveTile(context, coords, pt.tile);
+      }
     }
   }
 }
