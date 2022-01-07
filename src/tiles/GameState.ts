@@ -1,4 +1,5 @@
 import { List, Set } from "immutable";
+import { Fireworks } from "~/fireworks/Fireworks";
 import {
   Position,
   PositionedTile,
@@ -29,6 +30,7 @@ export class GameState {
     public panelActiveTileIndicies: Set<number>,
     public score: number,
     public currentPlacementScore: number,
+    public fireworkTilePositions: List<Position>,
     public mouseDragInProgress: MouseDrag | undefined,
     public panelHoverTileIndex: number | undefined
   ) {}
@@ -78,6 +80,7 @@ export class GameState {
       Set.of(),
       1,
       0,
+      List.of(),
       undefined,
       undefined
     );

@@ -49,6 +49,10 @@ export class TileGridGraphics {
     this.updatePressedPositions(state);
   }
 
+  tilePositionToScreenCoords(tilePosition: Position): Position {
+    return TileGraphics.screenCoords(tilePosition, this.effectiveMid);
+  }
+
   draw(context: CanvasRenderingContext2D, state: GameState): void {
     for (const pt of state.tileGrid.values) {
       const coords = TileGraphics.screenCoords(pt.position, this.effectiveMid);

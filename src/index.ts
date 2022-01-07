@@ -1,4 +1,4 @@
-import { Rect } from "./tiles/domain";
+import { Rect, Tile } from "./tiles/domain";
 
 import _ from "lodash";
 import { Position } from "./tiles/domain";
@@ -11,6 +11,9 @@ import { loadImage } from "./tiles/utility";
 import { Button } from "./tiles/Button";
 import { Score } from "./tiles/Score";
 import { Sounds } from "./tiles/Sounds";
+import { Fireworks } from "./fireworks/Fireworks";
+import { List } from "immutable";
+import { TileGraphics } from "./tiles/TileGraphics";
 
 const canvas = document.querySelector("#game") as HTMLCanvasElement;
 const context = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -70,6 +73,29 @@ export const cancelButton = new Button(
 
 const score: Score = new Score(new Position(10, 10));
 
+const fireworks: Fireworks = new Fireworks();
+
+function updateFireworks(gameState: GameState): void {
+  gameState.fireworkTilePositions.forEach((tp) => {
+    if (tileGrid) {
+      fireworks.create(
+        acceptButton.position.plus(
+          new Position(acceptInactive.width / 2, acceptInactive.height / 2)
+        ),
+        tileGrid
+          .tilePositionToScreenCoords(tp)
+          .plus(
+            new Position(
+              TileGraphics.tileWidth / 2,
+              TileGraphics.tileHeight / 2
+            )
+          )
+      );
+    }
+  });
+  gameState.fireworkTilePositions = List();
+}
+
 function gameLoop(context: CanvasRenderingContext2D) {
   context.fillStyle = "red";
   context.clearRect(0, 0, context.canvas.width, context.canvas.height);
@@ -88,6 +114,7 @@ function gameLoop(context: CanvasRenderingContext2D) {
   swapButton.updateGameState(gameState);
   cancelButton.updateGameState(gameState);
   GameLogic.updateGameState(gameState);
+  updateFireworks(gameState);
 
   tileGrid.draw(context, gameState);
   panel.draw(context, gameState);
@@ -95,6 +122,7 @@ function gameLoop(context: CanvasRenderingContext2D) {
   swapButton.draw(context, gameState);
   cancelButton.draw(context, gameState);
   score.draw(context, gameState);
+  fireworks.updateAndDraw(context);
 
   requestAnimationFrame(() => gameLoop(context));
 }

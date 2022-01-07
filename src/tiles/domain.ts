@@ -80,6 +80,12 @@ class Position {
     return new Position(this.x + other.x, this.y + other.y);
   }
 
+  distanceTo(other: Position): number {
+    const xDistance = this.x - other.x;
+    const yDistance = this.y - other.y;
+    return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
+  }
+
   toString(): string {
     return `(${this.x}, ${this.y})`;
   }

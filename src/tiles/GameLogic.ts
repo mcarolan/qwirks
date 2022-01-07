@@ -56,6 +56,11 @@ export class GameLogic {
       gameState.hand = gameState.hand.concat(toAdd);
       gameState.tileBag = newBag;
       gameState.score = gameState.score + gameState.currentPlacementScore;
+
+      gameState.fireworkTilePositions = gameState.currentPlacementSet
+        .map((pt) => pt.position)
+        .toList();
+
       gameState.currentPlacementScore = 0;
       gameState.currentPlacementSet = Set.of();
     } else if (
