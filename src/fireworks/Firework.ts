@@ -8,7 +8,7 @@ export class Firework {
   private coordinates: Array<Position>;
   private angle: number;
   private speed: number = 2;
-  private readonly acceleration: number = 1.08;
+  private readonly acceleration: number = 1.04;
   private readonly brightness: number = random(50, 70);
   private targetRadius: number = 1;
   private readonly hue: number = random(0, 360);

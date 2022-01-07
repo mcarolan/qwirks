@@ -10,7 +10,7 @@ export class Particle {
   private readonly hue: number = random(0, 360);
   private readonly brightness: number = random(50, 80);
   private alpha: number = 1;
-  private readonly decay: number = random(0.015, 0.03);
+  private readonly decay: number = random(0.006, 0.012) / 2.5;
   private current: Position;
 
   constructor(position: Position) {
