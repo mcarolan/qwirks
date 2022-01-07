@@ -1,4 +1,4 @@
-import { Position, Rect } from "./domain";
+import { Position, Rect, Tile } from "./domain";
 import { GameState } from "./GameState";
 import { MouseDrag } from "./Mouse";
 import { TileGraphics } from "./TileGraphics";
@@ -54,6 +54,40 @@ export class TileGridGraphics {
   }
 
   draw(context: CanvasRenderingContext2D, state: GameState): void {
+    if (state.mousePosition) {
+      const hoveringTilePosition = TileGraphics.positionFromScreen(
+        state.mousePosition,
+        this.effectiveMid
+      );
+      context.fillStyle = "#eeeeee";
+      const screenCoords = TileGraphics.screenCoords(
+        hoveringTilePosition,
+        this.effectiveMid
+      );
+
+      var singleActiveTile: Tile | undefined = undefined;
+
+      if (state.panelActiveTileIndicies.size == 1) {
+        const index = state.panelActiveTileIndicies.first();
+        if (index != undefined) {
+          singleActiveTile = state.hand.get(index);
+        }
+      }
+
+      if (singleActiveTile) {
+        context.save();
+        context.globalAlpha = 0.5;
+        TileGraphics.drawInactiveTile(context, screenCoords, singleActiveTile);
+        context.restore();
+      } else {
+        context.fillRect(
+          screenCoords.x,
+          screenCoords.y,
+          TileGraphics.tileWidth,
+          TileGraphics.tileHeight
+        );
+      }
+    }
     for (const pt of state.tileGrid.values) {
       const coords = TileGraphics.screenCoords(pt.position, this.effectiveMid);
       if (state.currentPlacementSet.contains(pt)) {
