@@ -12,8 +12,9 @@ function isValidPlacement(
   if (newTg) {
     switch (newTg.type) {
       case "Success":
-        gameState.tileGridInProgress = newTg.tileGrid;
-        gameState.currentPlacementScore = newTg.score;
+        gameState.currentPlacement.tileGrid = newTg.tileGrid;
+        gameState.currentPlacement.score = newTg.score;
+        gameState.currentPlacement.lines = newTg.lines;
         return true;
       default:
         console.log(`oh no, can't do that: ${prettyPrint(newTg)}`);
@@ -34,35 +35,35 @@ export class GameLogic {
       const activeTile = gameState.hand.get(singleActiveTile);
       if (activeTile) {
         gameState.tilePositionsPressed.forEach((p) => {
-          const newPlacement = gameState.currentPlacementSet.add(
+          const newPlacement = gameState.currentPlacement.tiles.add(
             new PositionedTile(activeTile, p)
           );
           if (isValidPlacement(gameState, newPlacement)) {
             const newHand = gameState.hand.remove(singleActiveTile);
             gameState.panelActiveTileIndicies = Set.of();
             gameState.hand = newHand;
-            gameState.currentPlacementSet = newPlacement;
+            gameState.currentPlacement.tiles = newPlacement;
           }
         });
       }
     }
 
     if (gameState.pressedButtonTags.contains(acceptButton.tag)) {
-      gameState.tileGridApplied = gameState.tileGridInProgress;
+      gameState.tileGridApplied = gameState.currentPlacement.tileGrid;
 
-      const toTake = gameState.currentPlacementSet.size;
+      const toTake = gameState.currentPlacement.tiles.size;
 
       const [toAdd, newBag] = gameState.tileBag.take(toTake);
       gameState.hand = gameState.hand.concat(toAdd);
       gameState.tileBag = newBag;
-      gameState.score = gameState.score + gameState.currentPlacementScore;
+      gameState.score = gameState.score + gameState.currentPlacement.score;
 
-      gameState.fireworkTilePositions = gameState.currentPlacementSet
-        .map((pt) => pt.position)
+      gameState.fireworkTilePositions = gameState.currentPlacement.lines
+        .flatMap((line) => line.map((pt) => pt.position))
         .toList();
 
-      gameState.currentPlacementScore = 0;
-      gameState.currentPlacementSet = Set.of();
+      gameState.currentPlacement.score = 0;
+      gameState.currentPlacement.tiles = Set.of();
     } else if (
       gameState.pressedButtonTags.contains(swapButton.tag) &&
       !gameState.panelActiveTileIndicies.isEmpty()
@@ -79,28 +80,28 @@ export class GameLogic {
       gameState.panelActiveTileIndicies = Set.of();
     } else if (
       gameState.pressedButtonTags.contains(cancelButton.tag) &&
-      !gameState.currentPlacementSet.isEmpty()
+      !gameState.currentPlacement.tiles.isEmpty()
     ) {
       const newHand = gameState.hand.concat(
-        gameState.currentPlacementSet.map((p) => p.tile)
+        gameState.currentPlacement.tiles.map((p) => p.tile)
       );
       gameState.hand = newHand;
-      gameState.tileGridInProgress = gameState.tileGridApplied;
-      gameState.currentPlacementSet = Set.of();
+      gameState.currentPlacement.tileGrid = gameState.tileGridApplied;
+      gameState.currentPlacement.tiles = Set.of();
     }
 
-    const placementButtonsEnabled = !gameState.currentPlacementSet.isEmpty();
+    const placementButtonsEnabled = !gameState.currentPlacement.tiles.isEmpty();
 
     gameState.setButtonEnabled(acceptButton.tag, placementButtonsEnabled);
     gameState.setButtonEnabled(cancelButton.tag, placementButtonsEnabled);
     gameState.setButtonEnabled(
       swapButton.tag,
       !gameState.panelActiveTileIndicies.isEmpty() &&
-        gameState.currentPlacementSet.isEmpty()
+        gameState.currentPlacement.tiles.isEmpty()
     );
 
-    gameState.tileGrid = gameState.currentPlacementSet.isEmpty()
+    gameState.tileGridToDisplay = gameState.currentPlacement.tiles.isEmpty()
       ? gameState.tileGridApplied
-      : gameState.tileGridInProgress;
+      : gameState.currentPlacement.tileGrid;
   }
 }

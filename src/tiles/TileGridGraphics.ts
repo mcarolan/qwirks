@@ -88,9 +88,9 @@ export class TileGridGraphics {
         );
       }
     }
-    for (const pt of state.tileGrid.values) {
+    for (const pt of state.tileGridToDisplay.values) {
       const coords = TileGraphics.screenCoords(pt.position, this.effectiveMid);
-      if (state.currentPlacementSet.contains(pt)) {
+      if (state.currentPlacement.tiles.contains(pt)) {
         TileGraphics.drawHoverTile(context, coords, pt.tile);
       } else {
         TileGraphics.drawInactiveTile(context, coords, pt.tile);

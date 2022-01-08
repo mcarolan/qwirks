@@ -171,6 +171,7 @@ interface Success {
   type: "Success";
   tileGrid: TileGrid;
   score: number;
+  lines: Set<Set<PositionedTile>>;
 }
 
 type PlacementResult =

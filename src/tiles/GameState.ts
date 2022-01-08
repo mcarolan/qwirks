@@ -13,24 +13,30 @@ import { MouseClickOrDrag, MouseDrag } from "./Mouse";
 import { TileBag } from "./TileBag";
 import { TileGrid } from "./TileGrid";
 
+export class CurrentPlacementState {
+  constructor(
+    public tiles: Set<PositionedTile>,
+    public tileGrid: TileGrid,
+    public lines: Set<Set<PositionedTile>>,
+    public score: number
+  ) {}
+}
 export class GameState {
   constructor(
     public hand: List<Tile>,
     public tileBag: TileBag,
     public canvasRect: Rect,
-    public tileGrid: TileGrid,
-    public tileGridInProgress: TileGrid,
+    public tileGridToDisplay: TileGrid,
     public tileGridApplied: TileGrid,
     public mousePosition: Position | undefined,
     public mouseEvents: Array<MouseClickOrDrag>,
     public tilePositionsPressed: Array<Position>,
-    public currentPlacementSet: Set<PositionedTile>,
     public pressedButtonTags: Set<string>,
     public enabledButtonTags: Set<string>,
     public panelActiveTileIndicies: Set<number>,
     public score: number,
-    public currentPlacementScore: number,
     public fireworkTilePositions: List<Position>,
+    public currentPlacement: CurrentPlacementState,
     public mouseDragInProgress: MouseDrag | undefined,
     public panelHoverTileIndex: number | undefined
   ) {}
@@ -70,17 +76,15 @@ export class GameState {
       canvasRect,
       tgResult.tileGrid,
       tgResult.tileGrid,
-      tgResult.tileGrid,
       new Position(0, 0),
       [],
       [],
       Set.of(),
       Set.of(),
       Set.of(),
-      Set.of(),
       1,
-      0,
       List.of(),
+      new CurrentPlacementState(Set.of(), tgResult.tileGrid, Set.of(), 0),
       undefined,
       undefined
     );

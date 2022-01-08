@@ -12,9 +12,9 @@ export class Score {
     context.fillStyle = "black";
     context.fillText(score, this.position.x, this.position.y);
 
-    if (gameState.currentPlacementScore > 0) {
+    if (gameState.currentPlacement.score > 0) {
       const scoreWidth = context.measureText(score).width;
-      const additionalScore = ` + ${gameState.currentPlacementScore}`;
+      const additionalScore = ` + ${gameState.currentPlacement.score}`;
       context.fillStyle = "blue";
       context.fillText(
         additionalScore,

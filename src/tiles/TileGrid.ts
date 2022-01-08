@@ -89,9 +89,8 @@ function scoreLine(line: Set<PositionedTile>): number {
   }
 }
 
-function scoreLines(lines: Set<List<PositionedTile>>): number {
-  const deduped = lines.map((l) => l.toSet());
-  return deduped
+function scoreLines(lines: Set<Set<PositionedTile>>): number {
+  return lines
     .toList()
     .map(scoreLine)
     .reduce((acc, n) => acc + n, 0);
@@ -162,9 +161,10 @@ export class TileGrid {
       return { type: "AllPlacedTilesMustBeInALine" };
     }
 
-    const score = singleTilePlacedOnEmpty ? 1 : scoreLines(lines);
+    const deduped = lines.map((l) => l.toSet());
+    const score = singleTilePlacedOnEmpty ? 1 : scoreLines(deduped);
 
-    return { type: "Success", tileGrid: res, score: score };
+    return { type: "Success", tileGrid: res, score: score, lines: deduped };
   }
 
   at(pos: Position): PositionedTile | undefined {
