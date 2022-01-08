@@ -7,7 +7,7 @@ import { TileGridGraphics } from "./tiles/TileGridGraphics";
 import { GameState } from "./tiles/GameState";
 import { Mouse } from "./tiles/Mouse";
 import { GameLogic } from "./tiles/GameLogic";
-import { loadImage } from "./tiles/utility";
+import { loadImage, random } from "./tiles/utility";
 import { Button } from "./tiles/Button";
 import { Score } from "./tiles/Score";
 import { Sounds } from "./tiles/Sounds";
@@ -33,7 +33,7 @@ const tileGridRect = new Rect(
 
 var panel: PanelGraphics | undefined;
 
-var tileGrid: TileGridGraphics | undefined;
+const tileGrid: TileGridGraphics = new TileGridGraphics(tileGridRect);
 
 const mouse: Mouse = new Mouse();
 
@@ -76,21 +76,25 @@ const score: Score = new Score(new Position(10, 10));
 const fireworks: Fireworks = new Fireworks();
 
 function updateFireworks(gameState: GameState): void {
-  gameState.fireworkTilePositions.forEach((tp) => {
-    if (tileGrid) {
-      fireworks.create(
-        acceptButton.position.plus(
-          new Position(acceptInactive.width / 2, acceptInactive.height / 2)
-        ),
-        tileGrid
-          .tilePositionToScreenCoords(tp)
-          .plus(
-            new Position(
-              TileGraphics.tileWidth / 2,
-              TileGraphics.tileHeight / 2
-            )
-          )
-      );
+  const targets = gameState.fireworkTilePositions.map((tp) =>
+    tileGrid
+      .tilePositionToScreenCoords(tp)
+      .plus(
+        new Position(TileGraphics.tileWidth / 2, TileGraphics.tileHeight / 2)
+      )
+  );
+
+  const acceptButtonMid = acceptButton.position.plus(
+    new Position(acceptInactive.width / 2, acceptInactive.height / 2)
+  );
+
+  targets.forEach((p) => {
+    fireworks.create(acceptButtonMid, p);
+
+    var i = 5;
+
+    while (--i) {
+      fireworks.create(fireworks.randomOrigin(canvasRect), p);
     }
   });
   gameState.fireworkTilePositions = List();
@@ -102,9 +106,6 @@ function gameLoop(context: CanvasRenderingContext2D) {
 
   if (!panel) {
     panel = new PanelGraphics(gameState);
-  }
-  if (!tileGrid) {
-    tileGrid = new TileGridGraphics(tileGridRect);
   }
 
   mouse.updateGameState(gameState);

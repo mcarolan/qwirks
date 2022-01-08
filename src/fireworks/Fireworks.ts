@@ -13,17 +13,23 @@ export class Fireworks {
   }
 
   randomOrigin(rect: Rect): Position {
-    if (random(0, 1)) {
-      if (random(0, 1)) {
-        return new Position(-20, random(-20, rect.height + 20));
+    if (Math.round(random(0, 1))) {
+      if (Math.round(random(0, 1))) {
+        return new Position(-20, Math.round(random(-20, rect.height + 20)));
       } else {
-        return new Position(20, random(-20, rect.height + 20));
+        return new Position(
+          rect.width + 20,
+          Math.round(random(-20, rect.height + 20))
+        );
       }
     } else {
-      if (random(0, 1)) {
-        return new Position(random(-20, rect.width + 20), -20);
+      if (Math.round(random(0, 1))) {
+        return new Position(Math.round(random(-20, rect.width + 20)), -20);
       } else {
-        return new Position(random(20, rect.width + 20), 20);
+        return new Position(
+          Math.round(random(20, rect.width + 20)),
+          rect.height + 20
+        );
       }
     }
   }
