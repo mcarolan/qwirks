@@ -14,6 +14,7 @@ import { Sounds } from "./tiles/Sounds";
 import { Fireworks } from "./fireworks/Fireworks";
 import { List } from "immutable";
 import { TileGraphics } from "./tiles/TileGraphics";
+import { io } from "socket.io-client";
 
 const canvas = document.querySelector("#game") as HTMLCanvasElement;
 const context = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -74,6 +75,8 @@ export const cancelButton = new Button(
 const score: Score = new Score(new Position(10, 10));
 
 const fireworks: Fireworks = new Fireworks();
+
+const socket = io();
 
 function updateFireworks(gameState: GameState): void {
   const targets = gameState.fireworkTilePositions.map((tp) =>
