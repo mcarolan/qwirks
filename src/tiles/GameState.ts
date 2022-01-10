@@ -17,8 +17,8 @@ export class CurrentPlacementState {
   constructor(
     public tiles: Set<PositionedTile>,
     public tileGrid: TileGrid,
-    public lines: Set<Set<PositionedTile>>,
-    public score: number
+    public score: number,
+    public lines: Set<Set<PositionedTile>>
   ) {}
 }
 export class GameState {
@@ -35,6 +35,7 @@ export class GameState {
     public enabledButtonTags: Set<string>,
     public panelActiveTileIndicies: Set<number>,
     public score: number,
+    public scoreJustAchieved: number,
     public fireworkTilePositions: List<Position>,
     public currentPlacement: CurrentPlacementState,
     public mouseDragInProgress: MouseDrag | undefined,
@@ -83,8 +84,9 @@ export class GameState {
       Set.of(),
       Set.of(),
       1,
+      0,
       List.of(),
-      new CurrentPlacementState(Set.of(), tgResult.tileGrid, Set.of(), 0),
+      new CurrentPlacementState(Set.of(), tgResult.tileGrid, 0, Set.of()),
       undefined,
       undefined
     );

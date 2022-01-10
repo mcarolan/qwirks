@@ -78,6 +78,8 @@ const fireworks: Fireworks = new Fireworks();
 
 const socket = io();
 
+const sounds = new Sounds();
+
 function updateFireworks(gameState: GameState): void {
   const targets = gameState.fireworkTilePositions.map((tp) =>
     tileGrid
@@ -96,10 +98,16 @@ function updateFireworks(gameState: GameState): void {
 
     var i = 5;
 
-    while (--i) {
+    while (i--) {
       fireworks.create(fireworks.randomOrigin(canvasRect), p);
     }
   });
+
+  if (gameState.scoreJustAchieved > 0) {
+    sounds.rises(gameState.scoreJustAchieved);
+    gameState.scoreJustAchieved = 0;
+  }
+
   gameState.fireworkTilePositions = List();
 }
 

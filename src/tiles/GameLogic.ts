@@ -57,6 +57,7 @@ export class GameLogic {
       gameState.hand = gameState.hand.concat(toAdd);
       gameState.tileBag = newBag;
       gameState.score = gameState.score + gameState.currentPlacement.score;
+      gameState.scoreJustAchieved = gameState.currentPlacement.score;
 
       gameState.fireworkTilePositions = gameState.currentPlacement.lines
         .flatMap((line) => line.map((pt) => pt.position))
