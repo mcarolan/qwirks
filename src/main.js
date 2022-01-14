@@ -7,7 +7,7 @@ exports.__esModule = true;
 var express_1 = __importDefault(require("express"));
 var http_1 = __importDefault(require("http"));
 var socket_io_1 = require("socket.io");
-var app = express_1["default"]();
+var app = (0, express_1["default"])();
 var port = (_a = process.env.PORT) !== null && _a !== void 0 ? _a : 3000;
 var server = http_1["default"].createServer(app);
 var io = new socket_io_1.Server(server);
@@ -19,4 +19,4 @@ io.on("connection", function (s) {
     });
 });
 server.listen(port);
-console.log("listening on port " + port);
+console.log("listening on port ".concat(port));
