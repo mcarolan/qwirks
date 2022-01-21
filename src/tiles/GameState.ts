@@ -39,7 +39,8 @@ export class GameState {
     public fireworkTilePositions: List<Position>,
     public currentPlacement: CurrentPlacementState,
     public mouseDragInProgress: MouseDrag | undefined,
-    public panelHoverTileIndex: number | undefined
+    public panelHoverTileIndex: number | undefined,
+    public username: string | undefined
   ) {}
 
   setButtonEnabled(tag: string, isEnabled: boolean): void {
@@ -87,6 +88,7 @@ export class GameState {
       0,
       List.of(),
       new CurrentPlacementState(Set.of(), tgResult.tileGrid, 0, Set.of()),
+      undefined,
       undefined,
       undefined
     );

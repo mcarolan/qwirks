@@ -15,6 +15,8 @@ import { Fireworks } from "./fireworks/Fireworks";
 import { List } from "immutable";
 import { TileGraphics } from "./tiles/TileGraphics";
 import { io } from "socket.io-client";
+import { Network } from "./tiles/Network";
+import { User } from "./tiles/User";
 
 const canvas = document.querySelector("#game") as HTMLCanvasElement;
 const context = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -77,6 +79,8 @@ const score: Score = new Score(new Position(10, 10));
 const fireworks: Fireworks = new Fireworks();
 
 const socket = io();
+const user = new User();
+const network = new Network(socket, user);
 
 const sounds = new Sounds();
 
@@ -119,6 +123,7 @@ function gameLoop(context: CanvasRenderingContext2D) {
     panel = new PanelGraphics(gameState);
   }
 
+  network.updateGameState(gameState);
   mouse.updateGameState(gameState);
   panel.updateGameState(gameState);
   tileGrid.updateGameState(gameState);
