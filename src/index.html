@@ -5,8 +5,18 @@
     <title>Typescript App</title>
   </head>
   <body>
-    <div id="main" class="main">
-      <canvas id="game"></canvas>
+    <div class="wrapper">
+      <div id="mainArea">
+        <canvas id="game"></canvas>
+      </div>
+      <div id="sidebarRight">&nbsp;</div>
+      <div id="bottom">
+        <div id="bottomPanel">
+          <div id="bottomPanelStart"></div>
+          <div id="bottomPanelMain"></div>
+          <div id="bottomPanelEnd"></div>
+        </div>
+      </div>
     </div>
     <script src="./index.ts"></script>
   </body>
@@ -21,6 +31,77 @@
       position: absolute;
       left: 0;
       top: 0;
+      z-index: 1;
+    }
+
+    #bottomPanel {
+      margin: auto;
+      width: 473px;
+      height: 129px;
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #feac5e; /* fallback for old browsers */
+      background: -webkit-linear-gradient(
+        to right,
+        #4bc0c8,
+        #c779d0,
+        #feac5e
+      ); /* Chrome 10-25, Safari 5.1-6 */
+      background: linear-gradient(
+        to right,
+        #4bc0c8,
+        #c779d0,
+        #feac5e
+      ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+      border-radius: 30px;
+      box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    }
+    /* 
+    #bottomPanelStart {
+      background: url("../static/images/panel-start.png") no-repeat;
+    }
+
+    #bottomPanelMain {
+      background: url("../static/images/panel-repeat.png") repeat-x;
+    } */
+
+    .wrapper {
+      display: grid;
+      height: 100%;
+      gap: 20px;
+      background: #feac5e; /* fallback for old browsers */
+      background: -webkit-linear-gradient(
+        to right,
+        #4bc0c8,
+        #c779d0,
+        #feac5e
+      ); /* Chrome 10-25, Safari 5.1-6 */
+      background: linear-gradient(
+        to right,
+        #4bc0c8,
+        #c779d0,
+        #feac5e
+      ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    }
+
+    #mainArea {
+      grid-row: 1 / 6;
+      grid-column: 1 / 6;
+      background-color: white;
+    }
+
+    #sidebarRight {
+      grid-row: 1 / 6;
+      grid-column: 6;
+      background-color: white;
+    }
+
+    #bottom {
+      grid-row: 6;
+      grid-column: 1 / 7;
+      background-color: white;
     }
   </style>
 </html>

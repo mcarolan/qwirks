@@ -107,6 +107,11 @@ class Rect {
     readonly height: number
   ) {}
 
+  static from(element: HTMLElement): Rect {
+    const r = element.getBoundingClientRect();
+    return new Rect(new Position(r.left, r.top), r.width, r.height);
+  }
+
   contains(position: Position): boolean {
     return (
       position.x >= this.position.x &&

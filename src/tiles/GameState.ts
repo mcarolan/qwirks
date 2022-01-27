@@ -38,6 +38,8 @@ export class GameState {
     public scoreJustAchieved: number,
     public fireworkTilePositions: List<Position>,
     public currentPlacement: CurrentPlacementState,
+    public mainAreaBounds: Rect,
+    public bottomPanelBounds: Rect,
     public mouseDragInProgress: MouseDrag | undefined,
     public panelHoverTileIndex: number | undefined,
     public username: string | undefined
@@ -88,6 +90,8 @@ export class GameState {
       0,
       List.of(),
       new CurrentPlacementState(Set.of(), tgResult.tileGrid, 0, Set.of()),
+      canvasRect,
+      new Rect(new Position(0, 0), 0, 0),
       undefined,
       undefined,
       undefined

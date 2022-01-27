@@ -29,10 +29,7 @@ export class PanelGraphics {
   private position: Position;
 
   private newPosition(state: GameState) {
-    return new Position(
-      state.canvasRect.width / 2 - PANEL_WIDTH / 2,
-      state.canvasRect.height - PADDING - PANEL_HEIGHT
-    );
+    return state.bottomPanelBounds.position;
   }
 
   constructor(state: GameState) {
@@ -97,7 +94,7 @@ export class PanelGraphics {
   }
 
   draw(context: CanvasRenderingContext2D, state: GameState): void {
-    this.drawPanel(context);
+    // this.drawPanel(context);
     const tileRects = this.tileRects(state);
 
     state.hand.map((tile, i) => {

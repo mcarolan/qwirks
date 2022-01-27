@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "start": "tsc --downlevelIteration --esModuleInterop src/main.ts && node src/main.js",
-    "prestart": "parcel build --no-cache src/index.html images/*.png"
+    "backend": "tsc --downlevelIteration --esModuleInterop src/main.ts && node src/main.js",
+    "web": "parcel serve src/index.html images/*.png"
   },
   "author": "",
   "license": "ISC",
