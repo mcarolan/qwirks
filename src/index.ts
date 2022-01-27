@@ -37,7 +37,7 @@ const gameState: GameState = GameState.initial(canvasRect);
 
 var panel: PanelGraphics | undefined;
 
-var tileGrid: TileGridGraphics | undefined;
+var tileGrid: TileGridGraphics = new TileGridGraphics();
 
 const mouse: Mouse = new Mouse();
 
@@ -55,21 +55,24 @@ const cancelInactive = loadImage("./images/cancel-inactive.png");
 const cancelHover = loadImage("./images/cancel-hover.png");
 
 export const acceptButton = new Button(
-  new Position(canvasRect.width - acceptInactive.width - 10, 10),
+  new Position(-acceptInactive.width - 10, 10),
   acceptInactive,
   acceptHover,
   "accept"
 );
 
 export const swapButton = new Button(
-  acceptButton.position.plus(new Position(0, acceptInactive.height + 10)),
+  new Position(-acceptInactive.width - 10, acceptInactive.height + 10 + 10),
   swapInactive,
   swapHover,
   "swap"
 );
 
 export const cancelButton = new Button(
-  swapButton.position.plus(new Position(0, swapInactive.height + 10)),
+  new Position(
+    -acceptInactive.width - 10,
+    acceptInactive.height + 10 + swapInactive.height + 10 + 10
+  ),
   cancelInactive,
   cancelHover,
   "cancel"
@@ -85,19 +88,16 @@ const network = new Network(socket, user);
 
 const sounds = new Sounds();
 
-function updateFireworks(
-  gameState: GameState,
-  tilePositionToScreenCoords: (p: Position) => Position
-): void {
+function updateFireworks(gameState: GameState): void {
   const targets = gameState.fireworkTilePositions.map((tp) =>
-    tilePositionToScreenCoords(tp).plus(
-      new Position(TileGraphics.tileWidth / 2, TileGraphics.tileHeight / 2)
-    )
+    tileGrid
+      .tilePositionToScreenCoords(tp, gameState)
+      .plus(
+        new Position(TileGraphics.tileWidth / 2, TileGraphics.tileHeight / 2)
+      )
   );
 
-  const acceptButtonMid = acceptButton.position.plus(
-    new Position(acceptInactive.width / 2, acceptInactive.height / 2)
-  );
+  const acceptButtonMid = acceptButton.rect.middle();
 
   targets.forEach((p) => {
     fireworks.create(acceptButtonMid, p);
@@ -123,10 +123,6 @@ function gameLoop(context: CanvasRenderingContext2D) {
   gameState.mainAreaBounds = Rect.from(mainArea);
   gameState.bottomPanelBounds = Rect.from(bottomPanel);
 
-  if (!tileGrid) {
-    tileGrid = new TileGridGraphics(gameState);
-  }
-
   if (!panel) {
     panel = new PanelGraphics(gameState);
   }
@@ -139,7 +135,7 @@ function gameLoop(context: CanvasRenderingContext2D) {
   swapButton.updateGameState(gameState);
   cancelButton.updateGameState(gameState);
   GameLogic.updateGameState(gameState);
-  updateFireworks(gameState, tileGrid.tilePositionToScreenCoords);
+  updateFireworks(gameState);
 
   tileGrid.draw(context, gameState);
   panel.draw(context, gameState);

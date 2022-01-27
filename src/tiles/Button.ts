@@ -4,19 +4,27 @@ import { GameState } from "./GameState";
 
 export class Button {
   private currentImage: HTMLImageElement;
-  private rect: Rect;
+  public rect: Rect;
 
   constructor(
-    readonly position: Position,
+    readonly mainAreaOffset: Position,
     readonly inactive: HTMLImageElement,
     readonly hover: HTMLImageElement,
     readonly tag: string
   ) {
     this.currentImage = inactive;
-    this.rect = new Rect(position, inactive.width, inactive.height);
+    this.rect = new Rect(new Position(0, 0), inactive.width, inactive.height);
   }
 
   updateGameState(gameState: GameState): void {
+    this.rect = new Rect(
+      new Position(
+        gameState.mainAreaBounds.width,
+        gameState.mainAreaBounds.position.y
+      ).plus(this.mainAreaOffset),
+      this.inactive.width,
+      this.inactive.height
+    );
     var hovering = false;
     var isClicked = false;
 
@@ -43,7 +51,11 @@ export class Button {
     const opacity = gameState.enabledButtonTags.contains(this.tag) ? 1.0 : 0.4;
     context.save();
     context.globalAlpha = opacity;
-    context.drawImage(this.currentImage, this.position.x, this.position.y);
+    context.drawImage(
+      this.currentImage,
+      this.rect.position.x,
+      this.rect.position.y
+    );
     context.restore();
   }
 }

@@ -4,27 +4,33 @@ import { MouseDrag } from "./Mouse";
 import { TileGraphics } from "./TileGraphics";
 
 export class TileGridGraphics {
-  private mid: Position;
-  private effectiveMid: Position;
+  private offset: Position;
+  private effectiveOffset: Position;
 
-  constructor(readonly gameState: GameState) {
-    this.mid = gameState.mainAreaBounds.middle();
-    this.effectiveMid = gameState.mainAreaBounds.middle();
+  constructor() {
+    this.offset = Position.ZERO;
+    this.effectiveOffset = Position.ZERO;
   }
 
   private updateDragging(gameState: GameState): void {
     const delta = (e: MouseDrag) => e.from.minus(e.to);
     gameState.mouseEvents.forEach((e) => {
       if (e.type == "MouseDrag") {
-        this.mid = this.mid.minus(delta(e));
+        this.offset = this.offset.minus(delta(e));
       }
     });
 
-    this.effectiveMid = this.mid;
+    this.effectiveOffset = this.offset;
 
     if (gameState.mouseDragInProgress) {
-      this.effectiveMid = this.mid.minus(delta(gameState.mouseDragInProgress));
+      this.effectiveOffset = this.offset.minus(
+        delta(gameState.mouseDragInProgress)
+      );
     }
+  }
+
+  private mid(state: GameState): Position {
+    return state.mainAreaBounds.middle().plus(this.effectiveOffset);
   }
 
   private updatePressedPositions(gameState: GameState): void {
@@ -34,7 +40,7 @@ export class TileGridGraphics {
         if (gameState.mainAreaBounds.contains(e.position)) {
           const xy = TileGraphics.positionFromScreen(
             e.position,
-            this.effectiveMid
+            this.mid(gameState)
           );
           tilePositionsPressed.push(xy);
         }
@@ -49,11 +55,15 @@ export class TileGridGraphics {
     this.updatePressedPositions(state);
   }
 
-  tilePositionToScreenCoords(tilePosition: Position): Position {
-    return TileGraphics.screenCoords(tilePosition, this.effectiveMid);
+  tilePositionToScreenCoords(
+    tilePosition: Position,
+    gameState: GameState
+  ): Position {
+    return TileGraphics.screenCoords(tilePosition, this.mid(gameState));
   }
 
   draw(context: CanvasRenderingContext2D, state: GameState): void {
+    const mid = this.mid(state);
     context.save();
     const clippingRect = new Path2D();
     clippingRect.rect(
@@ -66,13 +76,10 @@ export class TileGridGraphics {
     if (state.mousePosition) {
       const hoveringTilePosition = TileGraphics.positionFromScreen(
         state.mousePosition,
-        this.effectiveMid
+        mid
       );
       context.fillStyle = "#eeeeee";
-      const screenCoords = TileGraphics.screenCoords(
-        hoveringTilePosition,
-        this.effectiveMid
-      );
+      const screenCoords = TileGraphics.screenCoords(hoveringTilePosition, mid);
 
       var singleActiveTile: Tile | undefined = undefined;
 
@@ -98,7 +105,7 @@ export class TileGridGraphics {
       }
     }
     for (const pt of state.tileGridToDisplay.values) {
-      const coords = TileGraphics.screenCoords(pt.position, this.effectiveMid);
+      const coords = TileGraphics.screenCoords(pt.position, mid);
       if (state.currentPlacement.tiles.contains(pt)) {
         TileGraphics.drawHoverTile(context, coords, pt.tile);
       } else {
