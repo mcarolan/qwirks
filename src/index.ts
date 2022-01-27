@@ -25,7 +25,7 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 const mainArea = document.querySelector("#mainArea") as HTMLElement;
-const bottomPanel = document.querySelector("#bottomPanelMain") as HTMLElement;
+const bottomPanel = document.querySelector("#bottomPanel") as HTMLElement;
 
 const canvasRect = new Rect(
   new Position(mainArea.clientLeft, mainArea.clientTop),
