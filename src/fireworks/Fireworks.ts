@@ -1,6 +1,6 @@
 import { List } from "immutable";
-import { Position, Rect } from "~/tiles/domain";
-import { random } from "~/tiles/utility";
+import { Position, Rect } from "../tiles/domain";
+import { random } from "../tiles/utility";
 import { Firework } from "./Firework";
 import { Particle } from "./Particle";
 

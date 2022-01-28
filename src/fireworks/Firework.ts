@@ -1,5 +1,5 @@
-import { Position } from "~/tiles/domain";
-import { random } from "~/tiles/utility";
+import { Position } from "../tiles/domain";
+import { random } from "../tiles/utility";
 
 export class Firework {
   private current: Position;

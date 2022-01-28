@@ -17,6 +17,8 @@ import { TileGraphics } from "./tiles/TileGraphics";
 import { io } from "socket.io-client";
 import { Network } from "./tiles/Network";
 import { User } from "./tiles/User";
+import ReactDOM from "react-dom";
+import React from "react";
 
 const canvas = document.querySelector("#game") as HTMLCanvasElement;
 const context = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -26,6 +28,15 @@ canvas.height = window.innerHeight;
 
 const mainArea = document.querySelector("#mainArea") as HTMLElement;
 const bottomPanel = document.querySelector("#bottomPanel") as HTMLElement;
+const sidebarRight = document.querySelector("#sidebarRight");
+
+class HelloMessage extends React.Component {
+  render() {
+    return <h1>Woah</h1>;
+  }
+}
+
+ReactDOM.render(<HelloMessage />, sidebarRight);
 
 const canvasRect = new Rect(
   new Position(mainArea.clientLeft, mainArea.clientTop),
