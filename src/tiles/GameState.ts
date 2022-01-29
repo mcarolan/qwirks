@@ -1,4 +1,4 @@
-import { List, Set } from "immutable";
+import { List, Set, Map } from "immutable";
 import { Fireworks } from "~/fireworks/Fireworks";
 import {
   Position,
@@ -39,6 +39,7 @@ export class GameState {
     public currentPlacement: CurrentPlacementState,
     public mainAreaBounds: Rect,
     public bottomPanelBounds: Rect,
+    public userList: Map<string, string>,
     public mouseDragInProgress: MouseDrag | undefined,
     public panelHoverTileIndex: number | undefined,
     public username: string | undefined
@@ -73,6 +74,7 @@ export class GameState {
       new CurrentPlacementState(Set.of(), tgResult.tileGrid, 0, Set.of()),
       new Rect(new Position(0, 0), 0, 0),
       new Rect(new Position(0, 0), 0, 0),
+      Map(),
       undefined,
       undefined,
       undefined

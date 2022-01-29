@@ -2,10 +2,11 @@ import { Socket } from "socket.io-client";
 import { IGameStateUpdater } from "~/IGameStateUpdater";
 import { GameState } from "./GameState";
 import { User } from "./User";
+import { Map } from "immutable";
 
 export class Network implements IGameStateUpdater {
   private setUsername: string | undefined;
-
+  private setUserList: Map<string, string> | undefined;
   constructor(socket: Socket, user: User) {
     socket.on("connect", () => {
       socket.emit("user.identity", user.userId);
@@ -15,18 +16,19 @@ export class Network implements IGameStateUpdater {
       });
 
       socket.on("user.list", (users: [[string, string]]) => {
-        console.log(`user list is ${JSON.stringify(users)}`);
+        this.setUserList = Map(users);
       });
     });
   }
 
   update(gameState: GameState): GameState {
-    if (this.setUsername) {
-      const nextState = { ...gameState, username: this.setUsername };
-      this.setUsername = undefined;
-      return nextState;
-    } else {
-      return gameState;
-    }
+    const nextUsername = this.setUsername ?? gameState.username;
+    const nextUserList = this.setUserList ?? gameState.userList;
+
+    return {
+      ...gameState,
+      username: nextUsername,
+      userList: nextUserList,
+    };
   }
 }

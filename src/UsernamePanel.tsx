@@ -6,5 +6,7 @@ interface UsernamePanelProps {
 }
 
 export function UsernamePanel(props: UsernamePanelProps) {
-  return <div>{props.currentUsername ?? "connecting..."}</div>;
+  return (
+    <div id="usernamePanel">{props.currentUsername ?? "connecting..."}</div>
+  );
 }
