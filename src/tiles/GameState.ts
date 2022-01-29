@@ -24,6 +24,7 @@ export class CurrentPlacementState {
 }
 export class GameState {
   constructor(
+    public isConnected: boolean,
     public hand: List<Tile>,
     public tileBag: TileBag,
     public tileGridToDisplay: TileGrid,
@@ -59,6 +60,7 @@ export class GameState {
     var [hand, tileBag] = TileBag.full().take(6);
 
     return new GameState(
+      false,
       hand,
       tileBag,
       tgResult.tileGrid,

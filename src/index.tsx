@@ -23,6 +23,7 @@ import { UsernamePanel } from "./UsernamePanel";
 import { IGameStateUpdater } from "./IGameStateUpdater";
 import { UserList } from "./UserList";
 import { loadUser, User, UserWithStatus } from "./tiles/User";
+import { ConnectionStatus } from "./ConnectionStatus";
 
 export enum ButtonTags {
   Accept = "accept",
@@ -149,18 +150,20 @@ function updateGameState(
 interface SidebarState {
   userList: Map<string, UserWithStatus>;
   currentUser: User;
+  isConnected: boolean;
 }
 
 class Main extends React.Component<{}, SidebarState> {
   constructor(props: {}) {
     super(props);
-    this.state = { userList: Map(), currentUser: user };
+    this.state = { userList: Map(), currentUser: user, isConnected: false };
   }
 
   private shouldUpdateState(gameState: GameState): boolean {
     return (
       !is(this.state.currentUser, gameState.currentUser) ||
-      !is(this.state.userList, gameState.userList)
+      !is(this.state.userList, gameState.userList) ||
+      !is(this.state.isConnected, gameState.isConnected)
     );
   }
 
@@ -170,6 +173,7 @@ class Main extends React.Component<{}, SidebarState> {
         {
           userList: gameState.userList,
           currentUser: gameState.currentUser,
+          isConnected: gameState.isConnected,
         },
         () => {
           console.log(`react state update ${JSON.stringify(this.state)}`);
@@ -231,6 +235,7 @@ class Main extends React.Component<{}, SidebarState> {
       <div>
         <UsernamePanel currentUser={this.state.currentUser} />
         <UserList userList={this.state.userList} />
+        <ConnectionStatus isConnected={this.state.isConnected} />
       </div>
     );
   }
