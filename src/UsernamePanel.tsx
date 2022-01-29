@@ -1,12 +1,10 @@
 import React from "react";
-import { GameState } from "./tiles/GameState";
+import { User } from "./tiles/User";
 
 interface UsernamePanelProps {
-  currentUsername: string | undefined;
+  currentUser: User;
 }
 
 export function UsernamePanel(props: UsernamePanelProps) {
-  return (
-    <div id="usernamePanel">{props.currentUsername ?? "connecting..."}</div>
-  );
+  return <div id="usernamePanel">{props.currentUser.username}</div>;
 }

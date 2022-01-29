@@ -2,8 +2,8 @@ import { Rect, Tile } from "./tiles/domain";
 
 import _ from "lodash";
 import { Position } from "./tiles/domain";
-import { Map, ValueObject } from "immutable";
-import { PanelGraphics, PANEL_HEIGHT } from "./tiles/PanelGraphics";
+import { Map } from "immutable";
+import { PanelGraphics } from "./tiles/PanelGraphics";
 import { TileGridGraphics } from "./tiles/TileGridGraphics";
 import { GameState } from "./tiles/GameState";
 import { Mouse } from "./tiles/Mouse";
@@ -13,16 +13,16 @@ import { Button } from "./tiles/Button";
 import { Score } from "./tiles/Score";
 import { Sounds } from "./tiles/Sounds";
 import { Fireworks } from "./fireworks/Fireworks";
-import { hash, is, List } from "immutable";
+import { is, List } from "immutable";
 import { TileGraphics } from "./tiles/TileGraphics";
 import { io } from "socket.io-client";
 import { Network } from "./tiles/Network";
-import { User } from "./tiles/User";
 import ReactDOM from "react-dom";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React from "react";
 import { UsernamePanel } from "./UsernamePanel";
 import { IGameStateUpdater } from "./IGameStateUpdater";
 import { UserList } from "./UserList";
+import { loadUser, User, UserWithStatus } from "./tiles/User";
 
 export enum ButtonTags {
   Accept = "accept",
@@ -93,7 +93,7 @@ const score: Score = new Score(new Position(10, 10));
 const fireworks: Fireworks = new Fireworks();
 
 const socket = io("http://localhost:3000");
-const user = new User();
+const user = loadUser();
 const network = new Network(socket, user);
 
 const sounds = new Sounds();
@@ -147,19 +147,19 @@ function updateGameState(
 }
 
 interface SidebarState {
-  userList: Map<string, string>;
-  username: string | undefined;
+  userList: Map<string, UserWithStatus>;
+  currentUser: User;
 }
 
 class Main extends React.Component<{}, SidebarState> {
   constructor(props: {}) {
     super(props);
-    this.state = { userList: Map(), username: undefined };
+    this.state = { userList: Map(), currentUser: user };
   }
 
   private shouldUpdateState(gameState: GameState): boolean {
     return (
-      !is(this.state.username, gameState.username) ||
+      !is(this.state.currentUser, gameState.currentUser) ||
       !is(this.state.userList, gameState.userList)
     );
   }
@@ -169,7 +169,7 @@ class Main extends React.Component<{}, SidebarState> {
       this.setState(
         {
           userList: gameState.userList,
-          username: gameState.username,
+          currentUser: gameState.currentUser,
         },
         () => {
           console.log(`react state update ${JSON.stringify(this.state)}`);
@@ -216,7 +216,7 @@ class Main extends React.Component<{}, SidebarState> {
 
   componentDidMount() {
     this.frameId = requestAnimationFrame((_) =>
-      this.frame(GameState.initial())
+      this.frame(GameState.initial(user))
     );
   }
 
@@ -229,7 +229,7 @@ class Main extends React.Component<{}, SidebarState> {
   render() {
     return (
       <div>
-        <UsernamePanel currentUsername={this.state.username ?? "loading..."} />
+        <UsernamePanel currentUser={this.state.currentUser} />
         <UserList userList={this.state.userList} />
       </div>
     );

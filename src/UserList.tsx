@@ -1,15 +1,27 @@
 import { Map } from "immutable";
 import React from "react";
+import { OnlineStatus, UserWithStatus } from "./tiles/User";
 
 interface UserListProps {
-  userList: Map<string, string>;
+  userList: Map<string, UserWithStatus>;
 }
 export function UserList(props: UserListProps) {
-  const userListItems = Array.from(props.userList.entries()).map(
-    ([userId, username]) => {
-      return <li>{username}</li>;
+  function statusToString(userStatus: OnlineStatus): string {
+    switch (userStatus) {
+      case OnlineStatus.online:
+        return "Online";
+      case OnlineStatus.offline:
+        return "Offline";
     }
-  );
+  }
+
+  const userListItems = Array.from(props.userList.values()).map((user) => {
+    return (
+      <li key={user.userId}>
+        {user.username} ({statusToString(user.onlineStatus)})
+      </li>
+    );
+  });
   return (
     <div>
       <ul>{userListItems}</ul>

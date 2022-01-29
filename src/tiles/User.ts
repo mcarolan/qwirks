@@ -1,23 +1,33 @@
+import { generateUsername } from "unique-username-generator";
 import { v4 as uuidv4 } from "uuid";
 
-export class User {
-  private static keyUserId = "userid";
+export interface User {
+  userId: string;
+  username: string;
+}
 
-  private id: string;
+export enum OnlineStatus {
+  online,
+  offline,
+}
 
-  constructor() {
-    const id = localStorage.getItem(User.keyUserId);
+export interface UserWithStatus extends User {
+  onlineStatus: OnlineStatus;
+}
 
-    if (id) {
-      this.id = id;
-    } else {
-      const id = uuidv4();
-      localStorage.setItem(User.keyUserId, id);
-      this.id = id;
-    }
-  }
+export function loadUser(): User {
+  const localStorageUserIdKey = "userid";
+  const userId: string =
+    localStorage.getItem(localStorageUserIdKey) ?? uuidv4();
+  localStorage.setItem(localStorageUserIdKey, userId);
 
-  get userId(): string {
-    return this.id;
-  }
+  const localStorageUsernameKey = "username";
+  const username: string =
+    localStorage.getItem(localStorageUsernameKey) ?? generateUsername(" ");
+  localStorage.setItem(localStorageUsernameKey, username);
+
+  return {
+    userId,
+    username,
+  };
 }

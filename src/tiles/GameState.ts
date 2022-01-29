@@ -12,6 +12,7 @@ import {
 import { MouseClickOrDrag, MouseDrag } from "./Mouse";
 import { TileBag } from "./TileBag";
 import { TileGrid } from "./TileGrid";
+import { User, UserWithStatus } from "./User";
 
 export class CurrentPlacementState {
   constructor(
@@ -39,13 +40,13 @@ export class GameState {
     public currentPlacement: CurrentPlacementState,
     public mainAreaBounds: Rect,
     public bottomPanelBounds: Rect,
-    public userList: Map<string, string>,
+    public currentUser: User,
+    public userList: Map<string, UserWithStatus>,
     public mouseDragInProgress: MouseDrag | undefined,
-    public panelHoverTileIndex: number | undefined,
-    public username: string | undefined
+    public panelHoverTileIndex: number | undefined
   ) {}
 
-  static initial(): GameState {
+  static initial(user: User): GameState {
     const tgResult = TileGrid.empty().place(
       Set.of(
         new PositionedTile(
@@ -74,8 +75,8 @@ export class GameState {
       new CurrentPlacementState(Set.of(), tgResult.tileGrid, 0, Set.of()),
       new Rect(new Position(0, 0), 0, 0),
       new Rect(new Position(0, 0), 0, 0),
+      user,
       Map(),
-      undefined,
       undefined,
       undefined
     );
