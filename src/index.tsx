@@ -115,7 +115,7 @@ class FireworkUpdater implements IGameStateUpdater {
     targets.forEach((p) => {
       fireworks.create(acceptButtonMid, p);
 
-      var i = 5;
+      var i = gameState.scoreJustAchieved ?? 0;
 
       while (i--) {
         fireworks.create(fireworks.randomOrigin(canvasRect), p);

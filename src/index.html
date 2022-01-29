@@ -100,5 +100,35 @@
       grid-column: 1 / 7;
       background-color: white;
     }
+
+    .userListUser {
+      padding: 10px;
+      background: #666666; /* fallback for old browsers */
+      background: -webkit-linear-gradient(
+        #eeeeee,
+        #ffffff
+      ); /* Chrome 10-25, Safari 5.1-6 */
+      background: linear-gradient(
+        #eeeeee,
+        #ffffff,
+        #eeeeee
+      ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+      display: flex;
+      align-items: center;
+    }
+
+    .onlineStatus {
+      height: 25px;
+      width: 25px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 10px;
+    }
+    .onlineStatus-Online {
+      background-color: green;
+    }
+    .onlineStatus-Offline {
+      background-color: red;
+    }
   </style>
 </html>
