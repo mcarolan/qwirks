@@ -1,9 +1,10 @@
+import { IGameStateUpdater } from "~/IGameStateUpdater";
 import { Position, Rect, Tile } from "./domain";
 import { GameState } from "./GameState";
 import { MouseDrag } from "./Mouse";
 import { TileGraphics } from "./TileGraphics";
 
-export class TileGridGraphics {
+export class TileGridGraphics implements IGameStateUpdater {
   private offset: Position;
   private effectiveOffset: Position;
 
@@ -33,7 +34,7 @@ export class TileGridGraphics {
     return state.mainAreaBounds.middle().plus(this.effectiveOffset);
   }
 
-  private updatePressedPositions(gameState: GameState): void {
+  private updatePressedPositions(gameState: GameState): GameState {
     const tilePositionsPressed = new Array<Position>();
     gameState.mouseEvents.forEach((e) => {
       if (e.type == "MouseClick") {
@@ -47,12 +48,12 @@ export class TileGridGraphics {
       }
     });
 
-    gameState.tilePositionsPressed = tilePositionsPressed;
+    return { ...gameState, tilePositionsPressed: tilePositionsPressed };
   }
 
-  updateGameState(state: GameState): void {
-    this.updateDragging(state);
-    this.updatePressedPositions(state);
+  update(gameState: GameState): GameState {
+    this.updateDragging(gameState);
+    return this.updatePressedPositions(gameState);
   }
 
   tilePositionToScreenCoords(

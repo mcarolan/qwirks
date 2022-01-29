@@ -1,8 +1,9 @@
+import { IGameStateUpdater } from "~/IGameStateUpdater";
 import { Position, Rect } from "./domain";
 import { GameLogic } from "./GameLogic";
 import { GameState } from "./GameState";
 
-export class Button {
+export class Button implements IGameStateUpdater {
   private currentImage: HTMLImageElement;
   public rect: Rect;
 
@@ -16,7 +17,17 @@ export class Button {
     this.rect = new Rect(new Position(0, 0), inactive.width, inactive.height);
   }
 
-  updateGameState(gameState: GameState): void {
+  update(gameState: GameState): GameState {
+    var buttonsPressed = gameState.pressedButtonTags;
+
+    function setButtonPressed(tag: string, isPressed: boolean) {
+      if (isPressed) {
+        buttonsPressed = buttonsPressed.add(tag);
+      } else {
+        buttonsPressed = buttonsPressed.remove(tag);
+      }
+    }
+
     this.rect = new Rect(
       new Position(
         gameState.mainAreaBounds.width,
@@ -44,7 +55,9 @@ export class Button {
     this.currentImage =
       hovering && !isClicked && enabled ? this.hover : this.inactive;
 
-    gameState.setButtonPressed(this.tag, isClicked && enabled);
+    setButtonPressed(this.tag, isClicked && enabled);
+
+    return { ...gameState, pressedButtonTags: buttonsPressed };
   }
 
   draw(context: CanvasRenderingContext2D, gameState: GameState) {

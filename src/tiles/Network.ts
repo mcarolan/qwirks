@@ -1,8 +1,9 @@
 import { Socket } from "socket.io-client";
+import { IGameStateUpdater } from "~/IGameStateUpdater";
 import { GameState } from "./GameState";
 import { User } from "./User";
 
-export class Network {
+export class Network implements IGameStateUpdater {
   private setUsername: string | undefined;
 
   constructor(socket: Socket, user: User) {
@@ -19,11 +20,13 @@ export class Network {
     });
   }
 
-  updateGameState(gameState: GameState): void {
+  update(gameState: GameState): GameState {
     if (this.setUsername) {
-      gameState.username = this.setUsername;
+      const nextState = { ...gameState, username: this.setUsername };
       this.setUsername = undefined;
-      console.log(`set username to ${gameState.username}`);
+      return nextState;
+    } else {
+      return gameState;
     }
   }
 }

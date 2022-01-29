@@ -1,7 +1,8 @@
 import { PositionedTile, prettyPrint } from "./domain";
 import { GameState } from "./GameState";
 import { Set } from "immutable";
-import { acceptButton, cancelButton, swapButton } from "../index";
+import { ButtonTags } from "../index";
+import { IGameStateUpdater } from "~/IGameStateUpdater";
 
 function isValidPlacement(
   gameState: GameState,
@@ -26,8 +27,9 @@ function isValidPlacement(
   return false;
 }
 
-export class GameLogic {
-  public static updateGameState(gameState: GameState): void {
+export class GameLogic implements IGameStateUpdater {
+  update(oldState: GameState): GameState {
+    const gameState: GameState = { ...oldState };
     const singleActiveTile:
       | number
       | undefined = gameState.panelActiveTileIndicies.first();
@@ -48,7 +50,7 @@ export class GameLogic {
       }
     }
 
-    if (gameState.pressedButtonTags.contains(acceptButton.tag)) {
+    if (gameState.pressedButtonTags.contains(ButtonTags.Accept)) {
       gameState.tileGridApplied = gameState.currentPlacement.tileGrid;
 
       const toTake = gameState.currentPlacement.tiles.size;
@@ -66,7 +68,7 @@ export class GameLogic {
       gameState.currentPlacement.score = 0;
       gameState.currentPlacement.tiles = Set.of();
     } else if (
-      gameState.pressedButtonTags.contains(swapButton.tag) &&
+      gameState.pressedButtonTags.contains(ButtonTags.Swap) &&
       !gameState.panelActiveTileIndicies.isEmpty()
     ) {
       const [toAdd, newBag] = gameState.tileBag.take(
@@ -80,7 +82,7 @@ export class GameLogic {
       gameState.tileBag = newBag;
       gameState.panelActiveTileIndicies = Set.of();
     } else if (
-      gameState.pressedButtonTags.contains(cancelButton.tag) &&
+      gameState.pressedButtonTags.contains(ButtonTags.Cancel) &&
       !gameState.currentPlacement.tiles.isEmpty()
     ) {
       const newHand = gameState.hand.concat(
@@ -92,17 +94,29 @@ export class GameLogic {
     }
 
     const placementButtonsEnabled = !gameState.currentPlacement.tiles.isEmpty();
+    var buttonsEnabled = gameState.enabledButtonTags;
 
-    gameState.setButtonEnabled(acceptButton.tag, placementButtonsEnabled);
-    gameState.setButtonEnabled(cancelButton.tag, placementButtonsEnabled);
-    gameState.setButtonEnabled(
-      swapButton.tag,
+    function setButtonEnabled(tag: string, isPressed: boolean) {
+      if (isPressed) {
+        buttonsEnabled = buttonsEnabled.add(tag);
+      } else {
+        buttonsEnabled = buttonsEnabled.remove(tag);
+      }
+    }
+
+    setButtonEnabled(ButtonTags.Accept, placementButtonsEnabled);
+    setButtonEnabled(ButtonTags.Cancel, placementButtonsEnabled);
+    setButtonEnabled(
+      ButtonTags.Swap,
       !gameState.panelActiveTileIndicies.isEmpty() &&
         gameState.currentPlacement.tiles.isEmpty()
     );
+    gameState.enabledButtonTags = buttonsEnabled;
 
     gameState.tileGridToDisplay = gameState.currentPlacement.tiles.isEmpty()
       ? gameState.tileGridApplied
       : gameState.currentPlacement.tileGrid;
+
+    return gameState;
   }
 }

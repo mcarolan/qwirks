@@ -25,7 +25,6 @@ export class GameState {
   constructor(
     public hand: List<Tile>,
     public tileBag: TileBag,
-    public canvasRect: Rect,
     public tileGridToDisplay: TileGrid,
     public tileGridApplied: TileGrid,
     public mousePosition: Position | undefined,
@@ -45,24 +44,7 @@ export class GameState {
     public username: string | undefined
   ) {}
 
-  setButtonEnabled(tag: string, isEnabled: boolean): void {
-    if (isEnabled) this.enabledButtonTags = this.enabledButtonTags.add(tag);
-    else this.enabledButtonTags = this.enabledButtonTags.remove(tag);
-  }
-
-  setButtonPressed(tag: string, isPressed: boolean): void {
-    if (isPressed) this.pressedButtonTags = this.pressedButtonTags.add(tag);
-    else this.pressedButtonTags = this.pressedButtonTags.remove(tag);
-  }
-
-  setPanelTileActive(index: number, isActive: boolean): void {
-    if (isActive)
-      this.panelActiveTileIndicies = this.panelActiveTileIndicies.add(index);
-    else
-      this.panelActiveTileIndicies = this.panelActiveTileIndicies.remove(index);
-  }
-
-  static initial(canvasRect: Rect): GameState {
+  static initial(): GameState {
     const tgResult = TileGrid.empty().place(
       Set.of(
         new PositionedTile(
@@ -77,7 +59,6 @@ export class GameState {
     return new GameState(
       hand,
       tileBag,
-      canvasRect,
       tgResult.tileGrid,
       tgResult.tileGrid,
       new Position(0, 0),
@@ -90,7 +71,7 @@ export class GameState {
       0,
       List.of(),
       new CurrentPlacementState(Set.of(), tgResult.tileGrid, 0, Set.of()),
-      canvasRect,
+      new Rect(new Position(0, 0), 0, 0),
       new Rect(new Position(0, 0), 0, 0),
       undefined,
       undefined,

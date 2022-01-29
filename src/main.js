@@ -31,7 +31,11 @@ var unique_username_generator_1 = require("unique-username-generator");
 var app = express_1["default"]();
 var port = (_a = process.env.PORT) !== null && _a !== void 0 ? _a : 3000;
 var server = http_1["default"].createServer(app);
-var io = new socket_io_1.Server(server);
+var io = new socket_io_1.Server(server, {
+    cors: {
+        origin: "*"
+    }
+});
 app.use(express_1["default"].static("./dist"));
 var usernames = new Map();
 function randomUsername() {

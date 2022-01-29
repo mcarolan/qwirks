@@ -1,3 +1,4 @@
+import { IGameStateUpdater } from "~/IGameStateUpdater";
 import { Position } from "./domain";
 import { GameState } from "./GameState";
 
@@ -14,7 +15,7 @@ export interface MouseDrag {
 
 export type MouseClickOrDrag = MouseClick | MouseDrag;
 
-export class Mouse {
+export class Mouse implements IGameStateUpdater {
   private mousePosition: Position | undefined;
   private mouseDownCounter: number | undefined;
 
@@ -96,19 +97,27 @@ export class Mouse {
     };
   }
 
-  updateGameState(state: GameState): void {
-    state.mousePosition = this.mousePosition;
-    state.mouseEvents = this.events;
-    if (this.isDragging && state.mousePosition && this.mouseDragStart) {
+  update(gameState: GameState): GameState {
+    var drag: MouseDrag | undefined;
+
+    if (this.isDragging && gameState.mousePosition && this.mouseDragStart) {
       const e: MouseDrag = {
         type: "MouseDrag",
         from: this.mouseDragStart,
-        to: state.mousePosition,
+        to: this.mousePosition ?? gameState.mousePosition,
       };
-      state.mouseDragInProgress = e;
+      drag = e;
     } else {
-      state.mouseDragInProgress = undefined;
+      drag = undefined;
     }
+
+    const res = {
+      ...gameState,
+      mousePosition: this.mousePosition,
+      mouseEvents: this.events,
+      mouseDragInProgress: drag,
+    };
     this.events = [];
+    return res;
   }
 }
