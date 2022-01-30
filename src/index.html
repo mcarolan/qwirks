@@ -5,15 +5,8 @@
     <title>Typescript App</title>
   </head>
   <body>
-    <div class="wrapper">
-      <div id="mainArea">
-        <canvas id="game"></canvas>
-      </div>
-      <div id="sidebarRight">&nbsp;</div>
-      <div id="bottom">
-        <div id="bottomPanel">&nbsp;</div>
-      </div>
-    </div>
+    <canvas id="game"></canvas>
+    <div id="mainContainer"></div>
     <script src="./index.tsx" type="module"></script>
   </body>
   <style>
@@ -64,7 +57,12 @@
       box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     }
 
-    .wrapper {
+    #mainContainer {
+      width: 100%;
+      height: 100%;
+    }
+
+    #wrapper {
       display: grid;
       height: 100%;
       gap: 20px;
@@ -133,7 +131,7 @@
 
     .connectionStatusContainer {
       background-color: rgba(0, 0, 0, 0.9);
-      z-index: 2;
+      z-index: 3;
       position: absolute;
       top: 0;
       left: 0;
@@ -151,6 +149,38 @@
     }
 
     .connectionStatus-Connected {
+      display: none;
+    }
+
+    .vertical-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    button {
+      z-index: 2;
+      background: #feac5e; /* fallback for old browsers */
+      background: -webkit-linear-plagradient(
+        to right,
+        #4bc0c8,
+        #c779d0,
+        #feac5e
+      ); /* Chrome 10-25, Safari 5.1-6 */
+      background: linear-gradient(
+        to right,
+        #4bc0c8,
+        #c779d0,
+        #feac5e
+      ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+      border: 2px solid #666666;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    }
+
+    .startButton-invisible {
       display: none;
     }
   </style>

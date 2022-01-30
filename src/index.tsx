@@ -2,13 +2,13 @@ import { Rect, Tile } from "./tiles/domain";
 
 import _ from "lodash";
 import { Position } from "./tiles/domain";
-import { Map } from "immutable";
+import { Map, Set } from "immutable";
 import { PanelGraphics } from "./tiles/PanelGraphics";
 import { TileGridGraphics } from "./tiles/TileGridGraphics";
 import { GameState } from "./tiles/GameState";
 import { Mouse } from "./tiles/Mouse";
 import { GameLogic } from "./tiles/GameLogic";
-import { loadImage, random } from "./tiles/utility";
+import { loadImage } from "./tiles/utility";
 import { Button } from "./tiles/Button";
 import { Score } from "./tiles/Score";
 import { Sounds } from "./tiles/Sounds";
@@ -26,7 +26,8 @@ import { loadUser, User, UserWithStatus } from "./tiles/User";
 import { ConnectionStatus } from "./ConnectionStatus";
 import { StartButton } from "./StartButton";
 
-export enum ButtonTags {
+export enum ButtonTag {
+  Start = "start",
   Accept = "accept",
   Swap = "swap",
   Cancel = "cancel",
@@ -119,33 +120,52 @@ interface SidebarState {
   userList: Map<string, UserWithStatus>;
   currentUser: User | undefined;
   isConnected: boolean;
+  isStarted: boolean;
 }
 
-class Main extends React.Component<{}, SidebarState> {
+class Main
+  extends React.Component<{}, SidebarState>
+  implements IGameStateUpdater {
   constructor(props: {}) {
     super(props);
     this.state = {
       userList: Map(),
       currentUser: undefined,
       isConnected: false,
+      isStarted: false,
     };
+  }
+
+  private buttonsClicked: Set<ButtonTag> = Set();
+
+  onClickButton(buttonTag: ButtonTag): () => void {
+    return () => (this.buttonsClicked = this.buttonsClicked.add(buttonTag));
   }
 
   private shouldUpdateState(gameState: GameState): boolean {
     return (
       !is(this.state.currentUser, gameState.currentUser) ||
       !is(this.state.userList, gameState.userList) ||
-      !is(this.state.isConnected, gameState.isConnected)
+      !is(this.state.isConnected, gameState.isConnected) ||
+      !is(this.state.isStarted, gameState.isStarted)
     );
   }
 
-  update(gameState: GameState, callback: () => void): void {
+  update(gameState: GameState): GameState {
+    const newStarted =
+      this.buttonsClicked.contains(ButtonTag.Start) || gameState.isStarted;
+    this.buttonsClicked = Set();
+    return { ...gameState, isStarted: newStarted };
+  }
+
+  updateReactState(gameState: GameState, callback: () => void): void {
     if (this.shouldUpdateState(gameState)) {
       this.setState(
         {
           userList: gameState.userList,
           currentUser: gameState.currentUser,
           isConnected: gameState.isConnected,
+          isStarted: gameState.isStarted,
         },
         () => {
           console.log(`react state update ${JSON.stringify(this.state)}`);
@@ -172,6 +192,7 @@ class Main extends React.Component<{}, SidebarState> {
         mainAreaBounds: Rect.from(deps.mainArea),
         bottomPanelBounds: Rect.from(deps.bottomPanel),
       },
+      this,
       deps.network,
       deps.mouse,
       deps.panel,
@@ -190,7 +211,7 @@ class Main extends React.Component<{}, SidebarState> {
     deps.score.draw(deps.context, nextState);
     deps.fireworks.updateAndDraw(deps.context);
 
-    this.update(nextState, () => {
+    this.updateReactState(nextState, () => {
       this.frameId = requestAnimationFrame((_) => this.frame(nextState, deps));
     });
   }
@@ -218,14 +239,14 @@ class Main extends React.Component<{}, SidebarState> {
       new Position(-acceptInactive.width - 10, 10),
       acceptInactive,
       acceptHover,
-      ButtonTags.Accept
+      ButtonTag.Accept
     );
 
     const swapButton = new Button(
       new Position(-acceptInactive.width - 10, acceptInactive.height + 10 + 10),
       swapInactive,
       swapHover,
-      ButtonTags.Swap
+      ButtonTag.Swap
     );
 
     const cancelButton = new Button(
@@ -235,7 +256,7 @@ class Main extends React.Component<{}, SidebarState> {
       ),
       cancelInactive,
       cancelHover,
-      ButtonTags.Cancel
+      ButtonTag.Cancel
     );
 
     const score = new Score(new Position(10, 10));
@@ -302,15 +323,27 @@ class Main extends React.Component<{}, SidebarState> {
 
   render() {
     return (
-      <div>
-        <UsernamePanel currentUser={this.state.currentUser} />
-        <UserList userList={this.state.userList} />
+      <div id="wrapper">
+        <div id="mainArea">
+          <StartButton
+            visible={!this.state.isStarted}
+            onClick={this.onClickButton(ButtonTag.Start)}
+          />
+        </div>
+        <div id="sidebarRight">
+          <UsernamePanel currentUser={this.state.currentUser} />
+          <UserList userList={this.state.userList} />
+        </div>
+        <div id="bottom">
+          <div id="bottomPanel">&nbsp;</div>
+        </div>
         <ConnectionStatus isConnected={this.state.isConnected} />
-        {/* <StartButton /> */}
       </div>
     );
   }
 }
 
-const sidebarRight = document.querySelector("#sidebarRight");
-ReactDOM.render(<Main />, sidebarRight);
+window.onload = () => {
+  const mainContainer = document.querySelector("#mainContainer");
+  ReactDOM.render(<Main />, mainContainer);
+};

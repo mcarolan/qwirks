@@ -24,6 +24,7 @@ export class CurrentPlacementState {
 }
 export class GameState {
   constructor(
+    public isStarted: boolean,
     public isConnected: boolean,
     public hand: List<Tile>,
     public tileBag: TileBag,
@@ -64,6 +65,7 @@ export class GameState {
     var [hand, tileBag] = TileBag.full().take(6);
 
     return new GameState(
+      false,
       false,
       hand,
       tileBag,

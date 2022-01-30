@@ -1,7 +1,7 @@
 import { PositionedTile, prettyPrint } from "./domain";
 import { GameState } from "./GameState";
 import { Set } from "immutable";
-import { ButtonTags } from "../index";
+import { ButtonTag } from "../index";
 import { IGameStateUpdater } from "~/IGameStateUpdater";
 
 function isValidPlacement(
@@ -50,7 +50,7 @@ export class GameLogic implements IGameStateUpdater {
       }
     }
 
-    if (gameState.pressedButtonTags.contains(ButtonTags.Accept)) {
+    if (gameState.pressedButtonTags.contains(ButtonTag.Accept)) {
       gameState.tileGridApplied = gameState.currentPlacement.tileGrid;
 
       const toTake = gameState.currentPlacement.tiles.size;
@@ -68,7 +68,7 @@ export class GameLogic implements IGameStateUpdater {
       gameState.currentPlacement.score = 0;
       gameState.currentPlacement.tiles = Set.of();
     } else if (
-      gameState.pressedButtonTags.contains(ButtonTags.Swap) &&
+      gameState.pressedButtonTags.contains(ButtonTag.Swap) &&
       !gameState.panelActiveTileIndicies.isEmpty()
     ) {
       const [toAdd, newBag] = gameState.tileBag.take(
@@ -82,7 +82,7 @@ export class GameLogic implements IGameStateUpdater {
       gameState.tileBag = newBag;
       gameState.panelActiveTileIndicies = Set.of();
     } else if (
-      gameState.pressedButtonTags.contains(ButtonTags.Cancel) &&
+      gameState.pressedButtonTags.contains(ButtonTag.Cancel) &&
       !gameState.currentPlacement.tiles.isEmpty()
     ) {
       const newHand = gameState.hand.concat(
@@ -104,10 +104,10 @@ export class GameLogic implements IGameStateUpdater {
       }
     }
 
-    setButtonEnabled(ButtonTags.Accept, placementButtonsEnabled);
-    setButtonEnabled(ButtonTags.Cancel, placementButtonsEnabled);
+    setButtonEnabled(ButtonTag.Accept, placementButtonsEnabled);
+    setButtonEnabled(ButtonTag.Cancel, placementButtonsEnabled);
     setButtonEnabled(
-      ButtonTags.Swap,
+      ButtonTag.Swap,
       !gameState.panelActiveTileIndicies.isEmpty() &&
         gameState.currentPlacement.tiles.isEmpty()
     );
