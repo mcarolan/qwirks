@@ -152,14 +152,34 @@
       display: none;
     }
 
-    .vertical-center {
+    #buttonsContainer {
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-direction: row;
       height: 100%;
     }
 
+    .main-buttons {
+      flex: 1 1 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .right-side-buttons {
+      flex: 0 1 auto;
+    }
+
+    .right-side-buttons div {
+      padding-top: 10px;
+      padding-right: 10px;
+    }
+
+    .displayNone {
+      display: none;
+    }
+
     button {
+      position: relative;
       z-index: 2;
       background: #feac5e; /* fallback for old browsers */
       background: -webkit-linear-plagradient(
@@ -178,6 +198,11 @@
       padding: 10px;
       border-radius: 10px;
       box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    }
+
+    .squareButton {
+      width: 64px;
+      height: 64px;
     }
 
     .startButton-invisible {

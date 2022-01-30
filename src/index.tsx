@@ -9,7 +9,7 @@ import { GameState } from "./tiles/GameState";
 import { Mouse } from "./tiles/Mouse";
 import { GameLogic } from "./tiles/GameLogic";
 import { loadImage } from "./tiles/utility";
-import { Button } from "./tiles/Button";
+import { Button as OldButton } from "./tiles/Button";
 import { Score } from "./tiles/Score";
 import { Sounds } from "./tiles/Sounds";
 import { Fireworks } from "./fireworks/Fireworks";
@@ -24,7 +24,7 @@ import { IGameStateUpdater } from "./IGameStateUpdater";
 import { UserList } from "./UserList";
 import { loadUser, User, UserWithStatus } from "./tiles/User";
 import { ConnectionStatus } from "./ConnectionStatus";
-import { StartButton } from "./StartButton";
+import { Button } from "./Button";
 
 export enum ButtonTag {
   Start = "start",
@@ -41,9 +41,9 @@ interface GameDependencies {
   panel: PanelGraphics;
   tileGrid: TileGridGraphics;
   mouse: Mouse;
-  acceptButton: Button;
-  swapButton: Button;
-  cancelButton: Button;
+  acceptButton: OldButton;
+  swapButton: OldButton;
+  cancelButton: OldButton;
   score: Score;
   fireworks: Fireworks;
   socket: Socket;
@@ -58,7 +58,7 @@ class FireworkUpdater implements IGameStateUpdater {
   constructor(
     private tileGraphics: TileGraphics,
     private tileGrid: TileGridGraphics,
-    private acceptButton: Button,
+    private acceptButton: OldButton,
     private fireworks: Fireworks,
     private mainAreaRect: Rect,
     private sounds: Sounds
@@ -235,21 +235,21 @@ class Main
 
     const tileGraphics = await loadTileGraphics();
 
-    const acceptButton = new Button(
+    const acceptButton = new OldButton(
       new Position(-acceptInactive.width - 10, 10),
       acceptInactive,
       acceptHover,
       ButtonTag.Accept
     );
 
-    const swapButton = new Button(
+    const swapButton = new OldButton(
       new Position(-acceptInactive.width - 10, acceptInactive.height + 10 + 10),
       swapInactive,
       swapHover,
       ButtonTag.Swap
     );
 
-    const cancelButton = new Button(
+    const cancelButton = new OldButton(
       new Position(
         -acceptInactive.width - 10,
         acceptInactive.height + 10 + swapInactive.height + 10 + 10
@@ -325,10 +325,41 @@ class Main
     return (
       <div id="wrapper">
         <div id="mainArea">
-          <StartButton
-            visible={!this.state.isStarted}
-            onClick={this.onClickButton(ButtonTag.Start)}
-          />
+          <div id="buttonsContainer">
+            <div className="main-buttons">
+              <Button
+                visible={!this.state.isStarted}
+                onClick={this.onClickButton(ButtonTag.Start)}
+                text="Start"
+              />
+            </div>
+            <div className="right-side-buttons">
+              <div>
+                <Button
+                  visible
+                  onClick={this.onClickButton(ButtonTag.Accept)}
+                  text="Accept"
+                  className="squareButton acceptButton"
+                />
+              </div>
+              <div>
+                <Button
+                  visible
+                  onClick={this.onClickButton(ButtonTag.Swap)}
+                  text="Swap"
+                  className="squareButton emojiButton"
+                />
+              </div>
+              <div>
+                <Button
+                  visible
+                  onClick={this.onClickButton(ButtonTag.Cancel)}
+                  text="Cancel"
+                  className="squareButton emojiButton"
+                />
+              </div>
+            </div>
+          </div>
         </div>
         <div id="sidebarRight">
           <UsernamePanel currentUser={this.state.currentUser} />
