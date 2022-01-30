@@ -9,7 +9,6 @@ import { GameState } from "./tiles/GameState";
 import { Mouse } from "./tiles/Mouse";
 import { GameLogic } from "./tiles/GameLogic";
 import { loadImage } from "./tiles/utility";
-import { Button as OldButton } from "./tiles/Button";
 import { Score } from "./tiles/Score";
 import { Sounds } from "./tiles/Sounds";
 import { Fireworks } from "./fireworks/Fireworks";
@@ -41,9 +40,6 @@ interface GameDependencies {
   panel: PanelGraphics;
   tileGrid: TileGridGraphics;
   mouse: Mouse;
-  acceptButton: OldButton;
-  swapButton: OldButton;
-  cancelButton: OldButton;
   score: Score;
   fireworks: Fireworks;
   socket: Socket;
@@ -58,7 +54,6 @@ class FireworkUpdater implements IGameStateUpdater {
   constructor(
     private tileGraphics: TileGraphics,
     private tileGrid: TileGridGraphics,
-    private acceptButton: OldButton,
     private fireworks: Fireworks,
     private mainAreaRect: Rect,
     private sounds: Sounds
@@ -76,10 +71,10 @@ class FireworkUpdater implements IGameStateUpdater {
         )
     );
 
-    const acceptButtonMid = this.acceptButton.rect.middle();
+    const fireFrom = gameState.mousePosition ?? Position.ZERO;
 
     targets.forEach((p) => {
-      this.fireworks.create(acceptButtonMid, p);
+      this.fireworks.create(fireFrom, p);
 
       var i = gameState.scoreJustAchieved ?? 0;
 
@@ -121,6 +116,9 @@ interface SidebarState {
   currentUser: User | undefined;
   isConnected: boolean;
   isStarted: boolean;
+  isAcceptEnabled: boolean;
+  isSwapEnabled: boolean;
+  isCancelEnabled: boolean;
 }
 
 class Main
@@ -133,6 +131,9 @@ class Main
       currentUser: undefined,
       isConnected: false,
       isStarted: false,
+      isAcceptEnabled: false,
+      isSwapEnabled: false,
+      isCancelEnabled: false,
     };
   }
 
@@ -143,29 +144,38 @@ class Main
   }
 
   private shouldUpdateState(gameState: GameState): boolean {
+    const tagEnabled = (tag: ButtonTag) =>
+      gameState.enabledButtonTags.contains(tag);
     return (
       !is(this.state.currentUser, gameState.currentUser) ||
       !is(this.state.userList, gameState.userList) ||
       !is(this.state.isConnected, gameState.isConnected) ||
-      !is(this.state.isStarted, gameState.isStarted)
+      !is(this.state.isStarted, gameState.isStarted) ||
+      !is(this.state.isAcceptEnabled, tagEnabled(ButtonTag.Accept)) ||
+      !is(this.state.isSwapEnabled, tagEnabled(ButtonTag.Swap)) ||
+      !is(this.state.isCancelEnabled, tagEnabled(ButtonTag.Cancel))
     );
   }
 
   update(gameState: GameState): GameState {
-    const newStarted =
-      this.buttonsClicked.contains(ButtonTag.Start) || gameState.isStarted;
+    const buttonsPressed = this.buttonsClicked;
     this.buttonsClicked = Set();
-    return { ...gameState, isStarted: newStarted };
+    return { ...gameState, pressedButtonTags: buttonsPressed };
   }
 
   updateReactState(gameState: GameState, callback: () => void): void {
     if (this.shouldUpdateState(gameState)) {
+      const tagEnabled = (tag: ButtonTag) =>
+        gameState.enabledButtonTags.contains(tag);
       this.setState(
         {
           userList: gameState.userList,
           currentUser: gameState.currentUser,
           isConnected: gameState.isConnected,
           isStarted: gameState.isStarted,
+          isAcceptEnabled: tagEnabled(ButtonTag.Accept),
+          isSwapEnabled: tagEnabled(ButtonTag.Swap),
+          isCancelEnabled: tagEnabled(ButtonTag.Cancel),
         },
         () => {
           console.log(`react state update ${JSON.stringify(this.state)}`);
@@ -197,17 +207,11 @@ class Main
       deps.mouse,
       deps.panel,
       deps.tileGrid,
-      deps.acceptButton,
-      deps.swapButton,
-      deps.cancelButton,
       deps.gameLogic,
       deps.fireworkUpdater
     );
     deps.tileGrid.draw(deps.context, nextState);
     deps.panel.draw(deps.context, nextState);
-    deps.acceptButton.draw(deps.context, nextState);
-    deps.swapButton.draw(deps.context, nextState);
-    deps.cancelButton.draw(deps.context, nextState);
     deps.score.draw(deps.context, nextState);
     deps.fireworks.updateAndDraw(deps.context);
 
@@ -235,30 +239,6 @@ class Main
 
     const tileGraphics = await loadTileGraphics();
 
-    const acceptButton = new OldButton(
-      new Position(-acceptInactive.width - 10, 10),
-      acceptInactive,
-      acceptHover,
-      ButtonTag.Accept
-    );
-
-    const swapButton = new OldButton(
-      new Position(-acceptInactive.width - 10, acceptInactive.height + 10 + 10),
-      swapInactive,
-      swapHover,
-      ButtonTag.Swap
-    );
-
-    const cancelButton = new OldButton(
-      new Position(
-        -acceptInactive.width - 10,
-        acceptInactive.height + 10 + swapInactive.height + 10 + 10
-      ),
-      cancelInactive,
-      cancelHover,
-      ButtonTag.Cancel
-    );
-
     const score = new Score(new Position(10, 10));
 
     const socket = io("http://localhost:3000");
@@ -276,7 +256,6 @@ class Main
     const fireworkUpdater = new FireworkUpdater(
       tileGraphics,
       tileGrid,
-      acceptButton,
       fireworks,
       Rect.from(mainArea),
       sounds
@@ -290,9 +269,6 @@ class Main
       panel: new PanelGraphics(tileGraphics),
       tileGrid,
       mouse,
-      acceptButton,
-      swapButton,
-      cancelButton,
       score,
       fireworks,
       socket,
@@ -340,6 +316,7 @@ class Main
                   onClick={this.onClickButton(ButtonTag.Accept)}
                   text="Accept"
                   className="squareButton acceptButton"
+                  enabled={this.state.isAcceptEnabled}
                 />
               </div>
               <div>
@@ -348,6 +325,7 @@ class Main
                   onClick={this.onClickButton(ButtonTag.Swap)}
                   text="Swap"
                   className="squareButton emojiButton"
+                  enabled={this.state.isSwapEnabled}
                 />
               </div>
               <div>
@@ -356,6 +334,7 @@ class Main
                   onClick={this.onClickButton(ButtonTag.Cancel)}
                   text="Cancel"
                   className="squareButton emojiButton"
+                  enabled={this.state.isCancelEnabled}
                 />
               </div>
             </div>

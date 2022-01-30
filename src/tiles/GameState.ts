@@ -1,5 +1,6 @@
 import { List, Set, Map } from "immutable";
 import { Fireworks } from "~/fireworks/Fireworks";
+import { ButtonTag } from "..";
 import {
   Position,
   PositionedTile,
@@ -33,8 +34,8 @@ export class GameState {
     public mousePosition: Position | undefined,
     public mouseEvents: Array<MouseClickOrDrag>,
     public tilePositionsPressed: Array<Position>,
-    public pressedButtonTags: Set<string>,
-    public enabledButtonTags: Set<string>,
+    public pressedButtonTags: Set<ButtonTag>,
+    public enabledButtonTags: Set<ButtonTag>,
     public panelActiveTileIndicies: Set<number>,
     public score: number,
     public scoreJustAchieved: number,

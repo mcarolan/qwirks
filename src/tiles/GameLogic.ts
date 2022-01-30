@@ -96,7 +96,7 @@ export class GameLogic implements IGameStateUpdater {
     const placementButtonsEnabled = !gameState.currentPlacement.tiles.isEmpty();
     var buttonsEnabled = gameState.enabledButtonTags;
 
-    function setButtonEnabled(tag: string, isPressed: boolean) {
+    function setButtonEnabled(tag: ButtonTag, isPressed: boolean) {
       if (isPressed) {
         buttonsEnabled = buttonsEnabled.add(tag);
       } else {

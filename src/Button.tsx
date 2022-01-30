@@ -5,6 +5,7 @@ interface ButtonProps {
   onClick: () => void;
   text: JSX.Element | string;
   className?: string;
+  enabled: boolean;
 }
 
 export function Button(props: ButtonProps) {
@@ -12,7 +13,11 @@ export function Button(props: ButtonProps) {
     typeof props.text === "string" ? <span>{props.text}</span> : props.text;
   const className = `${props.className} ${props.visible ? "" : "displayNone"}`;
   return (
-    <button className={className} onClick={props.onClick}>
+    <button
+      disabled={!props.enabled}
+      className={className}
+      onClick={props.onClick}
+    >
       {contents}
     </button>
   );
