@@ -1,31 +1,56 @@
 import { Position, Tile, TileColour, TileShape } from "./domain";
-import { forIn } from "lodash";
 import { loadImage } from "./utility";
 
-function loadImageCache(): Map<TileColour, Map<TileShape, HTMLImageElement>> {
-  let colours: Map<TileColour, Map<TileShape, HTMLImageElement>> = new Map();
+async function loadImageCache(): Promise<
+  Map<TileColour, Map<TileShape, HTMLImageElement>>
+> {
+  const colours: Map<TileColour, Map<TileShape, HTMLImageElement>> = new Map();
 
-  forIn(TileColour, (colourValue, _) => {
-    let shapes: Map<TileShape, HTMLImageElement> = new Map();
-    forIn(TileShape, (shapeValue, _) => {
-      const src = `./images/${shapeValue.toString()}-${colourValue.toString()}.png`;
-      shapes.set(shapeValue, loadImage(src));
-    });
-    colours.set(colourValue, shapes);
-  });
+  for (const colour of [
+    TileColour.Blue,
+    TileColour.Green,
+    TileColour.Orange,
+    TileColour.Purple,
+    TileColour.Red,
+    TileColour.Yellow,
+  ]) {
+    const shapes: Map<TileShape, HTMLImageElement> = new Map();
+    for (const shape of [
+      TileShape.One,
+      TileShape.Two,
+      TileShape.Three,
+      TileShape.Four,
+      TileShape.Five,
+      TileShape.Six,
+    ]) {
+      const src = `./images/${shape.toString()}-${colour.toString()}.png`;
+      shapes.set(shape, await loadImage(src));
+    }
+    colours.set(colour, shapes);
+  }
 
   return colours;
 }
 
-const imageCache: Map<string, Map<string, HTMLImageElement>> = loadImageCache();
+let imageCache: Map<string, Map<string, HTMLImageElement>>;
 
-const emptyTileImage = loadImage("./images/empty-tile.png");
-const blankTileImage = loadImage("./images/blank-tile.png");
-const hoverTileImage = loadImage("./images/hover-tile.png");
-const activeTileImage = loadImage("./images/active-tile.png");
+let emptyTileImage: HTMLImageElement;
+let blankTileImage: HTMLImageElement;
+let hoverTileImage: HTMLImageElement;
+let activeTileImage: HTMLImageElement;
 
-const symWidth = emptyTileImage.width / 2;
-const symHeight = emptyTileImage.height / 2;
+let symWidth: number;
+let symHeight: number;
+
+export async function initialiseTileGraphics() {
+  imageCache = await loadImageCache();
+  emptyTileImage = await loadImage("./images/empty-tile.png");
+  blankTileImage = await loadImage("./images/blank-tile.png");
+  hoverTileImage = await loadImage("./images/hover-tile.png");
+  activeTileImage = await loadImage("./images/active-tile.png");
+  symWidth = emptyTileImage.width / 2;
+  symHeight = emptyTileImage.height / 2;
+}
 
 const PADDING = 10;
 

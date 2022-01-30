@@ -2,9 +2,9 @@ import React from "react";
 import { User } from "./tiles/User";
 
 interface UsernamePanelProps {
-  currentUser: User;
+  currentUser: User | undefined;
 }
 
 export function UsernamePanel(props: UsernamePanelProps) {
-  return <div id="usernamePanel">{props.currentUser.username}</div>;
+  return <div id="usernamePanel">{props.currentUser?.username ?? ""}</div>;
 }

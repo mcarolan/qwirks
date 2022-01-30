@@ -1,16 +1,12 @@
 import { Position, Rect, Tile } from "./domain";
 import { TileGraphics } from "./TileGraphics";
-import { loadImage } from "./utility";
-import { is, List, Map } from "immutable";
+import { is, Map } from "immutable";
 import { GameState } from "./GameState";
 import { IGameStateUpdater } from "~/IGameStateUpdater";
 
-const panelStartImage = loadImage("./images/panel-start.png");
-const PANEL_START_IMAGE_WIDTH = 26;
 export const PANEL_HEIGHT = 129;
-const PANEL_END_IMAGE_WIDTH = 26;
-const PANEL_ITEMS = 6;
 const PADDING = 5;
+const OFFSET = 25;
 
 export class PanelGraphics implements IGameStateUpdater {
   private position: Position = Position.ZERO;
@@ -20,12 +16,9 @@ export class PanelGraphics implements IGameStateUpdater {
   }
 
   private tileRects(state: GameState): Map<number, Rect> {
-    const tileY =
-      this.position.y +
-      panelStartImage.height / 2 -
-      TileGraphics.tileHeight / 2;
+    const tileY = this.position.y + TileGraphics.tileHeight / 2;
 
-    const startTileX = this.position.x + panelStartImage.width + PADDING;
+    const startTileX = this.position.x + OFFSET + PADDING;
 
     return Map<number, Rect>(
       state.hand.map((_, i) => {
@@ -88,7 +81,6 @@ export class PanelGraphics implements IGameStateUpdater {
   }
 
   draw(context: CanvasRenderingContext2D, state: GameState): void {
-    // this.drawPanel(context);
     const tileRects = this.tileRects(state);
 
     state.hand.map((tile, i) => {

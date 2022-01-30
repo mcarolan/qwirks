@@ -8,7 +8,7 @@ interface UserListProps {
 }
 export function UserList(props: UserListProps) {
   const userListItems = Array.from(props.userList.values()).map((user) => {
-    return <UserListUser user={user} />;
+    return <UserListUser key={user.userId} user={user} />;
   });
   return <div>{userListItems}</div>;
 }

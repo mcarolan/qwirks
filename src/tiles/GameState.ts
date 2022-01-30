@@ -47,7 +47,11 @@ export class GameState {
     public panelHoverTileIndex: number | undefined
   ) {}
 
-  static initial(user: User): GameState {
+  static initial(
+    user: User,
+    mainAreaBounds: Rect,
+    bottomPanelBounds: Rect
+  ): GameState {
     const tgResult = TileGrid.empty().place(
       Set.of(
         new PositionedTile(
@@ -75,8 +79,8 @@ export class GameState {
       0,
       List.of(),
       new CurrentPlacementState(Set.of(), tgResult.tileGrid, 0, Set.of()),
-      new Rect(new Position(0, 0), 0, 0),
-      new Rect(new Position(0, 0), 0, 0),
+      mainAreaBounds,
+      bottomPanelBounds,
       user,
       Map(),
       undefined,
