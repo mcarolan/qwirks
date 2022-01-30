@@ -8,7 +8,7 @@ export class TileGridGraphics implements IGameStateUpdater {
   private offset: Position;
   private effectiveOffset: Position;
 
-  constructor() {
+  constructor(private tileGraphics: TileGraphics) {
     this.offset = Position.ZERO;
     this.effectiveOffset = Position.ZERO;
   }
@@ -39,7 +39,7 @@ export class TileGridGraphics implements IGameStateUpdater {
     gameState.mouseEvents.forEach((e) => {
       if (e.type == "MouseClick") {
         if (gameState.mainAreaBounds.contains(e.position)) {
-          const xy = TileGraphics.positionFromScreen(
+          const xy = this.tileGraphics.positionFromScreen(
             e.position,
             this.mid(gameState)
           );
@@ -60,7 +60,7 @@ export class TileGridGraphics implements IGameStateUpdater {
     tilePosition: Position,
     gameState: GameState
   ): Position {
-    return TileGraphics.screenCoords(tilePosition, this.mid(gameState));
+    return this.tileGraphics.screenCoords(tilePosition, this.mid(gameState));
   }
 
   draw(context: CanvasRenderingContext2D, state: GameState): void {
@@ -75,12 +75,15 @@ export class TileGridGraphics implements IGameStateUpdater {
     );
     context.clip(clippingRect);
     if (state.mousePosition) {
-      const hoveringTilePosition = TileGraphics.positionFromScreen(
+      const hoveringTilePosition = this.tileGraphics.positionFromScreen(
         state.mousePosition,
         mid
       );
       context.fillStyle = "#eeeeee";
-      const screenCoords = TileGraphics.screenCoords(hoveringTilePosition, mid);
+      const screenCoords = this.tileGraphics.screenCoords(
+        hoveringTilePosition,
+        mid
+      );
 
       var singleActiveTile: Tile | undefined = undefined;
 
@@ -94,23 +97,27 @@ export class TileGridGraphics implements IGameStateUpdater {
       if (singleActiveTile) {
         context.save();
         context.globalAlpha = 0.5;
-        TileGraphics.drawInactiveTile(context, screenCoords, singleActiveTile);
+        this.tileGraphics.drawInactiveTile(
+          context,
+          screenCoords,
+          singleActiveTile
+        );
         context.restore();
       } else {
         context.fillRect(
           screenCoords.x,
           screenCoords.y,
-          TileGraphics.tileWidth,
-          TileGraphics.tileHeight
+          this.tileGraphics.tileWidth,
+          this.tileGraphics.tileHeight
         );
       }
     }
     for (const pt of state.tileGridToDisplay.values) {
-      const coords = TileGraphics.screenCoords(pt.position, mid);
+      const coords = this.tileGraphics.screenCoords(pt.position, mid);
       if (state.currentPlacement.tiles.contains(pt)) {
-        TileGraphics.drawHoverTile(context, coords, pt.tile);
+        this.tileGraphics.drawHoverTile(context, coords, pt.tile);
       } else {
-        TileGraphics.drawInactiveTile(context, coords, pt.tile);
+        this.tileGraphics.drawInactiveTile(context, coords, pt.tile);
       }
     }
     context.restore();

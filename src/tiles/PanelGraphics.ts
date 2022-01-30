@@ -11,25 +11,28 @@ const OFFSET = 25;
 export class PanelGraphics implements IGameStateUpdater {
   private position: Position = Position.ZERO;
 
+  constructor(private tileGraphics: TileGraphics) {}
+
   private newPosition(state: GameState) {
     return state.bottomPanelBounds.position;
   }
 
   private tileRects(state: GameState): Map<number, Rect> {
-    const tileY = this.position.y + TileGraphics.tileHeight / 2;
+    const tileY = this.position.y + this.tileGraphics.tileHeight / 2;
 
     const startTileX = this.position.x + OFFSET + PADDING;
 
     return Map<number, Rect>(
       state.hand.map((_, i) => {
-        const tileX = startTileX + i * TileGraphics.tileWidth + i * PADDING;
+        const tileX =
+          startTileX + i * this.tileGraphics.tileWidth + i * PADDING;
         const tilePosition = new Position(tileX, tileY);
         return [
           i,
           new Rect(
             tilePosition,
-            TileGraphics.tileWidth,
-            TileGraphics.tileHeight
+            this.tileGraphics.tileWidth,
+            this.tileGraphics.tileHeight
           ),
         ];
       })
@@ -87,14 +90,14 @@ export class PanelGraphics implements IGameStateUpdater {
       const rect = tileRects.get(i);
       if (rect) {
         if (state.panelActiveTileIndicies.contains(i)) {
-          TileGraphics.drawActiveTile(context, rect.position, tile);
+          this.tileGraphics.drawActiveTile(context, rect.position, tile);
         } else if (
           state.panelHoverTileIndex != undefined &&
           is(state.panelHoverTileIndex, i)
         ) {
-          TileGraphics.drawHoverTile(context, rect.position, tile);
+          this.tileGraphics.drawHoverTile(context, rect.position, tile);
         } else {
-          TileGraphics.drawInactiveTile(context, rect.position, tile);
+          this.tileGraphics.drawInactiveTile(context, rect.position, tile);
         }
       }
     });

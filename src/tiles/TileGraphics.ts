@@ -32,75 +32,81 @@ async function loadImageCache(): Promise<
   return colours;
 }
 
-let imageCache: Map<string, Map<string, HTMLImageElement>>;
+export async function loadTileGraphics(): Promise<TileGraphics> {
+  const imageCache = await loadImageCache();
+  const emptyTileImage = await loadImage("./images/empty-tile.png");
+  const blankTileImage = await loadImage("./images/blank-tile.png");
+  const hoverTileImage = await loadImage("./images/hover-tile.png");
+  const activeTileImage = await loadImage("./images/active-tile.png");
+  const symWidth = emptyTileImage.width / 2;
+  const symHeight = emptyTileImage.height / 2;
 
-let emptyTileImage: HTMLImageElement;
-let blankTileImage: HTMLImageElement;
-let hoverTileImage: HTMLImageElement;
-let activeTileImage: HTMLImageElement;
-
-let symWidth: number;
-let symHeight: number;
-
-export async function initialiseTileGraphics() {
-  imageCache = await loadImageCache();
-  emptyTileImage = await loadImage("./images/empty-tile.png");
-  blankTileImage = await loadImage("./images/blank-tile.png");
-  hoverTileImage = await loadImage("./images/hover-tile.png");
-  activeTileImage = await loadImage("./images/active-tile.png");
-  symWidth = emptyTileImage.width / 2;
-  symHeight = emptyTileImage.height / 2;
+  return new TileGraphics(
+    imageCache,
+    emptyTileImage,
+    blankTileImage,
+    hoverTileImage,
+    activeTileImage,
+    symWidth,
+    symHeight
+  );
 }
 
 const PADDING = 10;
 
 export class TileGraphics {
-  static drawEmptyTile(
-    context: CanvasRenderingContext2D,
-    position: Position
-  ): void {
+  constructor(
+    readonly imageCache: Map<string, Map<string, HTMLImageElement>>,
+    readonly emptyTileImage: HTMLImageElement,
+    readonly blankTileImage: HTMLImageElement,
+    readonly hoverTileImage: HTMLImageElement,
+    readonly activeTileImage: HTMLImageElement,
+    readonly symWidth: number,
+    readonly symHeight: number
+  ) {}
+  drawEmptyTile(context: CanvasRenderingContext2D, position: Position): void {
     context.drawImage(
-      emptyTileImage,
+      this.emptyTileImage,
       position.x,
       position.y,
-      emptyTileImage.width,
-      emptyTileImage.height
+      this.emptyTileImage.width,
+      this.emptyTileImage.height
     );
   }
 
-  static get tileWidth(): number {
-    return emptyTileImage.width;
+  get tileWidth(): number {
+    return this.emptyTileImage.width;
   }
 
-  static get tileHeight(): number {
-    return emptyTileImage.height;
+  get tileHeight(): number {
+    return this.emptyTileImage.height;
   }
 
-  static drawHoverTile(
+  drawHoverTile(
     context: CanvasRenderingContext2D,
     position: Position,
     tile: Tile
   ): void {
-    this.drawTile(context, position, tile, hoverTileImage);
+    this.drawTile(context, position, tile, this.hoverTileImage);
   }
 
-  static drawInactiveTile(
+  drawInactiveTile(
     context: CanvasRenderingContext2D,
     position: Position,
     tile: Tile
   ): void {
-    this.drawTile(context, position, tile, blankTileImage);
+    this.drawTile(context, position, tile, this.blankTileImage);
   }
 
-  static drawActiveTile(
+  drawActiveTile(
     context: CanvasRenderingContext2D,
     position: Position,
     tile: Tile
   ): void {
-    this.drawTile(context, position, tile, activeTileImage);
+    this.drawTile(context, position, tile, this.activeTileImage);
   }
 
-  private static drawTile(
+  private drawTile(
     context: CanvasRenderingContext2D,
     position: Position,
     tile: Tile,
@@ -110,33 +116,33 @@ export class TileGraphics {
       tileBackground,
       position.x,
       position.y,
-      blankTileImage.width,
-      blankTileImage.height
+      this.blankTileImage.width,
+      this.blankTileImage.height
     );
-    const inner = imageCache
+    const inner = this.imageCache
       .get(tile.colour)
       ?.get(tile.shape) as HTMLImageElement;
 
     if (inner) {
       context.drawImage(
         inner,
-        position.x + symWidth / 2,
-        position.y + symHeight / 2,
-        symWidth,
-        symHeight
+        position.x + this.symWidth / 2,
+        position.y + this.symHeight / 2,
+        this.symWidth,
+        this.symHeight
       );
     }
   }
 
-  static screenCoords(pos: Position, mid: Position): Position {
-    const tileX = pos.x * TileGraphics.tileWidth + pos.x * PADDING;
-    const tileY = pos.y * TileGraphics.tileHeight + pos.y * PADDING;
+  screenCoords(pos: Position, mid: Position): Position {
+    const tileX = pos.x * this.tileWidth + pos.x * PADDING;
+    const tileY = pos.y * this.tileHeight + pos.y * PADDING;
     return new Position(mid.x + tileX, mid.y + tileY);
   }
 
-  static positionFromScreen(screen: Position, mid: Position): Position {
-    const tileX = (screen.x - mid.x) / (TileGraphics.tileWidth + PADDING);
-    const tileY = (screen.y - mid.y) / (TileGraphics.tileHeight + PADDING);
+  positionFromScreen(screen: Position, mid: Position): Position {
+    const tileX = (screen.x - mid.x) / (this.tileWidth + PADDING);
+    const tileY = (screen.y - mid.y) / (this.tileHeight + PADDING);
     return new Position(Math.floor(tileX), Math.floor(tileY));
   }
 }

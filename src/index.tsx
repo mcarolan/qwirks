@@ -14,7 +14,7 @@ import { Score } from "./tiles/Score";
 import { Sounds } from "./tiles/Sounds";
 import { Fireworks } from "./fireworks/Fireworks";
 import { is, List } from "immutable";
-import { initialiseTileGraphics, TileGraphics } from "./tiles/TileGraphics";
+import { loadTileGraphics, TileGraphics } from "./tiles/TileGraphics";
 import { io, Socket } from "socket.io-client";
 import { Network } from "./tiles/Network";
 import ReactDOM from "react-dom";
@@ -55,6 +55,7 @@ interface GameDependencies {
 
 class FireworkUpdater implements IGameStateUpdater {
   constructor(
+    private tileGraphics: TileGraphics,
     private tileGrid: TileGridGraphics,
     private acceptButton: Button,
     private fireworks: Fireworks,
@@ -67,7 +68,10 @@ class FireworkUpdater implements IGameStateUpdater {
       this.tileGrid
         .tilePositionToScreenCoords(tp, gameState)
         .plus(
-          new Position(TileGraphics.tileWidth / 2, TileGraphics.tileHeight / 2)
+          new Position(
+            this.tileGraphics.tileWidth / 2,
+            this.tileGraphics.tileHeight / 2
+          )
         )
     );
 
@@ -208,7 +212,7 @@ class Main extends React.Component<{}, SidebarState> {
     const cancelInactive = await loadImage("./images/cancel-inactive.png");
     const cancelHover = await loadImage("./images/cancel-hover.png");
 
-    await initialiseTileGraphics();
+    const tileGraphics = await loadTileGraphics();
 
     const acceptButton = new Button(
       new Position(-acceptInactive.width - 10, 10),
@@ -242,13 +246,14 @@ class Main extends React.Component<{}, SidebarState> {
 
     const mouse = new Mouse();
 
-    const tileGrid = new TileGridGraphics();
+    const tileGrid = new TileGridGraphics(tileGraphics);
 
     const fireworks = new Fireworks();
 
     const sounds = new Sounds();
 
     const fireworkUpdater = new FireworkUpdater(
+      tileGraphics,
       tileGrid,
       acceptButton,
       fireworks,
@@ -261,7 +266,7 @@ class Main extends React.Component<{}, SidebarState> {
       context,
       mainArea,
       bottomPanel,
-      panel: new PanelGraphics(),
+      panel: new PanelGraphics(tileGraphics),
       tileGrid,
       mouse,
       acceptButton,
