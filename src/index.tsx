@@ -116,9 +116,7 @@ interface SidebarState {
   currentUser: User | undefined;
   isConnected: boolean;
   isStarted: boolean;
-  isAcceptEnabled: boolean;
-  isSwapEnabled: boolean;
-  isCancelEnabled: boolean;
+  enabledButtonTags: Set<ButtonTag>;
 }
 
 class Main
@@ -131,9 +129,7 @@ class Main
       currentUser: undefined,
       isConnected: false,
       isStarted: false,
-      isAcceptEnabled: false,
-      isSwapEnabled: false,
-      isCancelEnabled: false,
+      enabledButtonTags: Set(),
     };
   }
 
@@ -144,16 +140,12 @@ class Main
   }
 
   private shouldUpdateState(gameState: GameState): boolean {
-    const tagEnabled = (tag: ButtonTag) =>
-      gameState.enabledButtonTags.contains(tag);
     return (
       !is(this.state.currentUser, gameState.currentUser) ||
       !is(this.state.userList, gameState.userList) ||
       !is(this.state.isConnected, gameState.isConnected) ||
       !is(this.state.isStarted, gameState.isStarted) ||
-      !is(this.state.isAcceptEnabled, tagEnabled(ButtonTag.Accept)) ||
-      !is(this.state.isSwapEnabled, tagEnabled(ButtonTag.Swap)) ||
-      !is(this.state.isCancelEnabled, tagEnabled(ButtonTag.Cancel))
+      !is(this.state.enabledButtonTags, gameState.enabledButtonTags)
     );
   }
 
@@ -173,9 +165,7 @@ class Main
           currentUser: gameState.currentUser,
           isConnected: gameState.isConnected,
           isStarted: gameState.isStarted,
-          isAcceptEnabled: tagEnabled(ButtonTag.Accept),
-          isSwapEnabled: tagEnabled(ButtonTag.Swap),
-          isCancelEnabled: tagEnabled(ButtonTag.Cancel),
+          enabledButtonTags: gameState.enabledButtonTags,
         },
         () => {
           console.log(`react state update ${JSON.stringify(this.state)}`);
@@ -298,6 +288,9 @@ class Main
   }
 
   render() {
+    const isEnabled = (tag: ButtonTag) =>
+      this.state.enabledButtonTags.contains(tag);
+
     return (
       <div id="wrapper">
         <div id="mainArea">
@@ -307,6 +300,7 @@ class Main
                 visible={!this.state.isStarted}
                 onClick={this.onClickButton(ButtonTag.Start)}
                 text="Start"
+                enabled={isEnabled(ButtonTag.Start)}
               />
             </div>
             <div className="right-side-buttons">
@@ -316,7 +310,7 @@ class Main
                   onClick={this.onClickButton(ButtonTag.Accept)}
                   text="Accept"
                   className="squareButton acceptButton"
-                  enabled={this.state.isAcceptEnabled}
+                  enabled={isEnabled(ButtonTag.Accept)}
                 />
               </div>
               <div>
@@ -325,7 +319,7 @@ class Main
                   onClick={this.onClickButton(ButtonTag.Swap)}
                   text="Swap"
                   className="squareButton emojiButton"
-                  enabled={this.state.isSwapEnabled}
+                  enabled={isEnabled(ButtonTag.Swap)}
                 />
               </div>
               <div>
@@ -334,7 +328,7 @@ class Main
                   onClick={this.onClickButton(ButtonTag.Cancel)}
                   text="Cancel"
                   className="squareButton emojiButton"
-                  enabled={this.state.isCancelEnabled}
+                  enabled={isEnabled(ButtonTag.Cancel)}
                 />
               </div>
             </div>
