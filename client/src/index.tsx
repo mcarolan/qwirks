@@ -1,6 +1,5 @@
-import { Rect, Tile } from "./tiles/domain";
+import { Rect } from "./tiles/domain";
 
-import _ from "lodash";
 import { Position } from "./tiles/domain";
 import { Map, Set } from "immutable";
 import { PanelGraphics } from "./tiles/PanelGraphics";
@@ -8,7 +7,6 @@ import { TileGridGraphics } from "./tiles/TileGridGraphics";
 import { GameState } from "./tiles/GameState";
 import { Mouse } from "./tiles/Mouse";
 import { GameLogic } from "./tiles/GameLogic";
-import { loadImage } from "./tiles/utility";
 import { Score } from "./tiles/Score";
 import { Sounds } from "./tiles/Sounds";
 import { Fireworks } from "./fireworks/Fireworks";
@@ -21,9 +19,14 @@ import React from "react";
 import { UsernamePanel } from "./UsernamePanel";
 import { IGameStateUpdater } from "./IGameStateUpdater";
 import { UserList } from "./UserList";
-import { loadUser, User, UserWithStatus } from "./tiles/User";
+import {
+  generateNewURLWithGameKey,
+  getGameKeyFromURL,
+  loadUserFromLocalStorage,
+} from "./browser/BrowserAPI";
 import { ConnectionStatus } from "./ConnectionStatus";
 import { Button } from "./Button";
+import { User, UserWithStatus } from "../../shared/User";
 
 export enum ButtonTag {
   Start = "start",
@@ -111,25 +114,33 @@ function updateGameState(
   return state;
 }
 
-interface SidebarState {
+interface MainState {
   userList: Map<string, UserWithStatus>;
   currentUser: User | undefined;
   isConnected: boolean;
   isStarted: boolean;
   enabledButtonTags: Set<ButtonTag>;
+  visibleButtonTags: Set<ButtonTag>;
+  userInControl: string | undefined;
+}
+
+interface MainProps {
+  gameKey: string;
 }
 
 class Main
-  extends React.Component<{}, SidebarState>
+  extends React.Component<MainProps, MainState>
   implements IGameStateUpdater {
-  constructor(props: {}) {
+  constructor(props: MainProps) {
     super(props);
     this.state = {
       userList: Map(),
-      currentUser: undefined,
       isConnected: false,
       isStarted: false,
       enabledButtonTags: Set(),
+      visibleButtonTags: Set(),
+      currentUser: undefined,
+      userInControl: undefined,
     };
   }
 
@@ -145,7 +156,9 @@ class Main
       !is(this.state.userList, gameState.userList) ||
       !is(this.state.isConnected, gameState.isConnected) ||
       !is(this.state.isStarted, gameState.isStarted) ||
-      !is(this.state.enabledButtonTags, gameState.enabledButtonTags)
+      !is(this.state.enabledButtonTags, gameState.enabledButtonTags) ||
+      !is(this.state.visibleButtonTags, gameState.visibleButtonTags) ||
+      !is(this.state.userInControl, gameState.userInControl)
     );
   }
 
@@ -157,8 +170,6 @@ class Main
 
   updateReactState(gameState: GameState, callback: () => void): void {
     if (this.shouldUpdateState(gameState)) {
-      const tagEnabled = (tag: ButtonTag) =>
-        gameState.enabledButtonTags.contains(tag);
       this.setState(
         {
           userList: gameState.userList,
@@ -166,6 +177,8 @@ class Main
           isConnected: gameState.isConnected,
           isStarted: gameState.isStarted,
           enabledButtonTags: gameState.enabledButtonTags,
+          visibleButtonTags: gameState.visibleButtonTags,
+          userInControl: gameState.userInControl,
         },
         () => {
           console.log(`react state update ${JSON.stringify(this.state)}`);
@@ -218,22 +231,13 @@ class Main
     const mainArea = document.querySelector("#mainArea") as HTMLElement;
     const bottomPanel = document.querySelector("#bottomPanel") as HTMLElement;
 
-    const acceptInactive = await loadImage("./images/accept-inactive.png");
-    const acceptHover = await loadImage("./images/accept-hover.png");
-
-    const swapInactive = await loadImage("./images/swap-inactive.png");
-    const swapHover = await loadImage("./images/swap-hover.png");
-
-    const cancelInactive = await loadImage("./images/cancel-inactive.png");
-    const cancelHover = await loadImage("./images/cancel-hover.png");
-
     const tileGraphics = await loadTileGraphics();
 
     const score = new Score(new Position(10, 10));
 
     const socket = io("http://localhost:3000");
 
-    const user = loadUser();
+    const user = loadUserFromLocalStorage();
 
     const mouse = new Mouse();
 
@@ -275,7 +279,12 @@ class Main
 
     this.frameId = requestAnimationFrame((_) =>
       this.frame(
-        GameState.initial(user, Rect.from(mainArea), Rect.from(bottomPanel)),
+        GameState.initial(
+          this.props.gameKey,
+          user,
+          Rect.from(mainArea),
+          Rect.from(bottomPanel)
+        ),
         dependencies
       )
     );
@@ -291,13 +300,16 @@ class Main
     const isEnabled = (tag: ButtonTag) =>
       this.state.enabledButtonTags.contains(tag);
 
+    const isVisible = (tag: ButtonTag) =>
+      this.state.visibleButtonTags.contains(tag);
+
     return (
       <div id="wrapper">
         <div id="mainArea">
           <div id="buttonsContainer">
             <div className="main-buttons">
               <Button
-                visible={!this.state.isStarted}
+                visible={isVisible(ButtonTag.Start)}
                 onClick={this.onClickButton(ButtonTag.Start)}
                 text="Start"
                 enabled={isEnabled(ButtonTag.Start)}
@@ -306,7 +318,7 @@ class Main
             <div className="right-side-buttons">
               <div>
                 <Button
-                  visible
+                  visible={isVisible(ButtonTag.Accept)}
                   onClick={this.onClickButton(ButtonTag.Accept)}
                   text="Accept"
                   className="squareButton acceptButton"
@@ -315,7 +327,7 @@ class Main
               </div>
               <div>
                 <Button
-                  visible
+                  visible={isVisible(ButtonTag.Swap)}
                   onClick={this.onClickButton(ButtonTag.Swap)}
                   text="Swap"
                   className="squareButton emojiButton"
@@ -324,7 +336,7 @@ class Main
               </div>
               <div>
                 <Button
-                  visible
+                  visible={isVisible(ButtonTag.Cancel)}
                   onClick={this.onClickButton(ButtonTag.Cancel)}
                   text="Cancel"
                   className="squareButton emojiButton"
@@ -336,7 +348,7 @@ class Main
         </div>
         <div id="sidebarRight">
           <UsernamePanel currentUser={this.state.currentUser} />
-          <UserList userList={this.state.userList} />
+          <UserList userList={this.state.userList} userInControl={this.state.userInControl} />
         </div>
         <div id="bottom">
           <div id="bottomPanel">&nbsp;</div>
@@ -348,6 +360,12 @@ class Main
 }
 
 window.onload = () => {
-  const mainContainer = document.querySelector("#mainContainer");
-  ReactDOM.render(<Main />, mainContainer);
+  const gameKey = getGameKeyFromURL();
+
+  if (gameKey) {
+    const mainContainer = document.querySelector("#mainContainer");
+    ReactDOM.render(<Main gameKey={gameKey} />, mainContainer);
+  } else {
+    window.location.assign(generateNewURLWithGameKey());
+  }
 };

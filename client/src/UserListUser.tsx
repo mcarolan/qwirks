@@ -1,8 +1,9 @@
-import { OnlineStatus, UserWithStatus } from "./tiles/User";
 import React from "react";
+import { OnlineStatus, UserWithStatus } from "../../shared/User";
 
 interface UserListUserProps {
   user: UserWithStatus;
+  userInControl: string | undefined;
 }
 
 export function UserListUser(props: UserListUserProps) {
@@ -14,10 +15,16 @@ export function UserListUser(props: UserListUserProps) {
         return "onlineStatus onlineStatus-Offline";
     }
   }
+
+  const userInControlClassName: string =
+    props.userInControl === props.user.userId
+      ? "user-incontrol"
+      : "user-normal";
+
   return (
     <div className="userListUser">
       <span className={onlineStatusClassName(props.user.onlineStatus)}></span>
-      {props.user.username}
+      <span className={userInControlClassName}>{props.user.username}</span>
     </div>
   );
 }

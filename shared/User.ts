@@ -8,6 +8,12 @@ export enum OnlineStatus {
   offline,
 }
 
+export enum UserType {
+  Player,
+  Spectator,
+}
+
 export interface UserWithStatus extends User {
   onlineStatus: OnlineStatus;
+  userType: UserType;
 }

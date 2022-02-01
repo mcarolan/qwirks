@@ -1,28 +1,21 @@
-import { Position, Tile, TileColour, TileShape } from "./domain";
 import { loadImage } from "./utility";
+import {
+  TileColour,
+  TileShape,
+  Tile,
+  allTileColours,
+  allTileShapes,
+  Position,
+} from "../../../shared/Domain";
 
 async function loadImageCache(): Promise<
   Map<TileColour, Map<TileShape, HTMLImageElement>>
 > {
   const colours: Map<TileColour, Map<TileShape, HTMLImageElement>> = new Map();
 
-  for (const colour of [
-    TileColour.Blue,
-    TileColour.Green,
-    TileColour.Orange,
-    TileColour.Purple,
-    TileColour.Red,
-    TileColour.Yellow,
-  ]) {
+  for (const colour of allTileColours()) {
     const shapes: Map<TileShape, HTMLImageElement> = new Map();
-    for (const shape of [
-      TileShape.One,
-      TileShape.Two,
-      TileShape.Three,
-      TileShape.Four,
-      TileShape.Five,
-      TileShape.Six,
-    ]) {
+    for (const shape of allTileShapes()) {
       const src = `./images/${shape.toString()}-${colour.toString()}.png`;
       shapes.set(shape, await loadImage(src));
     }

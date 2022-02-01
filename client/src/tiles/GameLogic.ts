@@ -1,8 +1,9 @@
-import { PositionedTile, prettyPrint } from "./domain";
+import { prettyPrint } from "./domain";
 import { GameState } from "./GameState";
-import { Set } from "immutable";
+import { Set, Map } from "immutable";
 import { ButtonTag } from "../index";
 import { IGameStateUpdater } from "~/IGameStateUpdater";
+import { PositionedTile } from "../../../shared/Domain";
 
 function isValidPlacement(
   gameState: GameState,
@@ -25,6 +26,13 @@ function isValidPlacement(
     console.log("newTg or tileGridGraphics is null");
   }
   return false;
+}
+
+function buildSet<T>(map: Map<T, boolean>): Set<T> {
+  return map
+    .filter((v) => v)
+    .keySeq()
+    .toSet();
 }
 
 export class GameLogic implements IGameStateUpdater {
@@ -51,36 +59,31 @@ export class GameLogic implements IGameStateUpdater {
     }
 
     if (gameState.pressedButtonTags.contains(ButtonTag.Accept)) {
-      gameState.tileGridApplied = gameState.currentPlacement.tileGrid;
-
-      const toTake = gameState.currentPlacement.tiles.size;
-
-      const [toAdd, newBag] = gameState.tileBag.take(toTake);
-      gameState.hand = gameState.hand.concat(toAdd);
-      gameState.tileBag = newBag;
-      gameState.score = gameState.score + gameState.currentPlacement.score;
-      gameState.scoreJustAchieved = gameState.currentPlacement.score;
-
-      gameState.fireworkTilePositions = gameState.currentPlacement.lines
-        .flatMap((line) => line.map((pt) => pt.position))
-        .toList();
-
-      gameState.currentPlacement.score = 0;
-      gameState.currentPlacement.tiles = Set.of();
+      // gameState.tileGridApplied = gameState.currentPlacement.tileGrid;
+      // const toTake = gameState.currentPlacement.tiles.size;
+      // const [toAdd, newBag] = gameState.tileBag.take(toTake);
+      // gameState.hand = gameState.hand.concat(toAdd);
+      // gameState.tileBag = newBag;
+      // gameState.score = gameState.score + gameState.currentPlacement.score;
+      // gameState.scoreJustAchieved = gameState.currentPlacement.score;
+      // gameState.fireworkTilePositions = gameState.currentPlacement.lines
+      //   .flatMap((line) => line.map((pt) => pt.position))
+      //   .toList();
+      // gameState.currentPlacement.score = 0;
+      // gameState.currentPlacement.tiles = Set.of();
     } else if (
       gameState.pressedButtonTags.contains(ButtonTag.Swap) &&
       !gameState.panelActiveTileIndicies.isEmpty()
     ) {
-      const [toAdd, newBag] = gameState.tileBag.take(
-        gameState.panelActiveTileIndicies.size
-      );
-
-      const newHand = gameState.hand
-        .filterNot((_, i) => gameState.panelActiveTileIndicies.contains(i))
-        .concat(toAdd);
-      gameState.hand = newHand;
-      gameState.tileBag = newBag;
-      gameState.panelActiveTileIndicies = Set.of();
+      // const [toAdd, newBag] = gameState.tileBag.take(
+      //   gameState.panelActiveTileIndicies.size
+      // );
+      // const newHand = gameState.hand
+      //   .filterNot((_, i) => gameState.panelActiveTileIndicies.contains(i))
+      //   .concat(toAdd);
+      // gameState.hand = newHand;
+      // gameState.tileBag = newBag;
+      // gameState.panelActiveTileIndicies = Set.of();
     } else if (
       gameState.pressedButtonTags.contains(ButtonTag.Cancel) &&
       !gameState.currentPlacement.tiles.isEmpty()
@@ -94,24 +97,30 @@ export class GameLogic implements IGameStateUpdater {
     }
 
     const placementButtonsEnabled = !gameState.currentPlacement.tiles.isEmpty();
-    var buttonsEnabled = gameState.enabledButtonTags;
-
-    function setButtonEnabled(tag: ButtonTag, isPressed: boolean) {
-      if (isPressed) {
-        buttonsEnabled = buttonsEnabled.add(tag);
-      } else {
-        buttonsEnabled = buttonsEnabled.remove(tag);
-      }
-    }
-
-    setButtonEnabled(ButtonTag.Accept, placementButtonsEnabled);
-    setButtonEnabled(ButtonTag.Cancel, placementButtonsEnabled);
-    setButtonEnabled(
-      ButtonTag.Swap,
+    const cancelButtonEnabled =
       !gameState.panelActiveTileIndicies.isEmpty() &&
-        gameState.currentPlacement.tiles.isEmpty()
+      gameState.currentPlacement.tiles.isEmpty();
+
+    const startButtonEnabled =
+      !gameState.isStarted && gameState.userList.size > 1;
+
+    gameState.enabledButtonTags = buildSet(
+      Map([
+        [ButtonTag.Accept, placementButtonsEnabled],
+        [ButtonTag.Cancel, placementButtonsEnabled],
+        [ButtonTag.Swap, cancelButtonEnabled],
+        [ButtonTag.Start, startButtonEnabled],
+      ])
     );
-    gameState.enabledButtonTags = buttonsEnabled;
+
+    gameState.visibleButtonTags = buildSet(
+      Map([
+        [ButtonTag.Accept, gameState.isStarted],
+        [ButtonTag.Cancel, gameState.isStarted],
+        [ButtonTag.Swap, gameState.isStarted],
+        [ButtonTag.Start, !gameState.isStarted],
+      ])
+    );
 
     gameState.tileGridToDisplay = gameState.currentPlacement.tiles.isEmpty()
       ? gameState.tileGridApplied

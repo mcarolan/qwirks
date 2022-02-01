@@ -1,21 +1,8 @@
 import { generateUsername } from "unique-username-generator";
 import { v4 as uuidv4 } from "uuid";
+import { User } from "~/../../shared/User";
 
-export interface User {
-  userId: string;
-  username: string;
-}
-
-export enum OnlineStatus {
-  online,
-  offline,
-}
-
-export interface UserWithStatus extends User {
-  onlineStatus: OnlineStatus;
-}
-
-export function loadUser(): User {
+export function loadUserFromLocalStorage(): User {
   const localStorageUserIdKey = "userid";
   const userId: string =
     localStorage.getItem(localStorageUserIdKey) ?? uuidv4();
@@ -30,4 +17,15 @@ export function loadUser(): User {
     userId,
     username,
   };
+}
+
+export function getGameKeyFromURL(): string | null {
+  const url = new URL(document.location.toString());
+  return url.searchParams.get("gameKey");
+}
+
+export function generateNewURLWithGameKey(): URL {
+  const url = new URL(document.location.toString());
+  url.searchParams.set("gameKey", generateUsername("-"));
+  return url;
 }

@@ -1,7 +1,5 @@
 import { List } from "immutable";
-import { forIn } from "lodash";
-import { Tile, TileColour, TileShape } from "./domain";
-
+import { allTileColours, allTileShapes, Tile } from "../../shared/Domain";
 export class TileBag {
   constructor(private readonly contents: List<Tile>) {}
 
@@ -12,8 +10,8 @@ export class TileBag {
 
   private static everyTile(): List<Tile> {
     return List<Tile>().withMutations((mutable) => {
-      forIn(TileColour, (colour, _) => {
-        forIn(TileShape, (shape, _) => {
+      allTileColours().forEach((colour) => {
+        allTileShapes().forEach((shape) => {
           mutable.push(new Tile(colour, shape));
         });
       });

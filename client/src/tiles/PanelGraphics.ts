@@ -1,8 +1,9 @@
-import { Position, Rect, Tile } from "./domain";
+import { Rect } from "./domain";
 import { TileGraphics } from "./TileGraphics";
 import { is, Map } from "immutable";
 import { GameState } from "./GameState";
 import { IGameStateUpdater } from "~/IGameStateUpdater";
+import { Position, Tile } from "../../../shared/Domain";
 
 export const PANEL_HEIGHT = 129;
 const PADDING = 5;

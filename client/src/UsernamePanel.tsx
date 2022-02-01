@@ -1,5 +1,5 @@
 import React from "react";
-import { User } from "./tiles/User";
+import { User } from "../../shared/User";
 
 interface UsernamePanelProps {
   currentUser: User | undefined;

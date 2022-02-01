@@ -1,8 +1,8 @@
 import { IGameStateUpdater } from "~/IGameStateUpdater";
-import { Position, Rect, Tile } from "./domain";
 import { GameState } from "./GameState";
 import { MouseDrag } from "./Mouse";
 import { TileGraphics } from "./TileGraphics";
+import { Position, Tile } from "../../../shared/Domain";
 
 export class TileGridGraphics implements IGameStateUpdater {
   private offset: Position;

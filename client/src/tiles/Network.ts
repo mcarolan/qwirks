@@ -1,36 +1,77 @@
 import { Socket } from "socket.io-client";
 import { IGameStateUpdater } from "~/IGameStateUpdater";
 import { GameState } from "./GameState";
-import { User, UserWithStatus } from "./User";
-import { Map } from "immutable";
+import { List, Map } from "immutable";
+import { User, UserWithStatus } from "~/../../shared/User";
+import { ButtonTag } from "..";
+import { Tile } from "~/../../shared/Domain";
 
 export class Network implements IGameStateUpdater {
   private setUserList: Map<string, UserWithStatus> | undefined;
   private setConnected: boolean | undefined;
+  private setGameStarted: boolean | undefined;
+  private hand: List<Tile> | undefined;
+  private setUserInControl: string | undefined;
 
-  constructor(socket: Socket, user: User) {
-    socket.on("connect", () => {
-      this.setConnected = true;
-      socket.emit("user.identity", user);
+  private firstUpdate: boolean = true;
 
-      socket.on("user.list", (users: [[string, UserWithStatus]]) => {
-        this.setUserList = Map(users);
-      });
-    });
-
-    socket.on("disconnect", () => {
-      this.setConnected = false;
-    });
-  }
+  constructor(private socket: Socket, private user: User) {}
 
   update(gameState: GameState): GameState {
+    if (this.firstUpdate) {
+      this.socket.on("connect", () => {
+        this.setConnected = true;
+        this.socket.emit("user.identity", this.user, gameState.gameKey);
+
+        this.socket.on("user.list", (users: [[string, UserWithStatus]]) => {
+          this.setUserList = Map(users);
+        });
+
+        this.socket.on("user.hand", (tiles: Tile[]) => {
+          this.hand = List(tiles);
+        });
+
+        this.socket.on("game.started", () => {
+          this.setGameStarted = true;
+        });
+
+        this.socket.on("user.incontrol", (userId: string) => {
+          this.setUserInControl = userId;
+        });
+      });
+
+      this.socket.on("disconnect", () => {
+        this.setConnected = false;
+      });
+      this.firstUpdate = false;
+    }
+
     const nextUserList = this.setUserList ?? gameState.userList;
     const connected = this.setConnected ?? gameState.isConnected;
+    const nextGameStarted = this.setGameStarted ?? gameState.isStarted;
+    const nextHand = this.hand ?? gameState.hand;
+    const nextUserInControl = this.setUserInControl ?? gameState.userInControl;
+
+    this.setGameStarted = undefined;
+    this.setConnected = undefined;
+    this.setGameStarted = undefined;
+    this.hand = undefined;
+    this.setUserInControl = undefined;
+
+    if (
+      !nextGameStarted &&
+      gameState.pressedButtonTags.contains(ButtonTag.Start)
+    ) {
+      this.socket.emit("game.start");
+    }
 
     return {
       ...gameState,
       userList: nextUserList,
       isConnected: connected,
+      isStarted: nextGameStarted,
+      hand: nextHand,
+      userInControl: nextUserInControl,
     };
   }
 }
