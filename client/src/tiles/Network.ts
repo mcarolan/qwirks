@@ -2,9 +2,9 @@ import { Socket } from "socket.io-client";
 import { IGameStateUpdater } from "~/IGameStateUpdater";
 import { GameState } from "./GameState";
 import { List, Map } from "immutable";
-import { User, UserWithStatus } from "~/../../shared/User";
+import { User, UserWithStatus } from "../../../shared/User";
 import { ButtonTag } from "..";
-import { Tile } from "~/../../shared/Domain";
+import { PositionedTile, Tile } from "../../../shared/Domain";
 
 export class Network implements IGameStateUpdater {
   private setUserList: Map<string, UserWithStatus> | undefined;
@@ -12,6 +12,7 @@ export class Network implements IGameStateUpdater {
   private setGameStarted: boolean | undefined;
   private hand: List<Tile> | undefined;
   private setUserInControl: string | undefined;
+  private setTiles: PositionedTile[] | undefined;
 
   private firstUpdate: boolean = true;
 
@@ -35,6 +36,13 @@ export class Network implements IGameStateUpdater {
           this.setGameStarted = true;
         });
 
+        this.socket.on("game.tiles", (tiles: PositionedTile[]) => {
+          //TODO: hack, methods get stripped otherise
+          this.setTiles = tiles.map(
+            (t) => new PositionedTile(t.tile, t.position)
+          );
+        });
+
         this.socket.on("user.incontrol", (userId: string) => {
           this.setUserInControl = userId;
         });
@@ -51,6 +59,7 @@ export class Network implements IGameStateUpdater {
     const nextGameStarted = this.setGameStarted ?? gameState.isStarted;
     const nextHand = this.hand ?? gameState.hand;
     const nextUserInControl = this.setUserInControl ?? gameState.userInControl;
+    const nextTiles = this.setTiles ?? gameState.tilesApplied;
 
     this.setGameStarted = undefined;
     this.setConnected = undefined;
@@ -65,6 +74,11 @@ export class Network implements IGameStateUpdater {
       this.socket.emit("game.start");
     }
 
+    if (gameState.tilesToApply != undefined) {
+      this.socket.emit("game.applytiles", gameState.tilesToApply);
+      gameState.tilesToApply = undefined;
+    }
+
     return {
       ...gameState,
       userList: nextUserList,
@@ -72,6 +86,7 @@ export class Network implements IGameStateUpdater {
       isStarted: nextGameStarted,
       hand: nextHand,
       userInControl: nextUserInControl,
+      tilesApplied: nextTiles,
     };
   }
 }

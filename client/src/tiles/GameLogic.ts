@@ -4,17 +4,20 @@ import { Set, Map } from "immutable";
 import { ButtonTag } from "../index";
 import { IGameStateUpdater } from "~/IGameStateUpdater";
 import { PositionedTile } from "../../../shared/Domain";
+import { TileGrid } from "./TileGrid";
 
 function isValidPlacement(
   gameState: GameState,
-  placements: Set<PositionedTile>
+  placements: PositionedTile[]
 ): boolean {
-  const newTg = gameState.tileGridApplied.place(placements);
+  console.log(gameState.tilesApplied);
+  console.log(`placements ${JSON.stringify(placements)}`);
+  const newTg = new TileGrid(gameState.tilesApplied).place(Set(placements));
 
   if (newTg) {
     switch (newTg.type) {
       case "Success":
-        gameState.currentPlacement.tileGrid = newTg.tileGrid;
+        gameState.currentPlacement.tiles = newTg.tileGrid.tiles;
         gameState.currentPlacement.score = newTg.score;
         gameState.currentPlacement.lines = newTg.lines;
         return true;
@@ -45,7 +48,7 @@ export class GameLogic implements IGameStateUpdater {
       const activeTile = gameState.hand.get(singleActiveTile);
       if (activeTile) {
         gameState.tilePositionsPressed.forEach((p) => {
-          const newPlacement = gameState.currentPlacement.tiles.add(
+          const newPlacement = gameState.currentPlacement.tiles.concat(
             new PositionedTile(activeTile, p)
           );
           if (isValidPlacement(gameState, newPlacement)) {
@@ -59,18 +62,13 @@ export class GameLogic implements IGameStateUpdater {
     }
 
     if (gameState.pressedButtonTags.contains(ButtonTag.Accept)) {
-      // gameState.tileGridApplied = gameState.currentPlacement.tileGrid;
-      // const toTake = gameState.currentPlacement.tiles.size;
-      // const [toAdd, newBag] = gameState.tileBag.take(toTake);
-      // gameState.hand = gameState.hand.concat(toAdd);
-      // gameState.tileBag = newBag;
-      // gameState.score = gameState.score + gameState.currentPlacement.score;
-      // gameState.scoreJustAchieved = gameState.currentPlacement.score;
-      // gameState.fireworkTilePositions = gameState.currentPlacement.lines
-      //   .flatMap((line) => line.map((pt) => pt.position))
-      //   .toList();
-      // gameState.currentPlacement.score = 0;
-      // gameState.currentPlacement.tiles = Set.of();
+      gameState.scoreJustAchieved = gameState.currentPlacement.score;
+      gameState.fireworkTilePositions = gameState.currentPlacement.lines
+        .flatMap((line) => line.map((pt) => pt.position))
+        .toList();
+      gameState.currentPlacement.score = 0;
+      gameState.tilesToApply = gameState.currentPlacement.tiles;
+      gameState.currentPlacement.tiles = [];
     } else if (
       gameState.pressedButtonTags.contains(ButtonTag.Swap) &&
       !gameState.panelActiveTileIndicies.isEmpty()
@@ -86,20 +84,21 @@ export class GameLogic implements IGameStateUpdater {
       // gameState.panelActiveTileIndicies = Set.of();
     } else if (
       gameState.pressedButtonTags.contains(ButtonTag.Cancel) &&
-      !gameState.currentPlacement.tiles.isEmpty()
+      !(gameState.currentPlacement.tiles.length === 0)
     ) {
       const newHand = gameState.hand.concat(
         gameState.currentPlacement.tiles.map((p) => p.tile)
       );
       gameState.hand = newHand;
-      gameState.currentPlacement.tileGrid = gameState.tileGridApplied;
-      gameState.currentPlacement.tiles = Set.of();
+      gameState.currentPlacement.tiles = [];
     }
 
-    const placementButtonsEnabled = !gameState.currentPlacement.tiles.isEmpty();
+    const placementButtonsEnabled = !(
+      gameState.currentPlacement.tiles.length === 0
+    );
     const cancelButtonEnabled =
       !gameState.panelActiveTileIndicies.isEmpty() &&
-      gameState.currentPlacement.tiles.isEmpty();
+      gameState.currentPlacement.tiles.length === 0;
 
     const startButtonEnabled =
       !gameState.isStarted && gameState.userList.size > 1;
@@ -122,9 +121,10 @@ export class GameLogic implements IGameStateUpdater {
       ])
     );
 
-    gameState.tileGridToDisplay = gameState.currentPlacement.tiles.isEmpty()
-      ? gameState.tileGridApplied
-      : gameState.currentPlacement.tileGrid;
+    gameState.tilesToDisplay =
+      gameState.currentPlacement.tiles.length === 0
+        ? gameState.tilesApplied
+        : gameState.tilesApplied.concat(gameState.currentPlacement.tiles);
 
     return gameState;
   }

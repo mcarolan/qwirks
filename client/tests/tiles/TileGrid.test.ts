@@ -3,12 +3,10 @@ import {
   Position,
   PositionedTile,
   Success,
-  Tile,
-  TileColour,
-  TileShape,
 } from "../../src/tiles/domain";
 import { TileGrid } from "../../src/tiles/TileGrid";
 import { is, Set, List } from "immutable";
+import { TileColour, TileShape, Tile } from "../../../shared/Domain";
 
 function expectSuccess<T>(res: PlacementResult, f: (a: Success) => T): T {
   switch (res.type) {

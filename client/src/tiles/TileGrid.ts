@@ -99,13 +99,13 @@ function scoreLines(lines: Set<Set<PositionedTile>>): number {
 export class TileGrid {
   private elems: Map<string, PositionedTile>;
 
-  private constructor(elems: Map<string, PositionedTile>) {
-    this.elems = elems;
-    this.elems.values;
+  constructor(public tiles: PositionedTile[]) {
+    this.elems = new Map();
+    tiles.forEach((pt) => this.elems.set(this.mapKey(pt.position), pt));
   }
 
   public static empty(): TileGrid {
-    return new TileGrid(new Map());
+    return new TileGrid([]);
   }
 
   private mapKey(position: Position): string {
@@ -140,15 +140,13 @@ export class TileGrid {
     }
 
     //viable enough to try to construct the grid
-    const m = new Map<string, PositionedTile>();
-    this.elems.forEach((v, k) => m.set(k, v));
-    placements.forEach((pt) => m.set(this.mapKey(pt.position), pt));
-    const res = new TileGrid(m);
+    const res = new TileGrid(this.tiles.concat(placements.toSet().toArray()));
 
     const lines = allLines(res, placements);
     const invalidLines = lines.filter((l) => !isValidLine(l));
 
     if (!invalidLines.isEmpty()) {
+      console.log(`invalid lines ${JSON.stringify(invalidLines)}`);
       return { type: "CreatesInvalidLines", lines: invalidLines };
     }
 

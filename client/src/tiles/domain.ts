@@ -100,7 +100,9 @@ function prettyPrint(placementResult: PlacementResult): string {
     case "DuplicatePlacement":
       return `${placementResult.type} (${placementResult.tiles})`;
     case "CreatesInvalidLines":
-      return `${placementResult.type} (${placementResult.lines})`;
+      return `${placementResult.type} (${JSON.stringify(
+        placementResult.lines
+      )})`;
     case "AllPlacedTilesMustBeInALine":
       return `${placementResult.type}`;
   }

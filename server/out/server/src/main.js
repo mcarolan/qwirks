@@ -34,11 +34,25 @@ function initialGame(gameKey) {
         tileBag: TileBag_1.TileBag.full(),
         sockets: new Map(),
         hands: new Map(),
+        tiles: [],
         userInControl: undefined,
     };
 }
 function firstUserInControl(game) {
     return (0, immutable_1.List)(game.users.keys()).sort().first();
+}
+function nextUserInControl(game) {
+    if (!game.userInControl) {
+        return undefined;
+    }
+    const l = (0, immutable_1.List)(game.users.keys()).sort();
+    const i = l.indexOf(game.userInControl);
+    if (i === -1 || i === l.size - 1) {
+        return l.first();
+    }
+    else {
+        return l.get(i + 1);
+    }
 }
 function sendStartingHands(game) {
     var tb = game.tileBag;
@@ -74,6 +88,9 @@ io.on("connection", (s) => {
             if (g.userInControl) {
                 s.emit("user.incontrol", g.userInControl);
             }
+            if (g.tiles.length > 0) {
+                s.emit("game.tiles", g.tiles);
+            }
             const hand = g.hands.get(user.userId);
             if (hand) {
                 s.emit("user.hand", hand.toArray());
@@ -91,6 +108,20 @@ io.on("connection", (s) => {
                     io.to(gk).emit("user.incontrol", g.userInControl);
                     g.isStarted = true;
                     io.to(gk).emit("game.started");
+                }
+            });
+        }
+    });
+    s.on("game.applytiles", (tiles) => {
+        const gk = gameKey;
+        const uid = userId;
+        if (gk && uid) {
+            upsert(games, gk, () => initialGame(gk), (g) => {
+                if (g.userInControl === uid) {
+                    g.tiles = g.tiles.concat(tiles);
+                    g.userInControl = nextUserInControl(g);
+                    io.to(gk).emit("game.tiles", g.tiles);
+                    io.to(gk).emit("user.incontrol", g.userInControl);
                 }
             });
         }

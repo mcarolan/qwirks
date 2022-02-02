@@ -3,6 +3,7 @@ import { GameState } from "./GameState";
 import { MouseDrag } from "./Mouse";
 import { TileGraphics } from "./TileGraphics";
 import { Position, Tile } from "../../../shared/Domain";
+import { Set } from "immutable";
 
 export class TileGridGraphics implements IGameStateUpdater {
   private offset: Position;
@@ -55,7 +56,7 @@ export class TileGridGraphics implements IGameStateUpdater {
   }
 
   update(gameState: GameState): GameState {
-    if (gameState.tileGridToDisplay.size > 0) {
+    if (gameState.tilesToDisplay.length > 0) {
       this.updateDragging(gameState);
     }
     if (gameState.userInControl === gameState.currentUser.userId) {
@@ -75,20 +76,25 @@ export class TileGridGraphics implements IGameStateUpdater {
   draw(context: CanvasRenderingContext2D, state: GameState): void {
     const mid = this.mid(state);
 
-    const firstTilePosition = this.tileGraphics.screenCoords(
-      Position.ZERO,
-      mid
-    );
-    const firstTilePositionX = firstTilePosition.x;
-    const firstTilePositionY =
-      firstTilePosition.y -
-      this.firstTileImage.height +
-      this.tileGraphics.tileHeight;
-    context.drawImage(
-      this.firstTileImage,
-      firstTilePositionX,
-      firstTilePositionY
-    );
+    if (
+      state.tilesToDisplay.length === 0 &&
+      state.userInControl === state.currentUser.userId
+    ) {
+      const firstTilePosition = this.tileGraphics.screenCoords(
+        Position.ZERO,
+        mid
+      );
+      const firstTilePositionX = firstTilePosition.x;
+      const firstTilePositionY =
+        firstTilePosition.y -
+        this.firstTileImage.height +
+        this.tileGraphics.tileHeight;
+      context.drawImage(
+        this.firstTileImage,
+        firstTilePositionX,
+        firstTilePositionY
+      );
+    }
 
     context.save();
     const clippingRect = new Path2D();
@@ -137,9 +143,11 @@ export class TileGridGraphics implements IGameStateUpdater {
         );
       }
     }
-    for (const pt of state.tileGridToDisplay.values) {
+
+    const placed = Set(state.currentPlacement.tiles);
+    for (const pt of state.tilesToDisplay) {
       const coords = this.tileGraphics.screenCoords(pt.position, mid);
-      if (state.currentPlacement.tiles.contains(pt)) {
+      if (placed.contains(pt)) {
         this.tileGraphics.drawHoverTile(context, coords, pt.tile);
       } else {
         this.tileGraphics.drawInactiveTile(context, coords, pt.tile);

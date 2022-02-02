@@ -8,8 +8,7 @@ import { Tile, PositionedTile, Position } from "../../../shared/Domain";
 
 export class CurrentPlacementState {
   constructor(
-    public tiles: Set<PositionedTile>,
-    public tileGrid: TileGrid,
+    public tiles: PositionedTile[],
     public score: number,
     public lines: Set<Set<PositionedTile>>
   ) {}
@@ -21,8 +20,9 @@ export class GameState {
     public isStarted: boolean,
     public isConnected: boolean,
     public hand: List<Tile>,
-    public tileGridToDisplay: TileGrid,
-    public tileGridApplied: TileGrid,
+    public tilesToDisplay: PositionedTile[],
+    public tilesApplied: PositionedTile[],
+    public tilesToApply: PositionedTile[] | undefined,
     public mousePosition: Position | undefined,
     public mouseEvents: Array<MouseClickOrDrag>,
     public tilePositionsPressed: Array<Position>,
@@ -56,8 +56,9 @@ export class GameState {
       false,
       false,
       List.of(),
-      tileGrid,
-      tileGrid,
+      [],
+      [],
+      [],
       new Position(0, 0),
       [],
       [],
@@ -68,7 +69,7 @@ export class GameState {
       1,
       0,
       List.of(),
-      new CurrentPlacementState(Set.of(), tileGrid, 0, Set.of()),
+      new CurrentPlacementState([], 0, Set.of()),
       mainAreaBounds,
       bottomPanelBounds,
       user,
