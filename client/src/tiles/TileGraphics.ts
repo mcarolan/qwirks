@@ -45,9 +45,8 @@ export async function loadTileGraphics(): Promise<TileGraphics> {
   );
 }
 
-const PADDING = 10;
-
 export class TileGraphics {
+  static PADDING = 10;
   constructor(
     readonly imageCache: Map<string, Map<string, HTMLImageElement>>,
     readonly emptyTileImage: HTMLImageElement,
@@ -128,14 +127,14 @@ export class TileGraphics {
   }
 
   screenCoords(pos: Position, mid: Position): Position {
-    const tileX = pos.x * this.tileWidth + pos.x * PADDING;
-    const tileY = pos.y * this.tileHeight + pos.y * PADDING;
+    const tileX = pos.x * this.tileWidth + pos.x * TileGraphics.PADDING;
+    const tileY = pos.y * this.tileHeight + pos.y * TileGraphics.PADDING;
     return new Position(mid.x + tileX, mid.y + tileY);
   }
 
   positionFromScreen(screen: Position, mid: Position): Position {
-    const tileX = (screen.x - mid.x) / (this.tileWidth + PADDING);
-    const tileY = (screen.y - mid.y) / (this.tileHeight + PADDING);
+    const tileX = (screen.x - mid.x) / (this.tileWidth + TileGraphics.PADDING);
+    const tileY = (screen.y - mid.y) / (this.tileHeight + TileGraphics.PADDING);
     return new Position(Math.floor(tileX), Math.floor(tileY));
   }
 }

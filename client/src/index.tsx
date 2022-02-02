@@ -27,6 +27,7 @@ import {
 import { ConnectionStatus } from "./ConnectionStatus";
 import { Button } from "./Button";
 import { User, UserWithStatus } from "../../shared/User";
+import { loadImage } from "./tiles/utility";
 
 export enum ButtonTag {
   Start = "start",
@@ -241,7 +242,9 @@ class Main
 
     const mouse = new Mouse();
 
-    const tileGrid = new TileGridGraphics(tileGraphics);
+    const firstTileImage = await loadImage("./images/first-tile.png");
+
+    const tileGrid = new TileGridGraphics(tileGraphics, firstTileImage);
 
     const fireworks = new Fireworks();
 
@@ -348,7 +351,10 @@ class Main
         </div>
         <div id="sidebarRight">
           <UsernamePanel currentUser={this.state.currentUser} />
-          <UserList userList={this.state.userList} userInControl={this.state.userInControl} />
+          <UserList
+            userList={this.state.userList}
+            userInControl={this.state.userInControl}
+          />
         </div>
         <div id="bottom">
           <div id="bottomPanel">&nbsp;</div>

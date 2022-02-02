@@ -8,7 +8,10 @@ export class TileGridGraphics implements IGameStateUpdater {
   private offset: Position;
   private effectiveOffset: Position;
 
-  constructor(private tileGraphics: TileGraphics) {
+  constructor(
+    private tileGraphics: TileGraphics,
+    private firstTileImage: HTMLImageElement
+  ) {
     this.offset = Position.ZERO;
     this.effectiveOffset = Position.ZERO;
   }
@@ -65,6 +68,22 @@ export class TileGridGraphics implements IGameStateUpdater {
 
   draw(context: CanvasRenderingContext2D, state: GameState): void {
     const mid = this.mid(state);
+
+    const firstTilePosition = this.tileGraphics.screenCoords(
+      Position.ZERO,
+      mid
+    );
+    const firstTilePositionX = firstTilePosition.x;
+    const firstTilePositionY =
+      firstTilePosition.y -
+      this.firstTileImage.height +
+      this.tileGraphics.tileHeight;
+    context.drawImage(
+      this.firstTileImage,
+      firstTilePositionX,
+      firstTilePositionY
+    );
+
     context.save();
     const clippingRect = new Path2D();
     clippingRect.rect(
