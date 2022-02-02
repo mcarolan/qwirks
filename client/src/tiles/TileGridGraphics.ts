@@ -55,8 +55,14 @@ export class TileGridGraphics implements IGameStateUpdater {
   }
 
   update(gameState: GameState): GameState {
-    this.updateDragging(gameState);
-    return this.updatePressedPositions(gameState);
+    if (gameState.tileGridToDisplay.size > 0) {
+      this.updateDragging(gameState);
+    }
+    if (gameState.userInControl === gameState.currentUser.userId) {
+      return this.updatePressedPositions(gameState);
+    } else {
+      return gameState;
+    }
   }
 
   tilePositionToScreenCoords(

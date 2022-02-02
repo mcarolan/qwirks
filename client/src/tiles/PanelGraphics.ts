@@ -45,37 +45,38 @@ export class PanelGraphics implements IGameStateUpdater {
     const tileRects = this.tileRects(gameState);
 
     var newHover: number | undefined;
-
-    const mousePosition = gameState.mousePosition;
-    if (mousePosition) {
-      tileRects.forEach((rect, i) => {
-        if (rect.contains(mousePosition)) {
-          newHover = i;
-          return false;
-        }
-      });
-    }
-
     var activePanel = gameState.panelActiveTileIndicies;
 
-    function setActivePanel(index: number, active: boolean): void {
-      if (active) {
-        activePanel = activePanel.add(index);
-      } else {
-        activePanel = activePanel.remove(index);
-      }
-    }
-
-    gameState.mouseEvents.forEach((e) => {
-      if (e.type == "MouseClick") {
+    if (gameState.userInControl === gameState.currentUser.userId) {
+      const mousePosition = gameState.mousePosition;
+      if (mousePosition) {
         tileRects.forEach((rect, i) => {
-          if (rect.contains(e.position)) {
-            setActivePanel(i, !gameState.panelActiveTileIndicies.contains(i));
+          if (rect.contains(mousePosition)) {
+            newHover = i;
             return false;
           }
         });
       }
-    });
+
+      function setActivePanel(index: number, active: boolean): void {
+        if (active) {
+          activePanel = activePanel.add(index);
+        } else {
+          activePanel = activePanel.remove(index);
+        }
+      }
+
+      gameState.mouseEvents.forEach((e) => {
+        if (e.type == "MouseClick") {
+          tileRects.forEach((rect, i) => {
+            if (rect.contains(e.position)) {
+              setActivePanel(i, !gameState.panelActiveTileIndicies.contains(i));
+              return false;
+            }
+          });
+        }
+      });
+    }
 
     return {
       ...gameState,
