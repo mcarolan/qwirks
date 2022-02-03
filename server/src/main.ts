@@ -107,13 +107,13 @@ function sendStartingHands(game: Game) {
 function newHand(
   tileBag: TileBag,
   hand: List<Tile>,
-  tiles: PositionedTile[]
+  tiles: Tile[]
 ): [List<Tile>, TileBag] {
   const [replacements, newTileBag] = tileBag.take(tiles.length);
   let newHand = hand;
   tiles.forEach((t) => {
     const i = newHand.findIndex(
-      (ht) => ht.colour === t.tile.colour && ht.shape === t.tile.shape
+      (ht) => ht.colour === t.colour && ht.shape === t.shape
     );
     if (i > -1) {
       newHand = newHand.delete(i);
@@ -189,6 +189,31 @@ io.on("connection", (s) => {
     }
   });
 
+  s.on("game.swap", (tiles: Tile[]) => {
+    const gk = gameKey;
+    const uid = userId;
+    if (gk && uid) {
+      upsert(
+        games,
+        gk,
+        () => initialGame(gk),
+        (g) => {
+          if (g.userInControl === uid) {
+            const hand = g.hands.get(uid);
+            if (hand) {
+              const [nextHand, newTileBag] = newHand(g.tileBag, hand, tiles);
+              g.tileBag = newTileBag;
+              g.hands.set(uid, nextHand);
+              s.emit("user.hand", nextHand.toArray());
+              g.userInControl = nextUserInControl(g);
+              io.to(gk).emit("user.incontrol", g.userInControl);
+            }
+          }
+        }
+      );
+    }
+  });
+
   s.on("game.applytiles", (tiles: PositionedTile[]) => {
     const gk = gameKey;
     const uid = userId;
@@ -212,7 +237,11 @@ io.on("connection", (s) => {
             if (res.type === "Success") {
               const hand = g.hands.get(uid);
               if (hand) {
-                const [nextHand, newTileBag] = newHand(g.tileBag, hand, tiles);
+                const [nextHand, newTileBag] = newHand(
+                  g.tileBag,
+                  hand,
+                  tiles.map((pt) => new Tile(pt.tile.colour, pt.tile.shape))
+                );
                 g.tileBag = newTileBag;
                 g.hands.set(uid, nextHand);
                 s.emit("user.hand", nextHand.toArray());

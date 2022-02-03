@@ -2,7 +2,7 @@ import { GameState } from "./GameState";
 import { Set, Map } from "immutable";
 import { ButtonTag } from "../index";
 import { IGameStateUpdater } from "~/IGameStateUpdater";
-import { PositionedTile, prettyPrint } from "../../../shared/Domain";
+import { PositionedTile, prettyPrint, Tile } from "../../../shared/Domain";
 import { TileGrid } from "../../../shared/TileGrid";
 
 function isValidPlacement(
@@ -68,19 +68,23 @@ export class GameLogic implements IGameStateUpdater {
       gameState.currentPlacement.score = 0;
       gameState.tilesToApply = gameState.currentPlacement.tiles;
       gameState.currentPlacement.tiles = [];
+      gameState.userInControl = undefined;
     } else if (
       gameState.pressedButtonTags.contains(ButtonTag.Swap) &&
       !gameState.panelActiveTileIndicies.isEmpty()
     ) {
-      // const [toAdd, newBag] = gameState.tileBag.take(
-      //   gameState.panelActiveTileIndicies.size
-      // );
-      // const newHand = gameState.hand
-      //   .filterNot((_, i) => gameState.panelActiveTileIndicies.contains(i))
-      //   .concat(toAdd);
-      // gameState.hand = newHand;
-      // gameState.tileBag = newBag;
-      // gameState.panelActiveTileIndicies = Set.of();
+      const tiles = gameState.panelActiveTileIndicies.flatMap((i) => {
+        const t = gameState.hand.get(i);
+
+        if (t) {
+          return Set.of(t);
+        } else {
+          return Set<Tile>();
+        }
+      });
+      gameState.tilesToSwap = tiles.toArray();
+      gameState.panelActiveTileIndicies = Set.of();
+      gameState.userInControl = undefined;
     } else if (
       gameState.pressedButtonTags.contains(ButtonTag.Cancel) &&
       !(gameState.currentPlacement.tiles.length === 0)

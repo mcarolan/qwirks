@@ -81,6 +81,12 @@ export class Network implements IGameStateUpdater {
       gameState.tilesToApply = undefined;
     }
 
+    if (gameState.tilesToSwap != undefined) {
+      console.log("swap tiles");
+      this.socket.emit("game.swap", gameState.tilesToSwap);
+      gameState.tilesToSwap = undefined;
+    }
+
     return {
       ...gameState,
       userList: nextUserList,
