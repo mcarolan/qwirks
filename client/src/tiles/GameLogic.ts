@@ -47,9 +47,10 @@ export class GameLogic implements IGameStateUpdater {
       const activeTile = gameState.hand.get(singleActiveTile);
       if (activeTile) {
         gameState.tilePositionsPressed.forEach((p) => {
-          const newPlacement = gameState.currentPlacement.tiles.concat(
-            new PositionedTile(activeTile, p)
-          );
+          const newPlacement = gameState.currentPlacement.tiles.concat({
+            ...activeTile,
+            position: p,
+          });
           if (isValidPlacement(gameState, newPlacement)) {
             const newHand = gameState.hand.remove(singleActiveTile);
             gameState.panelActiveTileIndicies = Set.of();
@@ -89,9 +90,7 @@ export class GameLogic implements IGameStateUpdater {
       gameState.pressedButtonTags.contains(ButtonTag.Cancel) &&
       !(gameState.currentPlacement.tiles.length === 0)
     ) {
-      const newHand = gameState.hand.concat(
-        gameState.currentPlacement.tiles.map((p) => p.tile)
-      );
+      const newHand = gameState.hand.concat(gameState.currentPlacement.tiles);
       gameState.hand = newHand;
       gameState.currentPlacement.tiles = [];
     }

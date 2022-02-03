@@ -1,4 +1,4 @@
-import { Position } from "../../../shared/Domain";
+import { plus, Position } from "../../../shared/Domain";
 import { GameState } from "./GameState";
 
 export class Score {
@@ -23,10 +23,10 @@ export class Score {
   }
 
   draw(context: CanvasRenderingContext2D, gameState: GameState) {
-    const scorePosition = new Position(
-      gameState.mainAreaBounds.position.x + 10,
-      gameState.mainAreaBounds.position.y + 10
-    );
+    const scorePosition = plus(gameState.mainAreaBounds.position, {
+      x: 10,
+      y: 10,
+    });
     context.save();
     context.font = "48px serif";
     const score = (

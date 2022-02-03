@@ -16,21 +16,21 @@ export class Fireworks {
   randomOrigin(rect: Rect): Position {
     if (Math.round(random(0, 1))) {
       if (Math.round(random(0, 1))) {
-        return new Position(-20, Math.round(random(-20, rect.height + 20)));
+        return { x: -20, y: Math.round(random(-20, rect.height + 20)) };
       } else {
-        return new Position(
-          rect.width + 20,
-          Math.round(random(-20, rect.height + 20))
-        );
+        return {
+          x: rect.width + 20,
+          y: Math.round(random(-20, rect.height + 20)),
+        };
       }
     } else {
       if (Math.round(random(0, 1))) {
-        return new Position(Math.round(random(-20, rect.width + 20)), -20);
+        return { x: Math.round(random(-20, rect.width + 20)), y: -20 };
       } else {
-        return new Position(
-          Math.round(random(20, rect.width + 20)),
-          rect.height + 20
-        );
+        return {
+          x: Math.round(random(20, rect.width + 20)),
+          y: rect.height + 20,
+        };
       }
     }
   }

@@ -2,7 +2,8 @@ import { IGameStateUpdater } from "~/IGameStateUpdater";
 import { GameState } from "./GameState";
 import { MouseDrag } from "./Mouse";
 import { TileGraphics } from "./TileGraphics";
-import { Position, Tile } from "../../../shared/Domain";
+import { ORIGIN, Position, Tile, minus, plus } from "../../../shared/Domain";
+import { middle, rectContains } from "./domain";
 import { Set } from "immutable";
 
 export class TileGridGraphics implements IGameStateUpdater {
@@ -13,36 +14,37 @@ export class TileGridGraphics implements IGameStateUpdater {
     private tileGraphics: TileGraphics,
     private firstTileImage: HTMLImageElement
   ) {
-    this.offset = Position.ZERO;
-    this.effectiveOffset = Position.ZERO;
+    this.offset = ORIGIN;
+    this.effectiveOffset = ORIGIN;
   }
 
   private updateDragging(gameState: GameState): void {
-    const delta = (e: MouseDrag) => e.from.minus(e.to);
+    const delta = (e: MouseDrag) => minus(e.from, e.to);
     gameState.mouseEvents.forEach((e) => {
       if (e.type == "MouseDrag") {
-        this.offset = this.offset.minus(delta(e));
+        this.offset = minus(this.offset, delta(e));
       }
     });
 
     this.effectiveOffset = this.offset;
 
     if (gameState.mouseDragInProgress) {
-      this.effectiveOffset = this.offset.minus(
+      this.effectiveOffset = minus(
+        this.offset,
         delta(gameState.mouseDragInProgress)
       );
     }
   }
 
   private mid(state: GameState): Position {
-    return state.mainAreaBounds.middle().plus(this.effectiveOffset);
+    return plus(middle(state.mainAreaBounds), this.effectiveOffset);
   }
 
   private updatePressedPositions(gameState: GameState): GameState {
     const tilePositionsPressed = new Array<Position>();
     gameState.mouseEvents.forEach((e) => {
       if (e.type == "MouseClick") {
-        if (gameState.mainAreaBounds.contains(e.position)) {
+        if (rectContains(gameState.mainAreaBounds, e.position)) {
           const xy = this.tileGraphics.positionFromScreen(
             e.position,
             this.mid(gameState)
@@ -80,10 +82,7 @@ export class TileGridGraphics implements IGameStateUpdater {
       state.tilesToDisplay.length === 0 &&
       state.userInControl === state.currentUser.userId
     ) {
-      const firstTilePosition = this.tileGraphics.screenCoords(
-        Position.ZERO,
-        mid
-      );
+      const firstTilePosition = this.tileGraphics.screenCoords(ORIGIN, mid);
       const firstTilePositionX = firstTilePosition.x;
       const firstTilePositionY =
         firstTilePosition.y -
@@ -148,9 +147,9 @@ export class TileGridGraphics implements IGameStateUpdater {
     for (const pt of state.tilesToDisplay) {
       const coords = this.tileGraphics.screenCoords(pt.position, mid);
       if (placed.contains(pt)) {
-        this.tileGraphics.drawHoverTile(context, coords, pt.tile);
+        this.tileGraphics.drawHoverTile(context, coords, pt);
       } else {
-        this.tileGraphics.drawInactiveTile(context, coords, pt.tile);
+        this.tileGraphics.drawInactiveTile(context, coords, pt);
       }
     }
     context.restore();

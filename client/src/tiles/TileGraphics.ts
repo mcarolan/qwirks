@@ -129,12 +129,12 @@ export class TileGraphics {
   screenCoords(pos: Position, mid: Position): Position {
     const tileX = pos.x * this.tileWidth + pos.x * TileGraphics.PADDING;
     const tileY = pos.y * this.tileHeight + pos.y * TileGraphics.PADDING;
-    return new Position(mid.x + tileX, mid.y + tileY);
+    return { x: mid.x + tileX, y: mid.y + tileY };
   }
 
   positionFromScreen(screen: Position, mid: Position): Position {
     const tileX = (screen.x - mid.x) / (this.tileWidth + TileGraphics.PADDING);
     const tileY = (screen.y - mid.y) / (this.tileHeight + TileGraphics.PADDING);
-    return new Position(Math.floor(tileX), Math.floor(tileY));
+    return { x: Math.floor(tileX), y: Math.floor(tileY) };
   }
 }

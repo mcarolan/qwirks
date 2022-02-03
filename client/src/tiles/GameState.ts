@@ -4,7 +4,7 @@ import { ButtonTag } from "..";
 import { Rect } from "./domain";
 import { MouseClickOrDrag, MouseDrag } from "./Mouse";
 import { TileGrid } from "../../../shared/TileGrid";
-import { Tile, PositionedTile, Position } from "../../../shared/Domain";
+import { Tile, PositionedTile, Position, ORIGIN } from "../../../shared/Domain";
 
 export class CurrentPlacementState {
   constructor(
@@ -60,7 +60,7 @@ export class GameState {
       [],
       [],
       [],
-      new Position(0, 0),
+      ORIGIN,
       [],
       [],
       Set.of(),

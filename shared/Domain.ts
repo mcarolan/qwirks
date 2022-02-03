@@ -41,103 +41,71 @@ export function allTileShapes(): TileShape[] {
   ];
 }
 
-export class Tile {
-  constructor(readonly colour: TileColour, readonly shape: TileShape) {}
-
-  toString(): string {
-    return `Tile(${this.colour}, ${this.shape})`;
-  }
-
-  equals(other: unknown): boolean {
-    const o = other as Tile;
-    return o && is(o.colour, this.colour) && is(o.shape, this.shape);
-  }
-
-  hashCode(): number {
-    return hash(this.colour.toString()) + hash(this.shape.toString());
-  }
+export interface Tile {
+  colour: TileColour;
+  shape: TileShape;
 }
 
-export class PositionedTile {
-  constructor(readonly tile: Tile, readonly position: Position) {}
-
-  static from(
-    position: Position,
-    colour: TileColour,
-    shape: TileShape
-  ): PositionedTile {
-    return new PositionedTile(new Tile(colour, shape), position);
-  }
-
-  get colour(): TileColour {
-    return this.tile.colour;
-  }
-
-  get shape(): TileShape {
-    return this.tile.shape;
-  }
-
-  toString(): string {
-    return `(${this.tile.toString()}, ${this.position.toString()})`;
-  }
-
-  equals(other: unknown): boolean {
-    const o = other as PositionedTile;
-    return o && is(o.position, this.position) && is(o.tile, this.tile);
-  }
-
-  hashCode(): number {
-    return this.tile.hashCode() + this.position.hashCode();
-  }
+export interface PositionedTile extends Tile {
+  position: Position;
 }
 
-export class Position {
-  public static ZERO: Position = new Position(0, 0);
+export interface Position {
+  x: number;
+  y: number;
+}
 
-  constructor(readonly x: number, readonly y: number) {}
+export const ORIGIN: Position = {
+  x: 0,
+  y: 0,
+};
 
-  public static below(pos: Position): Position {
-    return new Position(pos.x, pos.y - 1);
-  }
+export function below(pos: Position): Position {
+  return {
+    ...pos,
+    y: pos.y - 1,
+  };
+}
 
-  public static above(pos: Position): Position {
-    return new Position(pos.x, pos.y + 1);
-  }
+export function above(pos: Position): Position {
+  return {
+    ...pos,
+    y: pos.y + 1,
+  };
+}
 
-  public static left(pos: Position): Position {
-    return new Position(pos.x - 1, pos.y);
-  }
+export function left(pos: Position): Position {
+  return {
+    ...pos,
+    x: pos.x - 1,
+  };
+}
 
-  public static right(pos: Position): Position {
-    return new Position(pos.x + 1, pos.y);
-  }
+export function right(pos: Position) {
+  return {
+    ...pos,
+    x: pos.x + 1,
+  };
+}
 
-  minus(other: Position): Position {
-    return new Position(this.x - other.x, this.y - other.y);
-  }
+export function minus(a: Position, b: Position): Position {
+  return {
+    x: a.x - b.x,
+    y: a.y - b.y,
+  };
+}
 
-  plus(other: Position): Position {
-    return new Position(this.x + other.x, this.y + other.y);
-  }
+export function plus(a: Position, b: Position): Position {
+  return {
+    x: a.x + b.x,
+    y: a.y + b.y,
+  };
+}
 
-  distanceTo(other: Position): number {
-    const xDistance = this.x - other.x;
-    const yDistance = this.y - other.y;
-    return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
-  }
-
-  toString(): string {
-    return `(${this.x}, ${this.y})`;
-  }
-
-  equals(other: unknown): boolean {
-    const o = other as Position;
-    return o && o.x === this.x && o.y === this.y;
-  }
-
-  hashCode(): number {
-    return hash(this.x) + hash(this.y);
-  }
+export function distanceBetween(a: Position, b: Position): number {
+  const xDistance = a.x - b.x;
+  const yDistance = a.y - b.y;
+  return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
 }
 
 export interface PlacementOnEmptyGridMustBeAtOrigin {

@@ -8,7 +8,6 @@ const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
 const immutable_1 = require("immutable");
 const socket_io_1 = require("socket.io");
-const Domain_1 = require("../../shared/Domain");
 const TileGrid_1 = require("../../shared/TileGrid");
 const User_1 = require("../../shared/User");
 const TileBag_1 = require("./TileBag");
@@ -148,8 +147,6 @@ io.on("connection", (s) => {
     s.on("game.applytiles", (tiles) => {
         const gk = gameKey;
         const uid = userId;
-        //TODO: hack
-        tiles = tiles.map((t) => new Domain_1.PositionedTile(new Domain_1.Tile(t.tile.colour, t.tile.shape), new Domain_1.Position(t.position.x, t.position.y)));
         if (gk && uid) {
             upsert(games, gk, () => initialGame(gk), (g) => {
                 if (g.userInControl === uid) {
@@ -157,7 +154,7 @@ io.on("connection", (s) => {
                     if (res.type === "Success") {
                         const hand = g.hands.get(uid);
                         if (hand) {
-                            const [nextHand, newTileBag] = newHand(g.tileBag, hand, tiles.map((pt) => new Domain_1.Tile(pt.tile.colour, pt.tile.shape)));
+                            const [nextHand, newTileBag] = newHand(g.tileBag, hand, tiles);
                             g.tileBag = newTileBag;
                             g.hands.set(uid, nextHand);
                             s.emit("user.hand", nextHand.toArray());

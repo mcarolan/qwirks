@@ -36,10 +36,7 @@ export class Network implements IGameStateUpdater {
 
       this.socket.on("game.tiles", (tiles: PositionedTile[]) => {
         console.log("game tiles update");
-        //TODO: hack, methods get stripped otherise
-        this.setTiles = tiles.map(
-          (t) => new PositionedTile(t.tile, t.position)
-        );
+        this.setTiles = tiles;
       });
 
       this.socket.on("user.incontrol", (userId: string) => {

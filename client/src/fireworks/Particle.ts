@@ -1,4 +1,4 @@
-import { Position } from "../../../shared/Domain";
+import { Position, plus } from "../../../shared/Domain";
 import { random } from "../tiles/utility";
 
 export class Particle {
@@ -28,12 +28,10 @@ export class Particle {
     this.coordinates.pop();
     this.coordinates.unshift(this.current);
     this.speed *= this.friction;
-    this.current = this.current.plus(
-      new Position(
-        Math.cos(this.angle) * this.speed,
-        Math.sin(this.angle) * this.speed + this.gravity
-      )
-    );
+    this.current = plus(this.current, {
+      x: Math.cos(this.angle) * this.speed,
+      y: Math.sin(this.angle) * this.speed + this.gravity,
+    });
     this.alpha -= this.decay;
     return this.alpha <= this.decay;
   }

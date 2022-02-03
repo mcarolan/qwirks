@@ -12,7 +12,7 @@ export class TileBag {
     return List<Tile>().withMutations((mutable) => {
       allTileColours().forEach((colour) => {
         allTileShapes().forEach((shape) => {
-          mutable.push(new Tile(colour, shape));
+          mutable.push({ colour, shape });
         });
       });
     });

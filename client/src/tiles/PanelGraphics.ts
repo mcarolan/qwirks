@@ -1,16 +1,16 @@
-import { Rect } from "./domain";
+import { Rect, rectContains } from "./domain";
 import { TileGraphics } from "./TileGraphics";
 import { is, Map } from "immutable";
 import { GameState } from "./GameState";
 import { IGameStateUpdater } from "~/IGameStateUpdater";
-import { Position, Tile } from "../../../shared/Domain";
+import { ORIGIN, Position, Tile } from "../../../shared/Domain";
 
 export const PANEL_HEIGHT = 129;
 const PADDING = 5;
 const OFFSET = 25;
 
 export class PanelGraphics implements IGameStateUpdater {
-  private position: Position = Position.ZERO;
+  private position: Position = ORIGIN;
 
   constructor(private tileGraphics: TileGraphics) {}
 
@@ -27,14 +27,14 @@ export class PanelGraphics implements IGameStateUpdater {
       state.hand.map((_, i) => {
         const tileX =
           startTileX + i * this.tileGraphics.tileWidth + i * PADDING;
-        const tilePosition = new Position(tileX, tileY);
+        const tilePosition = { x: tileX, y: tileY };
         return [
           i,
-          new Rect(
-            tilePosition,
-            this.tileGraphics.tileWidth,
-            this.tileGraphics.tileHeight
-          ),
+          {
+            position: tilePosition,
+            width: this.tileGraphics.tileWidth,
+            height: this.tileGraphics.tileHeight,
+          },
         ];
       })
     );
@@ -51,7 +51,7 @@ export class PanelGraphics implements IGameStateUpdater {
       const mousePosition = gameState.mousePosition;
       if (mousePosition) {
         tileRects.forEach((rect, i) => {
-          if (rect.contains(mousePosition)) {
+          if (rectContains(rect, mousePosition)) {
             newHover = i;
             return false;
           }
@@ -69,7 +69,7 @@ export class PanelGraphics implements IGameStateUpdater {
       gameState.mouseEvents.forEach((e) => {
         if (e.type == "MouseClick") {
           tileRects.forEach((rect, i) => {
-            if (rect.contains(e.position)) {
+            if (rectContains(rect, e.position)) {
               setActivePanel(i, !gameState.panelActiveTileIndicies.contains(i));
               return false;
             }

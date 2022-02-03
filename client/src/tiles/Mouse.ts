@@ -79,7 +79,7 @@ export class Mouse implements IGameStateUpdater {
 
   static updateMousePosition(mouse: Mouse): (e: MouseEvent) => void {
     return (e) => {
-      mouse.mousePosition = new Position(e.pageX, e.pageY);
+      mouse.mousePosition = { x: e.pageX, y: e.pageY };
 
       if (
         mouse.isMouseDown() &&

@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.prettyPrint = exports.Position = exports.PositionedTile = exports.Tile = exports.allTileShapes = exports.TileShape = exports.allTileColours = exports.TileColour = void 0;
-const immutable_1 = require("immutable");
+exports.prettyPrint = exports.distanceBetween = exports.plus = exports.minus = exports.right = exports.left = exports.above = exports.below = exports.ORIGIN = exports.allTileShapes = exports.TileShape = exports.allTileColours = exports.TileColour = void 0;
 var TileColour;
 (function (TileColour) {
     TileColour["Yellow"] = "yellow";
@@ -42,90 +41,46 @@ function allTileShapes() {
     ];
 }
 exports.allTileShapes = allTileShapes;
-class Tile {
-    constructor(colour, shape) {
-        this.colour = colour;
-        this.shape = shape;
-    }
-    toString() {
-        return `Tile(${this.colour}, ${this.shape})`;
-    }
-    equals(other) {
-        const o = other;
-        return o && (0, immutable_1.is)(o.colour, this.colour) && (0, immutable_1.is)(o.shape, this.shape);
-    }
-    hashCode() {
-        return (0, immutable_1.hash)(this.colour.toString()) + (0, immutable_1.hash)(this.shape.toString());
-    }
+exports.ORIGIN = {
+    x: 0,
+    y: 0,
+};
+function below(pos) {
+    return Object.assign(Object.assign({}, pos), { y: pos.y - 1 });
 }
-exports.Tile = Tile;
-class PositionedTile {
-    constructor(tile, position) {
-        this.tile = tile;
-        this.position = position;
-    }
-    static from(position, colour, shape) {
-        return new PositionedTile(new Tile(colour, shape), position);
-    }
-    get colour() {
-        return this.tile.colour;
-    }
-    get shape() {
-        return this.tile.shape;
-    }
-    toString() {
-        return `(${this.tile.toString()}, ${this.position.toString()})`;
-    }
-    equals(other) {
-        const o = other;
-        return o && (0, immutable_1.is)(o.position, this.position) && (0, immutable_1.is)(o.tile, this.tile);
-    }
-    hashCode() {
-        return this.tile.hashCode() + this.position.hashCode();
-    }
+exports.below = below;
+function above(pos) {
+    return Object.assign(Object.assign({}, pos), { y: pos.y + 1 });
 }
-exports.PositionedTile = PositionedTile;
-class Position {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-    static below(pos) {
-        return new Position(pos.x, pos.y - 1);
-    }
-    static above(pos) {
-        return new Position(pos.x, pos.y + 1);
-    }
-    static left(pos) {
-        return new Position(pos.x - 1, pos.y);
-    }
-    static right(pos) {
-        return new Position(pos.x + 1, pos.y);
-    }
-    minus(other) {
-        return new Position(this.x - other.x, this.y - other.y);
-    }
-    plus(other) {
-        return new Position(this.x + other.x, this.y + other.y);
-    }
-    distanceTo(other) {
-        const xDistance = this.x - other.x;
-        const yDistance = this.y - other.y;
-        return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
-    }
-    toString() {
-        return `(${this.x}, ${this.y})`;
-    }
-    equals(other) {
-        const o = other;
-        return o && o.x === this.x && o.y === this.y;
-    }
-    hashCode() {
-        return (0, immutable_1.hash)(this.x) + (0, immutable_1.hash)(this.y);
-    }
+exports.above = above;
+function left(pos) {
+    return Object.assign(Object.assign({}, pos), { x: pos.x - 1 });
 }
-exports.Position = Position;
-Position.ZERO = new Position(0, 0);
+exports.left = left;
+function right(pos) {
+    return Object.assign(Object.assign({}, pos), { x: pos.x + 1 });
+}
+exports.right = right;
+function minus(a, b) {
+    return {
+        x: a.x - b.x,
+        y: a.y - b.y,
+    };
+}
+exports.minus = minus;
+function plus(a, b) {
+    return {
+        x: a.x + b.x,
+        y: a.y + b.y,
+    };
+}
+exports.plus = plus;
+function distanceBetween(a, b) {
+    const xDistance = a.x - b.x;
+    const yDistance = a.y - b.y;
+    return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
+}
+exports.distanceBetween = distanceBetween;
 function prettyPrint(placementResult) {
     switch (placementResult.type) {
         case "Success":

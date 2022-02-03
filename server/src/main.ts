@@ -217,14 +217,6 @@ io.on("connection", (s) => {
   s.on("game.applytiles", (tiles: PositionedTile[]) => {
     const gk = gameKey;
     const uid = userId;
-    //TODO: hack
-    tiles = tiles.map(
-      (t) =>
-        new PositionedTile(
-          new Tile(t.tile.colour, t.tile.shape),
-          new Position(t.position.x, t.position.y)
-        )
-    );
 
     if (gk && uid) {
       upsert(
@@ -237,11 +229,7 @@ io.on("connection", (s) => {
             if (res.type === "Success") {
               const hand = g.hands.get(uid);
               if (hand) {
-                const [nextHand, newTileBag] = newHand(
-                  g.tileBag,
-                  hand,
-                  tiles.map((pt) => new Tile(pt.tile.colour, pt.tile.shape))
-                );
+                const [nextHand, newTileBag] = newHand(g.tileBag, hand, tiles);
                 g.tileBag = newTileBag;
                 g.hands.set(uid, nextHand);
                 s.emit("user.hand", nextHand.toArray());

@@ -15,7 +15,7 @@ class TileBag {
         return (0, immutable_1.List)().withMutations((mutable) => {
             (0, Domain_1.allTileColours)().forEach((colour) => {
                 (0, Domain_1.allTileShapes)().forEach((shape) => {
-                    mutable.push(new Domain_1.Tile(colour, shape));
+                    mutable.push({ colour, shape });
                 });
             });
         });

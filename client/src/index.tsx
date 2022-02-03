@@ -1,6 +1,6 @@
-import { Rect } from "./tiles/domain";
+import { Rect, rectFromElement } from "./tiles/domain";
 
-import { Position } from "../../shared/Domain";
+import { ORIGIN, plus } from "../../shared/Domain";
 import { Map, Set } from "immutable";
 import { PanelGraphics } from "./tiles/PanelGraphics";
 import { TileGridGraphics } from "./tiles/TileGridGraphics";
@@ -65,17 +65,13 @@ class FireworkUpdater implements IGameStateUpdater {
 
   update(gameState: GameState): GameState {
     const targets = gameState.fireworkTilePositions.map((tp) =>
-      this.tileGrid
-        .tilePositionToScreenCoords(tp, gameState)
-        .plus(
-          new Position(
-            this.tileGraphics.tileWidth / 2,
-            this.tileGraphics.tileHeight / 2
-          )
-        )
+      plus(this.tileGrid.tilePositionToScreenCoords(tp, gameState), {
+        x: this.tileGraphics.tileWidth / 2,
+        y: this.tileGraphics.tileHeight / 2,
+      })
     );
 
-    const fireFrom = gameState.mousePosition ?? Position.ZERO;
+    const fireFrom = gameState.mousePosition ?? ORIGIN;
 
     targets.forEach((p) => {
       this.fireworks.create(fireFrom, p);
@@ -203,8 +199,8 @@ class Main
     const nextState = updateGameState(
       {
         ...gameState,
-        mainAreaBounds: Rect.from(deps.mainArea),
-        bottomPanelBounds: Rect.from(deps.bottomPanel),
+        mainAreaBounds: rectFromElement(deps.mainArea),
+        bottomPanelBounds: rectFromElement(deps.bottomPanel),
       },
       this,
       deps.network,
@@ -254,7 +250,7 @@ class Main
       tileGraphics,
       tileGrid,
       fireworks,
-      Rect.from(mainArea),
+      rectFromElement(mainArea),
       sounds
     );
 
@@ -285,8 +281,8 @@ class Main
         GameState.initial(
           this.props.gameKey,
           user,
-          Rect.from(mainArea),
-          Rect.from(bottomPanel)
+          rectFromElement(mainArea),
+          rectFromElement(bottomPanel)
         ),
         dependencies
       )

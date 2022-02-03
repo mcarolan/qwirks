@@ -1,51 +1,36 @@
-import { hash } from "immutable";
 import { Position } from "../../../shared/Domain";
 
-export class Rect {
-  constructor(
-    readonly position: Position,
-    readonly width: number,
-    readonly height: number
-  ) {}
+export interface Rect {
+  position: Position;
+  width: number;
+  height: number;
+}
 
-  static from(element: HTMLElement): Rect {
-    const r = element.getBoundingClientRect();
-    return new Rect(new Position(r.left, r.top), r.width, r.height);
-  }
+export function rectFromElement(element: HTMLElement): Rect {
+  const r = element.getBoundingClientRect();
 
-  contains(position: Position): boolean {
-    return (
-      position.x >= this.position.x &&
-      position.x <= this.position.x + this.width &&
-      position.y >= this.position.y &&
-      position.y <= this.position.y + this.height
-    );
-  }
+  return {
+    position: {
+      x: r.left,
+      y: r.top,
+    },
+    width: r.width,
+    height: r.height,
+  };
+}
 
-  middle(): Position {
-    return new Position(
-      this.position.x + this.width / 2,
-      this.position.y + this.height / 2
-    );
-  }
+export function rectContains(rect: Rect, position: Position): boolean {
+  return (
+    position.x >= rect.position.x &&
+    position.x <= rect.position.x + rect.width &&
+    position.y >= rect.position.y &&
+    position.y <= rect.position.y + rect.height
+  );
+}
 
-  toString(): string {
-    return `(${this.position.toString()}, width=${this.width}, height=${
-      this.height
-    })`;
-  }
-
-  equals(other: unknown): boolean {
-    const o = other as Rect;
-    return (
-      o &&
-      o.position.equals(this.position) &&
-      o.width === this.width &&
-      o.height === this.height
-    );
-  }
-
-  hashCode(): number {
-    return this.position.hashCode() + hash(this.width) + hash(this.height);
-  }
+export function middle(rect: Rect): Position {
+  return {
+    x: rect.position.x + rect.width / 2,
+    y: rect.position.y + rect.height / 2,
+  };
 }

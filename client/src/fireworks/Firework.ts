@@ -1,4 +1,4 @@
-import { Position } from "../../../shared/Domain";
+import { Position, plus, distanceBetween } from "../../../shared/Domain";
 import { random } from "../tiles/utility";
 
 export class Firework {
@@ -15,7 +15,7 @@ export class Firework {
 
   constructor(private readonly start: Position, readonly target: Position) {
     this.current = start;
-    this.distanceToTarget = start.distanceTo(target);
+    this.distanceToTarget = distanceBetween(start, target);
     //increase for a longer trail
     this.coordinates = new Array<Position>(start, start, start, start);
     this.angle = Math.atan2(target.y - start.y, target.x - start.x);
@@ -33,14 +33,14 @@ export class Firework {
 
     this.speed *= this.acceleration;
 
-    const velocities = new Position(
-      Math.cos(this.angle) * this.speed,
-      Math.sin(this.angle) * this.speed
-    );
+    const velocities: Position = {
+      x: Math.cos(this.angle) * this.speed,
+      y: Math.sin(this.angle) * this.speed,
+    };
 
-    const newPosition = this.current.plus(velocities);
+    const newPosition = plus(this.current, velocities);
 
-    this.distanceTravelled = this.start.distanceTo(newPosition);
+    this.distanceTravelled = distanceBetween(this.start, newPosition);
     this.current = newPosition;
 
     return this.distanceTravelled >= this.distanceToTarget;

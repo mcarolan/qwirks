@@ -49,10 +49,10 @@ function allLines(grid, placements) {
     return placements
         .flatMap((placement) => {
         var _a, _b;
-        const l = neighbours(grid, placement.position, Domain_1.Position.left);
-        const r = neighbours(grid, placement.position, Domain_1.Position.right);
-        const a = neighbours(grid, placement.position, Domain_1.Position.above);
-        const b = neighbours(grid, placement.position, Domain_1.Position.below);
+        const l = neighbours(grid, placement.position, Domain_1.left);
+        const r = neighbours(grid, placement.position, Domain_1.right);
+        const a = neighbours(grid, placement.position, Domain_1.above);
+        const b = neighbours(grid, placement.position, Domain_1.below);
         const l1 = (_a = buildLine(l, placement, r)) !== null && _a !== void 0 ? _a : (0, immutable_1.List)();
         const l2 = (_b = buildLine(a, placement, b)) !== null && _b !== void 0 ? _b : (0, immutable_1.List)();
         return immutable_1.List.of(l1, l2).filter((l) => l.size > 0);
@@ -95,7 +95,7 @@ class TileGrid {
             return { type: "PlacingOverCurrentlyPlacedTiles", tiles: overlapping };
         }
         if (this.elems.size === 0 &&
-            !placements.some((p) => p.position.equals(new Domain_1.Position(0, 0)))) {
+            !placements.some((p) => (0, immutable_1.is)((0, immutable_1.fromJS)(p.position), (0, immutable_1.fromJS)(Domain_1.ORIGIN)))) {
             return { type: "PlacementOnEmptyGridMustBeAtOrigin" };
         }
         const dupes = placements.filter((p) => placements.filter((p2) => (0, immutable_1.is)(p, p2)).size > 1);

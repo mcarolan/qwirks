@@ -3,9 +3,14 @@ import {
   PlacementResult,
   Position,
   PositionedTile,
+  left,
+  right,
+  above,
+  below,
+  ORIGIN,
 } from "./Domain";
 
-import { Set, List, is } from "immutable";
+import { Set, List, is, fromJS } from "immutable";
 
 function neighbours(
   grid: TileGrid,
@@ -67,10 +72,10 @@ export function allLines(
 ): Set<List<PositionedTile>> {
   return placements
     .flatMap((placement) => {
-      const l = neighbours(grid, placement.position, Position.left);
-      const r = neighbours(grid, placement.position, Position.right);
-      const a = neighbours(grid, placement.position, Position.above);
-      const b = neighbours(grid, placement.position, Position.below);
+      const l = neighbours(grid, placement.position, left);
+      const r = neighbours(grid, placement.position, right);
+      const a = neighbours(grid, placement.position, above);
+      const b = neighbours(grid, placement.position, below);
 
       const l1 = buildLine(l, placement, r) ?? List();
       const l2 = buildLine(a, placement, b) ?? List();
@@ -125,7 +130,7 @@ export class TileGrid {
 
     if (
       this.elems.size === 0 &&
-      !placements.some((p) => p.position.equals(new Position(0, 0)))
+      !placements.some((p) => is(fromJS(p.position), fromJS(ORIGIN)))
     ) {
       return { type: "PlacementOnEmptyGridMustBeAtOrigin" };
     }
