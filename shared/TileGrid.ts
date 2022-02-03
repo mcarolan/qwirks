@@ -1,10 +1,9 @@
 import { trampoline, ThunkOrValue } from "trampoline-ts";
 import {
-  PlacementOnEmptyGridMustBeAtOrigin,
   PlacementResult,
   Position,
   PositionedTile,
-} from "./domain";
+} from "./Domain";
 
 import { Set, List, is } from "immutable";
 

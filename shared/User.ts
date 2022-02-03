@@ -16,4 +16,5 @@ export enum UserType {
 export interface UserWithStatus extends User {
   onlineStatus: OnlineStatus;
   userType: UserType;
+  score: number;
 }

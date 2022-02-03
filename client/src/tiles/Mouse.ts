@@ -1,5 +1,5 @@
 import { IGameStateUpdater } from "~/IGameStateUpdater";
-import { Position } from "./domain";
+import { Position } from "../../../shared/Domain";
 import { GameState } from "./GameState";
 
 export interface MouseClick {

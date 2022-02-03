@@ -1,4 +1,5 @@
-import { is, hash } from "immutable";
+import { is, hash, Set, List } from "immutable";
+import { TileGrid } from "./TileGrid";
 
 export enum TileColour {
   Yellow = "yellow",
@@ -136,5 +137,62 @@ export class Position {
 
   hashCode(): number {
     return hash(this.x) + hash(this.y);
+  }
+}
+
+export interface PlacementOnEmptyGridMustBeAtOrigin {
+  type: "PlacementOnEmptyGridMustBeAtOrigin";
+}
+
+export interface PlacingOverCurrentlyPlacedTiles {
+  type: "PlacingOverCurrentlyPlacedTiles";
+  tiles: Set<PositionedTile>;
+}
+
+export interface DuplicatePlacement {
+  type: "DuplicatePlacement";
+  tiles: Set<PositionedTile>;
+}
+
+export interface CreatesInvalidLines {
+  type: "CreatesInvalidLines";
+  lines: Set<List<PositionedTile>>;
+}
+
+export interface AllPlacedTilesMustBeInALine {
+  type: "AllPlacedTilesMustBeInALine";
+}
+
+export interface Success {
+  type: "Success";
+  tileGrid: TileGrid;
+  score: number;
+  lines: Set<Set<PositionedTile>>;
+}
+
+export type PlacementResult =
+  | PlacementOnEmptyGridMustBeAtOrigin
+  | PlacingOverCurrentlyPlacedTiles
+  | DuplicatePlacement
+  | CreatesInvalidLines
+  | AllPlacedTilesMustBeInALine
+  | Success;
+
+export function prettyPrint(placementResult: PlacementResult): string {
+  switch (placementResult.type) {
+    case "Success":
+      return `${placementResult.type} (tile grid size ${placementResult.tileGrid.size})`;
+    case "PlacingOverCurrentlyPlacedTiles":
+      return `${placementResult.type} (${placementResult.tiles})`;
+    case "PlacementOnEmptyGridMustBeAtOrigin":
+      return `${placementResult.type}`;
+    case "DuplicatePlacement":
+      return `${placementResult.type} (${placementResult.tiles})`;
+    case "CreatesInvalidLines":
+      return `${placementResult.type} (${JSON.stringify(
+        placementResult.lines
+      )})`;
+    case "AllPlacedTilesMustBeInALine":
+      return `${placementResult.type}`;
   }
 }

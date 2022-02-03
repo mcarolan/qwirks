@@ -1,8 +1,7 @@
-import { TileGrid } from "./TileGrid";
-import { Set, hash, List } from "immutable";
-import { Position, PositionedTile } from "../../../shared/Domain";
+import { hash } from "immutable";
+import { Position } from "../../../shared/Domain";
 
-class Rect {
+export class Rect {
   constructor(
     readonly position: Position,
     readonly width: number,
@@ -50,74 +49,3 @@ class Rect {
     return this.position.hashCode() + hash(this.width) + hash(this.height);
   }
 }
-
-interface PlacementOnEmptyGridMustBeAtOrigin {
-  type: "PlacementOnEmptyGridMustBeAtOrigin";
-}
-
-interface PlacingOverCurrentlyPlacedTiles {
-  type: "PlacingOverCurrentlyPlacedTiles";
-  tiles: Set<PositionedTile>;
-}
-
-interface DuplicatePlacement {
-  type: "DuplicatePlacement";
-  tiles: Set<PositionedTile>;
-}
-
-interface CreatesInvalidLines {
-  type: "CreatesInvalidLines";
-  lines: Set<List<PositionedTile>>;
-}
-
-interface AllPlacedTilesMustBeInALine {
-  type: "AllPlacedTilesMustBeInALine";
-}
-
-interface Success {
-  type: "Success";
-  tileGrid: TileGrid;
-  score: number;
-  lines: Set<Set<PositionedTile>>;
-}
-
-type PlacementResult =
-  | PlacementOnEmptyGridMustBeAtOrigin
-  | PlacingOverCurrentlyPlacedTiles
-  | DuplicatePlacement
-  | CreatesInvalidLines
-  | AllPlacedTilesMustBeInALine
-  | Success;
-
-function prettyPrint(placementResult: PlacementResult): string {
-  switch (placementResult.type) {
-    case "Success":
-      return `${placementResult.type} (tile grid size ${placementResult.tileGrid.size})`;
-    case "PlacingOverCurrentlyPlacedTiles":
-      return `${placementResult.type} (${placementResult.tiles})`;
-    case "PlacementOnEmptyGridMustBeAtOrigin":
-      return `${placementResult.type}`;
-    case "DuplicatePlacement":
-      return `${placementResult.type} (${placementResult.tiles})`;
-    case "CreatesInvalidLines":
-      return `${placementResult.type} (${JSON.stringify(
-        placementResult.lines
-      )})`;
-    case "AllPlacedTilesMustBeInALine":
-      return `${placementResult.type}`;
-  }
-}
-
-export {
-  PositionedTile,
-  Position,
-  PlacementResult,
-  PlacementOnEmptyGridMustBeAtOrigin,
-  PlacingOverCurrentlyPlacedTiles,
-  DuplicatePlacement,
-  CreatesInvalidLines,
-  AllPlacedTilesMustBeInALine,
-  Success,
-  Rect,
-  prettyPrint,
-};

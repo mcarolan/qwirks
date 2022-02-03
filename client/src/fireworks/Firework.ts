@@ -1,4 +1,4 @@
-import { Position } from "../tiles/domain";
+import { Position } from "../../../shared/Domain";
 import { random } from "../tiles/utility";
 
 export class Firework {

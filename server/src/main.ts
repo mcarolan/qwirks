@@ -1,9 +1,16 @@
-import express from "express";
+import express, { Handler } from "express";
 import http from "http";
-import { List } from "immutable";
+import { List, Set } from "immutable";
 import { Server, Socket } from "socket.io";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
-import { PositionedTile, Tile } from "../../shared/Domain";
+import {
+  PositionedTile,
+  Tile,
+  Position,
+  TileColour,
+  TileShape,
+} from "../../shared/Domain";
+import { TileGrid } from "../../shared/TileGrid";
 import {
   OnlineStatus,
   User,
@@ -97,6 +104,25 @@ function sendStartingHands(game: Game) {
   game.tileBag = tb;
 }
 
+function newHand(
+  tileBag: TileBag,
+  hand: List<Tile>,
+  tiles: PositionedTile[]
+): [List<Tile>, TileBag] {
+  const [replacements, newTileBag] = tileBag.take(tiles.length);
+  let newHand = hand;
+  tiles.forEach((t) => {
+    const i = newHand.findIndex(
+      (ht) => ht.colour === t.tile.colour && ht.shape === t.tile.shape
+    );
+    if (i > -1) {
+      newHand = newHand.delete(i);
+    }
+  });
+
+  return [newHand.concat(replacements), newTileBag];
+}
+
 io.on("connection", (s) => {
   var userId: string | undefined;
   var gameKey: string | undefined;
@@ -117,6 +143,7 @@ io.on("connection", (s) => {
           ...user,
           onlineStatus: OnlineStatus.online,
           userType: UserType.Player,
+          score: g.users.get(user.userId)?.score ?? 0,
         });
         g.sockets.set(user.userId, s);
 
@@ -165,6 +192,14 @@ io.on("connection", (s) => {
   s.on("game.applytiles", (tiles: PositionedTile[]) => {
     const gk = gameKey;
     const uid = userId;
+    //TODO: hack
+    tiles = tiles.map(
+      (t) =>
+        new PositionedTile(
+          new Tile(t.tile.colour, t.tile.shape),
+          new Position(t.position.x, t.position.y)
+        )
+    );
 
     if (gk && uid) {
       upsert(
@@ -173,10 +208,29 @@ io.on("connection", (s) => {
         () => initialGame(gk),
         (g) => {
           if (g.userInControl === uid) {
-            g.tiles = g.tiles.concat(tiles);
-            g.userInControl = nextUserInControl(g);
-            io.to(gk).emit("game.tiles", g.tiles);
-            io.to(gk).emit("user.incontrol", g.userInControl);
+            const res = new TileGrid(g.tiles).place(Set(tiles));
+            if (res.type === "Success") {
+              const hand = g.hands.get(uid);
+              if (hand) {
+                const [nextHand, newTileBag] = newHand(g.tileBag, hand, tiles);
+                g.tileBag = newTileBag;
+                g.hands.set(uid, nextHand);
+                s.emit("user.hand", nextHand.toArray());
+              }
+
+              g.tiles = res.tileGrid.tiles;
+              const user = g.users.get(uid);
+              if (user) {
+                g.users.set(uid, {
+                  ...user,
+                  score: user.score + res.score,
+                });
+                io.to(gk).emit("user.list", [...g.users.entries()]);
+              }
+              g.userInControl = nextUserInControl(g);
+              io.to(gk).emit("game.tiles", g.tiles);
+              io.to(gk).emit("user.incontrol", g.userInControl);
+            }
           }
         }
       );

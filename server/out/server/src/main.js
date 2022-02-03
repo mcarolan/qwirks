@@ -8,6 +8,8 @@ const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
 const immutable_1 = require("immutable");
 const socket_io_1 = require("socket.io");
+const Domain_1 = require("../../shared/Domain");
+const TileGrid_1 = require("../../shared/TileGrid");
 const User_1 = require("../../shared/User");
 const TileBag_1 = require("./TileBag");
 const app = (0, express_1.default)();
@@ -70,6 +72,17 @@ function sendStartingHands(game) {
     }
     game.tileBag = tb;
 }
+function newHand(tileBag, hand, tiles) {
+    const [replacements, newTileBag] = tileBag.take(tiles.length);
+    let newHand = hand;
+    tiles.forEach((t) => {
+        const i = newHand.findIndex((ht) => ht.colour === t.tile.colour && ht.shape === t.tile.shape);
+        if (i > -1) {
+            newHand = newHand.delete(i);
+        }
+    });
+    return [newHand.concat(replacements), newTileBag];
+}
 io.on("connection", (s) => {
     var userId;
     var gameKey;
@@ -80,7 +93,8 @@ io.on("connection", (s) => {
         gameKey = joiningGameKey;
         s.join(joiningGameKey);
         upsert(games, gameKey, () => initialGame(joiningGameKey), (g) => {
-            g.users.set(user.userId, Object.assign(Object.assign({}, user), { onlineStatus: User_1.OnlineStatus.online, userType: User_1.UserType.Player }));
+            var _a, _b;
+            g.users.set(user.userId, Object.assign(Object.assign({}, user), { onlineStatus: User_1.OnlineStatus.online, userType: User_1.UserType.Player, score: (_b = (_a = g.users.get(user.userId)) === null || _a === void 0 ? void 0 : _a.score) !== null && _b !== void 0 ? _b : 0 }));
             g.sockets.set(user.userId, s);
             if (g.isStarted) {
                 s.emit("game.started");
@@ -115,13 +129,30 @@ io.on("connection", (s) => {
     s.on("game.applytiles", (tiles) => {
         const gk = gameKey;
         const uid = userId;
+        //TODO: hack
+        tiles = tiles.map((t) => new Domain_1.PositionedTile(new Domain_1.Tile(t.tile.colour, t.tile.shape), new Domain_1.Position(t.position.x, t.position.y)));
         if (gk && uid) {
             upsert(games, gk, () => initialGame(gk), (g) => {
                 if (g.userInControl === uid) {
-                    g.tiles = g.tiles.concat(tiles);
-                    g.userInControl = nextUserInControl(g);
-                    io.to(gk).emit("game.tiles", g.tiles);
-                    io.to(gk).emit("user.incontrol", g.userInControl);
+                    const res = new TileGrid_1.TileGrid(g.tiles).place((0, immutable_1.Set)(tiles));
+                    if (res.type === "Success") {
+                        const hand = g.hands.get(uid);
+                        if (hand) {
+                            const [nextHand, newTileBag] = newHand(g.tileBag, hand, tiles);
+                            g.tileBag = newTileBag;
+                            g.hands.set(uid, nextHand);
+                            s.emit("user.hand", nextHand.toArray());
+                        }
+                        g.tiles = res.tileGrid.tiles;
+                        const user = g.users.get(uid);
+                        if (user) {
+                            g.users.set(uid, Object.assign(Object.assign({}, user), { score: user.score + res.score }));
+                            io.to(gk).emit("user.list", [...g.users.entries()]);
+                        }
+                        g.userInControl = nextUserInControl(g);
+                        io.to(gk).emit("game.tiles", g.tiles);
+                        io.to(gk).emit("user.incontrol", g.userInControl);
+                    }
                 }
             });
         }

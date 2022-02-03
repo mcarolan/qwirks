@@ -14,46 +14,46 @@ export class Network implements IGameStateUpdater {
   private setUserInControl: string | undefined;
   private setTiles: PositionedTile[] | undefined;
 
-  private firstUpdate: boolean = true;
+  constructor(private socket: Socket, private user: User, gameKey: string) {
+    this.socket.on("connect", () => {
+      this.setConnected = true;
+      this.socket.emit("user.identity", this.user, gameKey);
 
-  constructor(private socket: Socket, private user: User) {}
+      this.socket.on("user.list", (users: [[string, UserWithStatus]]) => {
+        console.log("user list update");
+        this.setUserList = Map(users);
+      });
+
+      this.socket.on("user.hand", (tiles: Tile[]) => {
+        console.log("hand update");
+        this.hand = List(tiles);
+      });
+
+      this.socket.on("game.started", () => {
+        console.log("game started update");
+        this.setGameStarted = true;
+      });
+
+      this.socket.on("game.tiles", (tiles: PositionedTile[]) => {
+        console.log("game tiles update");
+        //TODO: hack, methods get stripped otherise
+        this.setTiles = tiles.map(
+          (t) => new PositionedTile(t.tile, t.position)
+        );
+      });
+
+      this.socket.on("user.incontrol", (userId: string) => {
+        console.log("user in control update");
+        this.setUserInControl = userId;
+      });
+    });
+
+    this.socket.on("disconnect", () => {
+      this.setConnected = false;
+    });
+  }
 
   update(gameState: GameState): GameState {
-    if (this.firstUpdate) {
-      this.socket.on("connect", () => {
-        this.setConnected = true;
-        this.socket.emit("user.identity", this.user, gameState.gameKey);
-
-        this.socket.on("user.list", (users: [[string, UserWithStatus]]) => {
-          this.setUserList = Map(users);
-        });
-
-        this.socket.on("user.hand", (tiles: Tile[]) => {
-          this.hand = List(tiles);
-        });
-
-        this.socket.on("game.started", () => {
-          this.setGameStarted = true;
-        });
-
-        this.socket.on("game.tiles", (tiles: PositionedTile[]) => {
-          //TODO: hack, methods get stripped otherise
-          this.setTiles = tiles.map(
-            (t) => new PositionedTile(t.tile, t.position)
-          );
-        });
-
-        this.socket.on("user.incontrol", (userId: string) => {
-          this.setUserInControl = userId;
-        });
-      });
-
-      this.socket.on("disconnect", () => {
-        this.setConnected = false;
-      });
-      this.firstUpdate = false;
-    }
-
     const nextUserList = this.setUserList ?? gameState.userList;
     const connected = this.setConnected ?? gameState.isConnected;
     const nextGameStarted = this.setGameStarted ?? gameState.isStarted;
@@ -71,10 +71,12 @@ export class Network implements IGameStateUpdater {
       !nextGameStarted &&
       gameState.pressedButtonTags.contains(ButtonTag.Start)
     ) {
+      console.log("game start");
       this.socket.emit("game.start");
     }
 
     if (gameState.tilesToApply != undefined) {
+      console.log("apply tiles");
       this.socket.emit("game.applytiles", gameState.tilesToApply);
       gameState.tilesToApply = undefined;
     }

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Position = exports.PositionedTile = exports.Tile = exports.allTileShapes = exports.TileShape = exports.allTileColours = exports.TileColour = void 0;
+exports.prettyPrint = exports.Position = exports.PositionedTile = exports.Tile = exports.allTileShapes = exports.TileShape = exports.allTileColours = exports.TileColour = void 0;
 const immutable_1 = require("immutable");
 var TileColour;
 (function (TileColour) {
@@ -126,4 +126,21 @@ class Position {
 }
 exports.Position = Position;
 Position.ZERO = new Position(0, 0);
+function prettyPrint(placementResult) {
+    switch (placementResult.type) {
+        case "Success":
+            return `${placementResult.type} (tile grid size ${placementResult.tileGrid.size})`;
+        case "PlacingOverCurrentlyPlacedTiles":
+            return `${placementResult.type} (${placementResult.tiles})`;
+        case "PlacementOnEmptyGridMustBeAtOrigin":
+            return `${placementResult.type}`;
+        case "DuplicatePlacement":
+            return `${placementResult.type} (${placementResult.tiles})`;
+        case "CreatesInvalidLines":
+            return `${placementResult.type} (${JSON.stringify(placementResult.lines)})`;
+        case "AllPlacedTilesMustBeInALine":
+            return `${placementResult.type}`;
+    }
+}
+exports.prettyPrint = prettyPrint;
 //# sourceMappingURL=Domain.js.map

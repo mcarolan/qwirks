@@ -18,13 +18,18 @@ export function UserListUser(props: UserListUserProps) {
 
   const userInControlClassName: string =
     props.userInControl === props.user.userId
-      ? "user-incontrol"
-      : "user-normal";
+      ? "username user-incontrol"
+      : "username user-normal";
 
   return (
     <div className="userListUser">
-      <span className={onlineStatusClassName(props.user.onlineStatus)}></span>
-      <span className={userInControlClassName}>{props.user.username}</span>
+      <div className="userListUsername">
+        <span className={onlineStatusClassName(props.user.onlineStatus)}></span>
+        <span className={userInControlClassName}>{props.user.username}</span>
+      </div>
+      <div className="userListScore">
+        <span className="userScore">{props.user.score}</span>
+      </div>
     </div>
   );
 }

@@ -1,8 +1,9 @@
 import { List } from "immutable";
-import { Position, Rect } from "../tiles/domain";
+import { Rect } from "../tiles/domain";
 import { random } from "../tiles/utility";
 import { Firework } from "./Firework";
 import { Particle } from "./Particle";
+import { Position } from "../../../shared/Domain";
 
 export class Fireworks {
   private fireworks: List<Firework> = List();

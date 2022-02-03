@@ -1,6 +1,6 @@
 import { Rect } from "./tiles/domain";
 
-import { Position } from "./tiles/domain";
+import { Position } from "../../shared/Domain";
 import { Map, Set } from "immutable";
 import { PanelGraphics } from "./tiles/PanelGraphics";
 import { TileGridGraphics } from "./tiles/TileGridGraphics";
@@ -234,7 +234,7 @@ class Main
 
     const tileGraphics = await loadTileGraphics();
 
-    const score = new Score(new Position(10, 10));
+    const score = new Score();
 
     const socket = io("http://localhost:3000");
 
@@ -270,7 +270,7 @@ class Main
       fireworks,
       socket,
       user,
-      network: new Network(socket, user),
+      network: new Network(socket, user, this.props.gameKey),
       sounds,
       gameLogic: new GameLogic(),
       fireworkUpdater,

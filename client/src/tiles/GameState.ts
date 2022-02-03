@@ -3,7 +3,7 @@ import { User, UserWithStatus } from "~/../../shared/User";
 import { ButtonTag } from "..";
 import { Rect } from "./domain";
 import { MouseClickOrDrag, MouseDrag } from "./Mouse";
-import { TileGrid } from "./TileGrid";
+import { TileGrid } from "../../../shared/TileGrid";
 import { Tile, PositionedTile, Position } from "../../../shared/Domain";
 
 export class CurrentPlacementState {
@@ -30,7 +30,6 @@ export class GameState {
     public enabledButtonTags: Set<ButtonTag>,
     public visibleButtonTags: Set<ButtonTag>,
     public panelActiveTileIndicies: Set<number>,
-    public score: number,
     public scoreJustAchieved: number,
     public fireworkTilePositions: List<Position>,
     public currentPlacement: CurrentPlacementState,
@@ -66,7 +65,6 @@ export class GameState {
       Set.of(),
       Set.of(),
       Set.of(),
-      1,
       0,
       List.of(),
       new CurrentPlacementState([], 0, Set.of()),
