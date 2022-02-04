@@ -1,8 +1,7 @@
 import { Rect, rectFromElement } from "./tiles/domain";
 
-import { plus } from "../../shared/Domain";
+import { plus, Tile } from "../../shared/Domain";
 import { Map, Set as ImmSet } from "immutable";
-import { PanelGraphics } from "./tiles/PanelGraphics";
 import { TileGridGraphics } from "./tiles/TileGridGraphics";
 import { GameState, initialGameState } from "./tiles/GameState";
 import { Mouse } from "./tiles/Mouse";
@@ -28,6 +27,7 @@ import { ConnectionStatus } from "./ConnectionStatus";
 import { Button } from "./Button";
 import { User, UserWithStatus } from "../../shared/User";
 import { loadImage } from "./tiles/utility";
+import { UserHand } from "./UserHand";
 
 export enum ButtonTag {
   Start = "start",
@@ -41,7 +41,6 @@ interface GameDependencies {
   context: CanvasRenderingContext2D;
   mainArea: HTMLElement;
   bottomPanel: HTMLElement;
-  panel: PanelGraphics;
   tileGrid: TileGridGraphics;
   mouse: Mouse;
   score: Score;
@@ -109,6 +108,8 @@ interface MainState {
   enabledButtonTags: ImmSet<ButtonTag>;
   visibleButtonTags: ImmSet<ButtonTag>;
   userInControl: string | undefined;
+  hand: List<Tile>;
+  activeTileIndicies: ImmSet<number>;
 }
 
 interface MainProps {
@@ -126,15 +127,22 @@ class Main
       isStarted: false,
       enabledButtonTags: ImmSet(),
       visibleButtonTags: ImmSet(),
+      hand: List(),
+      activeTileIndicies: ImmSet(),
       currentUser: undefined,
       userInControl: undefined,
     };
   }
 
-  private buttonsClicked: Array<ButtonTag> = [];
+  private buttonsClicked: ImmSet<ButtonTag> = ImmSet();
+  private handTilesClicked: Array<number> = [];
 
   onClickButton(buttonTag: ButtonTag): () => void {
-    return () => this.buttonsClicked.push(buttonTag);
+    return () => (this.buttonsClicked = this.buttonsClicked.add(buttonTag));
+  }
+
+  onHandTileClicked(i: number): void {
+    this.handTilesClicked.push(i);
   }
 
   private shouldUpdateState(gameState: GameState): boolean {
@@ -145,16 +153,33 @@ class Main
       !is(this.state.isStarted, gameState.isStarted) ||
       !is(this.state.enabledButtonTags, gameState.enabledButtonTags) ||
       !is(this.state.visibleButtonTags, gameState.visibleButtonTags) ||
-      !is(this.state.userInControl, gameState.userInControl)
+      !is(this.state.userInControl, gameState.userInControl) ||
+      !is(this.state.hand, gameState.hand) ||
+      !is(this.state.activeTileIndicies, gameState.panelActiveTileIndicies)
     );
   }
 
   update(gameState: GameState): void {
-    if (this.buttonsClicked.length > 0) {
-      gameState.pressedButtonTags = ImmSet(this.buttonsClicked);
-      this.buttonsClicked = [];
+    if (this.buttonsClicked.size > 0) {
+      gameState.pressedButtonTags = this.buttonsClicked;
+      this.buttonsClicked = ImmSet();
     } else {
       gameState.pressedButtonTags = ImmSet();
+    }
+
+    if (this.handTilesClicked.length > 0) {
+      gameState.panelActiveTileIndicies = gameState.panelActiveTileIndicies.withMutations(
+        (m) => {
+          for (const i of this.handTilesClicked) {
+            if (m.has(i)) {
+              m.delete(i);
+            } else {
+              m.add(i);
+            }
+          }
+        }
+      );
+      this.handTilesClicked = [];
     }
   }
 
@@ -169,6 +194,8 @@ class Main
           enabledButtonTags: gameState.enabledButtonTags,
           visibleButtonTags: gameState.visibleButtonTags,
           userInControl: gameState.userInControl,
+          hand: gameState.hand,
+          activeTileIndicies: gameState.panelActiveTileIndicies,
         },
         () => {
           console.log(`react state update ${JSON.stringify(this.state)}`);
@@ -184,48 +211,41 @@ class Main
 
   private frameId: number | undefined;
 
-  private counter: number = 0;
-
   frame(gameState: GameState, deps: GameDependencies): void {
+    gameState.mainAreaBounds = rectFromElement(deps.mainArea);
+    deps.canvas.width = gameState.mainAreaBounds.width;
+    deps.canvas.height = gameState.mainAreaBounds.height;
     deps.context.clearRect(
       0,
       0,
       deps.context.canvas.width,
       deps.context.canvas.height
     );
-    gameState.mainAreaBounds = rectFromElement(deps.mainArea);
     gameState.bottomPanelBounds = rectFromElement(deps.bottomPanel);
 
     this.update(gameState);
     deps.network.update(gameState);
     deps.mouse.update(gameState);
-    deps.panel.update(gameState);
     deps.tileGrid.update(gameState);
     deps.gameLogic.update(gameState);
     deps.fireworkUpdater.update(gameState);
 
     deps.tileGrid.draw(deps.context, gameState);
-    deps.panel.draw(deps.context, gameState);
     deps.score.draw(deps.context, gameState);
     deps.fireworks.updateAndDraw(deps.context);
-    this.counter++;
-    this.counter = this.counter % 100;
 
-    if (this.counter === 0) {
-      this.frameId = requestAnimationFrame((_) =>
-        this.updateReactState(gameState, deps)
-      );
-    } else {
-      this.frameId = requestAnimationFrame((_) => this.frame(gameState, deps));
-    }
+    this.frameId = requestAnimationFrame((_) =>
+      this.updateReactState(gameState, deps)
+    );
   }
 
   async componentDidMount() {
     const canvas = document.querySelector("#game") as HTMLCanvasElement;
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
     const mainArea = document.querySelector("#mainArea") as HTMLElement;
     const bottomPanel = document.querySelector("#bottomPanel") as HTMLElement;
+
+    canvas.width = mainArea.clientWidth;
+    canvas.height = mainArea.clientHeight;
 
     const tileGraphics = await loadTileGraphics();
 
@@ -258,7 +278,6 @@ class Main
       context: canvas.getContext("2d") as CanvasRenderingContext2D,
       mainArea,
       bottomPanel,
-      panel: new PanelGraphics(tileGraphics),
       tileGrid,
       mouse,
       score,
@@ -270,7 +289,7 @@ class Main
       gameLogic: new GameLogic(),
       fireworkUpdater,
     };
-    console.log(dependencies);
+
     document.addEventListener("mousedown", Mouse.updateMouseDown(mouse));
     document.addEventListener("mouseup", Mouse.updateMouseUp(mouse));
     document.addEventListener("mousemove", Mouse.updateMousePosition(mouse));
@@ -352,7 +371,16 @@ class Main
           />
         </div>
         <div id="bottom">
-          <div id="bottomPanel">&nbsp;</div>
+          <div id="bottomPanel">
+            <UserHand
+              isEnabled={
+                this.state.userInControl === this.state.currentUser?.userId
+              }
+              hand={this.state.hand}
+              activeIndicies={this.state.activeTileIndicies}
+              onPressed={(i) => this.onHandTileClicked(i)}
+            />
+          </div>
         </div>
         <ConnectionStatus isConnected={this.state.isConnected} />
       </div>

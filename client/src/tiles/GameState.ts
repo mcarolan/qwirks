@@ -27,7 +27,7 @@ export interface GameState {
   pressedButtonTags: ImmSet<ButtonTag>;
   enabledButtonTags: ImmSet<ButtonTag>;
   visibleButtonTags: ImmSet<ButtonTag>;
-  panelActiveTileIndicies: Set<number>;
+  panelActiveTileIndicies: ImmSet<number>;
   scoreJustAchieved: number;
   fireworkTilePositions: List<Position>;
   currentPlacement: CurrentPlacementState;
@@ -37,20 +37,21 @@ export interface GameState {
   userList: Map<string, UserWithStatus>;
   userInControl: string | undefined;
   mouseDragInProgress: MouseDrag | undefined;
-  panelHoverTileIndex: number | undefined;
 }
 
 export function singleActiveTile(
   gameState: GameState
 ): [number, Tile] | undefined {
   if (gameState.panelActiveTileIndicies.size === 1) {
-    for (const n of gameState.panelActiveTileIndicies) {
-      const t = gameState.hand.get(n);
-      return t ? [n, t] : undefined;
+    const index = gameState.panelActiveTileIndicies.toArray().at(0);
+    const tile = index != undefined ? gameState.hand.get(index) : undefined;
+
+    if (index != undefined && tile) {
+      return [index, tile];
     }
-  } else {
-    return undefined;
   }
+
+  return undefined;
 }
 
 export function initialGameState(
@@ -74,7 +75,7 @@ export function initialGameState(
     pressedButtonTags: ImmSet(),
     enabledButtonTags: ImmSet(),
     visibleButtonTags: ImmSet(),
-    panelActiveTileIndicies: new Set(),
+    panelActiveTileIndicies: ImmSet(),
     scoreJustAchieved: 0,
     fireworkTilePositions: List.of(),
     currentPlacement: {
@@ -89,6 +90,5 @@ export function initialGameState(
     userList: Map(),
     userInControl: undefined,
     mouseDragInProgress: undefined,
-    panelHoverTileIndex: undefined,
   };
 }

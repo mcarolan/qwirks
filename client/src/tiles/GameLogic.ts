@@ -51,7 +51,7 @@ export class GameLogic implements IGameStateUpdater {
         });
         if (isValidPlacement(gameState, newPlacement)) {
           const newHand = gameState.hand.remove(activeIndex);
-          gameState.panelActiveTileIndicies.clear();
+          gameState.panelActiveTileIndicies = Set();
           gameState.hand = newHand;
         }
       });
