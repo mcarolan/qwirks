@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.prettyPrint = exports.distanceBetween = exports.plus = exports.minus = exports.right = exports.left = exports.above = exports.below = exports.ORIGIN = exports.allTileShapes = exports.TileShape = exports.allTileColours = exports.TileColour = void 0;
+exports.prettyPrint = exports.distanceBetween = exports.plus = exports.minus = exports.right = exports.left = exports.above = exports.below = exports.allTileShapes = exports.TileShape = exports.allTileColours = exports.TileColour = void 0;
 var TileColour;
 (function (TileColour) {
     TileColour["Yellow"] = "yellow";
@@ -41,10 +41,6 @@ function allTileShapes() {
     ];
 }
 exports.allTileShapes = allTileShapes;
-exports.ORIGIN = {
-    x: 0,
-    y: 0,
-};
 function below(pos) {
     return Object.assign(Object.assign({}, pos), { y: pos.y - 1 });
 }

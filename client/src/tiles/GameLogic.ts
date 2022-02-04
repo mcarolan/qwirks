@@ -1,5 +1,5 @@
-import { GameState } from "./GameState";
-import { Set, Map } from "immutable";
+import { GameState, singleActiveTile } from "./GameState";
+import { Set } from "immutable";
 import { ButtonTag } from "../index";
 import { IGameStateUpdater } from "~/IGameStateUpdater";
 import { PositionedTile, prettyPrint, Tile } from "../../../shared/Domain";
@@ -7,11 +7,9 @@ import { TileGrid } from "../../../shared/TileGrid";
 
 function isValidPlacement(
   gameState: GameState,
-  placements: PositionedTile[]
+  placements: Set<PositionedTile>
 ): boolean {
-  console.log(gameState.tilesApplied);
-  console.log(`placements ${JSON.stringify(placements)}`);
-  const newTg = new TileGrid(gameState.tilesApplied).place(Set(placements));
+  const newTg = new TileGrid(gameState.tilesApplied).place(placements);
 
   if (newTg) {
     switch (newTg.type) {
@@ -19,6 +17,7 @@ function isValidPlacement(
         gameState.currentPlacement.tiles = newTg.tileGrid.tiles;
         gameState.currentPlacement.score = newTg.score;
         gameState.currentPlacement.lines = newTg.lines;
+        gameState.currentPlacement.placedTiles = placements;
         return true;
       default:
         console.log(`oh no, can't do that: ${prettyPrint(newTg)}`);
@@ -30,35 +29,32 @@ function isValidPlacement(
   return false;
 }
 
-function buildSet<T>(map: Map<T, boolean>): Set<T> {
-  return map
-    .filter((v) => v)
-    .keySeq()
-    .toSet();
+function buildSet<T>(...entries: [T, boolean][]): Set<T> {
+  return Set<T>().withMutations((m) => {
+    entries.forEach(([v, b]) => {
+      if (b) {
+        m.add(v);
+      }
+    });
+  });
 }
 
 export class GameLogic implements IGameStateUpdater {
-  update(oldState: GameState): GameState {
-    const gameState: GameState = { ...oldState };
-    const singleActiveTile:
-      | number
-      | undefined = gameState.panelActiveTileIndicies.first();
-    if (singleActiveTile != undefined) {
-      const activeTile = gameState.hand.get(singleActiveTile);
-      if (activeTile) {
-        gameState.tilePositionsPressed.forEach((p) => {
-          const newPlacement = gameState.currentPlacement.tiles.concat({
-            ...activeTile,
-            position: p,
-          });
-          if (isValidPlacement(gameState, newPlacement)) {
-            const newHand = gameState.hand.remove(singleActiveTile);
-            gameState.panelActiveTileIndicies = Set.of();
-            gameState.hand = newHand;
-            gameState.currentPlacement.tiles = newPlacement;
-          }
+  update(gameState: GameState): void {
+    const singleActive = singleActiveTile(gameState);
+    if (singleActive) {
+      const [activeIndex, activeTile] = singleActive;
+      gameState.tilePositionsPressed.forEach((p) => {
+        const newPlacement = gameState.currentPlacement.placedTiles.add({
+          ...activeTile,
+          position: { x: p.x, y: p.y },
         });
-      }
+        if (isValidPlacement(gameState, newPlacement)) {
+          const newHand = gameState.hand.remove(activeIndex);
+          gameState.panelActiveTileIndicies.clear();
+          gameState.hand = newHand;
+        }
+      });
     }
 
     if (gameState.pressedButtonTags.contains(ButtonTag.Accept)) {
@@ -67,24 +63,23 @@ export class GameLogic implements IGameStateUpdater {
         .flatMap((line) => line.map((pt) => pt.position))
         .toList();
       gameState.currentPlacement.score = 0;
-      gameState.tilesToApply = gameState.currentPlacement.tiles;
+      gameState.tilesToApply = gameState.currentPlacement.placedTiles.toArray();
       gameState.currentPlacement.tiles = [];
+      gameState.currentPlacement.placedTiles = Set();
       gameState.userInControl = undefined;
     } else if (
       gameState.pressedButtonTags.contains(ButtonTag.Swap) &&
-      !gameState.panelActiveTileIndicies.isEmpty()
+      !(gameState.panelActiveTileIndicies.size === 0)
     ) {
-      const tiles = gameState.panelActiveTileIndicies.flatMap((i) => {
-        const t = gameState.hand.get(i);
-
+      const toSwap = new Array<Tile>();
+      for (const ti of gameState.panelActiveTileIndicies) {
+        const t = gameState.hand.get(ti);
         if (t) {
-          return Set.of(t);
-        } else {
-          return Set<Tile>();
+          toSwap.push(t);
         }
-      });
-      gameState.tilesToSwap = tiles.toArray();
-      gameState.panelActiveTileIndicies = Set.of();
+      }
+      gameState.tilesToSwap = toSwap;
+      gameState.panelActiveTileIndicies.clear();
       gameState.userInControl = undefined;
     } else if (
       gameState.pressedButtonTags.contains(ButtonTag.Cancel) &&
@@ -99,35 +94,28 @@ export class GameLogic implements IGameStateUpdater {
       gameState.currentPlacement.tiles.length === 0
     );
     const cancelButtonEnabled =
-      !gameState.panelActiveTileIndicies.isEmpty() &&
+      !(gameState.panelActiveTileIndicies.size === 0) &&
       gameState.currentPlacement.tiles.length === 0;
 
     const startButtonEnabled =
       !gameState.isStarted && gameState.userList.size > 1;
 
     gameState.enabledButtonTags = buildSet(
-      Map([
-        [ButtonTag.Accept, placementButtonsEnabled],
-        [ButtonTag.Cancel, placementButtonsEnabled],
-        [ButtonTag.Swap, cancelButtonEnabled],
-        [ButtonTag.Start, startButtonEnabled],
-      ])
+      [ButtonTag.Accept, placementButtonsEnabled],
+      [ButtonTag.Cancel, placementButtonsEnabled],
+      [ButtonTag.Swap, cancelButtonEnabled],
+      [ButtonTag.Start, startButtonEnabled]
     );
 
     gameState.visibleButtonTags = buildSet(
-      Map([
-        [ButtonTag.Accept, gameState.isStarted],
-        [ButtonTag.Cancel, gameState.isStarted],
-        [ButtonTag.Swap, gameState.isStarted],
-        [ButtonTag.Start, !gameState.isStarted],
-      ])
+      [ButtonTag.Accept, gameState.isStarted],
+      [ButtonTag.Cancel, gameState.isStarted],
+      [ButtonTag.Swap, gameState.isStarted],
+      [ButtonTag.Start, !gameState.isStarted]
     );
 
-    gameState.tilesToDisplay =
-      gameState.currentPlacement.tiles.length === 0
-        ? gameState.tilesApplied
-        : gameState.tilesApplied.concat(gameState.currentPlacement.tiles);
-
-    return gameState;
+    gameState.tilesToDisplay = gameState.currentPlacement.placedTiles.isEmpty()
+      ? gameState.tilesApplied
+      : gameState.currentPlacement.tiles;
   }
 }

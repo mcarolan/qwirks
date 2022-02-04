@@ -95,7 +95,7 @@ class TileGrid {
             return { type: "PlacingOverCurrentlyPlacedTiles", tiles: overlapping };
         }
         if (this.elems.size === 0 &&
-            !placements.some((p) => (0, immutable_1.is)((0, immutable_1.fromJS)(p.position), (0, immutable_1.fromJS)(Domain_1.ORIGIN)))) {
+            !placements.some((p) => (0, immutable_1.is)((0, immutable_1.fromJS)(p.position), (0, immutable_1.fromJS)({ x: 0, y: 0 })))) {
             return { type: "PlacementOnEmptyGridMustBeAtOrigin" };
         }
         const dupes = placements.filter((p) => placements.filter((p2) => (0, immutable_1.is)(p, p2)).size > 1);

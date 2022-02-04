@@ -16,6 +16,7 @@ export class Network implements IGameStateUpdater {
 
   constructor(private socket: Socket, private user: User, gameKey: string) {
     this.socket.on("connect", () => {
+      console.log("connected");
       this.setConnected = true;
       this.socket.emit("user.identity", this.user, gameKey);
 
@@ -50,22 +51,23 @@ export class Network implements IGameStateUpdater {
     });
   }
 
-  update(gameState: GameState): GameState {
-    const nextUserList = this.setUserList ?? gameState.userList;
-    const connected = this.setConnected ?? gameState.isConnected;
-    const nextGameStarted = this.setGameStarted ?? gameState.isStarted;
-    const nextHand = this.hand ?? gameState.hand;
-    const nextUserInControl = this.setUserInControl ?? gameState.userInControl;
-    const nextTiles = this.setTiles ?? gameState.tilesApplied;
+  update(gameState: GameState): void {
+    gameState.userList = this.setUserList ?? gameState.userList;
+    gameState.isConnected = this.setConnected ?? gameState.isConnected;
+    gameState.isStarted = this.setGameStarted ?? gameState.isStarted;
+    gameState.hand = this.hand ?? gameState.hand;
+    gameState.userInControl = this.setUserInControl ?? gameState.userInControl;
+    gameState.tilesApplied = this.setTiles ?? gameState.tilesApplied;
 
     this.setGameStarted = undefined;
     this.setConnected = undefined;
     this.setGameStarted = undefined;
     this.hand = undefined;
     this.setUserInControl = undefined;
+    this.setTiles = undefined;
 
     if (
-      !nextGameStarted &&
+      !gameState.isStarted &&
       gameState.pressedButtonTags.contains(ButtonTag.Start)
     ) {
       console.log("game start");
@@ -83,15 +85,5 @@ export class Network implements IGameStateUpdater {
       this.socket.emit("game.swap", gameState.tilesToSwap);
       gameState.tilesToSwap = undefined;
     }
-
-    return {
-      ...gameState,
-      userList: nextUserList,
-      isConnected: connected,
-      isStarted: nextGameStarted,
-      hand: nextHand,
-      userInControl: nextUserInControl,
-      tilesApplied: nextTiles,
-    };
   }
 }

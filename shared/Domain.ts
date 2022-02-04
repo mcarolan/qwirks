@@ -55,11 +55,6 @@ export interface Position {
   y: number;
 }
 
-export const ORIGIN: Position = {
-  x: 0,
-  y: 0,
-};
-
 export function below(pos: Position): Position {
   return {
     ...pos,

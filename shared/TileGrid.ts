@@ -7,7 +7,6 @@ import {
   right,
   above,
   below,
-  ORIGIN,
 } from "./Domain";
 
 import { Set, List, is, fromJS } from "immutable";
@@ -130,7 +129,7 @@ export class TileGrid {
 
     if (
       this.elems.size === 0 &&
-      !placements.some((p) => is(fromJS(p.position), fromJS(ORIGIN)))
+      !placements.some((p) => is(fromJS(p.position), fromJS({ x: 0, y: 0 })))
     ) {
       return { type: "PlacementOnEmptyGridMustBeAtOrigin" };
     }

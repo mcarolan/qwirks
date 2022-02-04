@@ -1,30 +1,29 @@
 import { Rect, rectContains } from "./domain";
 import { TileGraphics } from "./TileGraphics";
-import { is, Map } from "immutable";
+import { fromJS, is, Map } from "immutable";
 import { GameState } from "./GameState";
 import { IGameStateUpdater } from "~/IGameStateUpdater";
-import { ORIGIN, Position, Tile } from "../../../shared/Domain";
+import { Position } from "../../../shared/Domain";
 
 export const PANEL_HEIGHT = 129;
 const PADDING = 5;
 const OFFSET = 25;
 
 export class PanelGraphics implements IGameStateUpdater {
-  private position: Position = ORIGIN;
+  private position: Position = { x: 0, y: 0 };
+  private tileRects: Map<number, Rect>;
 
-  constructor(private tileGraphics: TileGraphics) {}
-
-  private newPosition(state: GameState) {
-    return state.bottomPanelBounds.position;
+  constructor(private tileGraphics: TileGraphics) {
+    this.tileRects = this.computeTileRects();
   }
 
-  private tileRects(state: GameState): Map<number, Rect> {
+  private computeTileRects(): Map<number, Rect> {
     const tileY = this.position.y + this.tileGraphics.tileHeight / 2;
 
     const startTileX = this.position.x + OFFSET + PADDING;
 
     return Map<number, Rect>(
-      state.hand.map((_, i) => {
+      [0, 1, 2, 3, 4, 5].map((_, i) => {
         const tileX =
           startTileX + i * this.tileGraphics.tileWidth + i * PADDING;
         const tilePosition = { x: tileX, y: tileY };
@@ -40,62 +39,53 @@ export class PanelGraphics implements IGameStateUpdater {
     );
   }
 
-  update(gameState: GameState): GameState {
-    this.position = this.newPosition(gameState);
-    const tileRects = this.tileRects(gameState);
+  update(gameState: GameState): void {
+    if (
+      !is(fromJS(this.position), fromJS(gameState.bottomPanelBounds.position))
+    ) {
+      this.position = gameState.bottomPanelBounds.position;
+      this.tileRects = this.computeTileRects();
+    }
 
-    var newHover: number | undefined;
-    var activePanel = gameState.panelActiveTileIndicies;
+    gameState.panelHoverTileIndex = undefined;
 
     if (gameState.userInControl === gameState.currentUser.userId) {
-      const mousePosition = gameState.mousePosition;
-      if (mousePosition) {
-        tileRects.forEach((rect, i) => {
-          if (rectContains(rect, mousePosition)) {
-            newHover = i;
-            return false;
-          }
-        });
-      }
-
-      function setActivePanel(index: number, active: boolean): void {
-        if (active) {
-          activePanel = activePanel.add(index);
-        } else {
-          activePanel = activePanel.remove(index);
-        }
-      }
-
-      gameState.mouseEvents.forEach((e) => {
-        if (e.type == "MouseClick") {
-          tileRects.forEach((rect, i) => {
-            if (rectContains(rect, e.position)) {
-              setActivePanel(i, !gameState.panelActiveTileIndicies.contains(i));
-              return false;
-            }
-          });
+      this.tileRects.forEach((rect, i) => {
+        if (
+          i < gameState.hand.size &&
+          rectContains(rect, gameState.mousePosition)
+        ) {
+          gameState.panelHoverTileIndex = i;
+          return false;
         }
       });
     }
 
-    return {
-      ...gameState,
-      panelHoverTileIndex: newHover,
-      panelActiveTileIndicies: activePanel,
-    };
+    gameState.mouseEvents.forEach((e) => {
+      if (e.type == "MouseClick") {
+        this.tileRects.forEach((rect, i) => {
+          if (i < gameState.hand.size && rectContains(rect, e.position)) {
+            if (gameState.panelActiveTileIndicies.has(i)) {
+              gameState.panelActiveTileIndicies.delete(i);
+            } else {
+              gameState.panelActiveTileIndicies.add(i);
+            }
+            return false;
+          }
+        });
+      }
+    });
   }
 
   draw(context: CanvasRenderingContext2D, state: GameState): void {
-    const tileRects = this.tileRects(state);
-
     state.hand.map((tile, i) => {
-      const rect = tileRects.get(i);
+      const rect = this.tileRects.get(i);
       if (rect) {
-        if (state.panelActiveTileIndicies.contains(i)) {
+        if (state.panelActiveTileIndicies.has(i)) {
           this.tileGraphics.drawActiveTile(context, rect.position, tile);
         } else if (
           state.panelHoverTileIndex != undefined &&
-          is(state.panelHoverTileIndex, i)
+          state.panelHoverTileIndex === i
         ) {
           this.tileGraphics.drawHoverTile(context, rect.position, tile);
         } else {

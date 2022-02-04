@@ -1,10 +1,10 @@
 import { Rect, rectFromElement } from "./tiles/domain";
 
-import { ORIGIN, plus } from "../../shared/Domain";
-import { Map, Set } from "immutable";
+import { plus } from "../../shared/Domain";
+import { Map, Set as ImmSet } from "immutable";
 import { PanelGraphics } from "./tiles/PanelGraphics";
 import { TileGridGraphics } from "./tiles/TileGridGraphics";
-import { GameState } from "./tiles/GameState";
+import { GameState, initialGameState } from "./tiles/GameState";
 import { Mouse } from "./tiles/Mouse";
 import { GameLogic } from "./tiles/GameLogic";
 import { Score } from "./tiles/Score";
@@ -63,52 +63,42 @@ class FireworkUpdater implements IGameStateUpdater {
     private sounds: Sounds
   ) {}
 
-  update(gameState: GameState): GameState {
-    const targets = gameState.fireworkTilePositions.map((tp) =>
-      plus(this.tileGrid.tilePositionToScreenCoords(tp, gameState), {
+  update(gameState: GameState): void {
+    if (!gameState.fireworkTilePositions.isEmpty()) {
+      console.log("fire in the hole");
+      const tileOffset = {
         x: this.tileGraphics.tileWidth / 2,
         y: this.tileGraphics.tileHeight / 2,
-      })
-    );
+      };
+      const fireFrom = {
+        x: gameState.mousePosition.x,
+        y: gameState.mousePosition.y,
+      };
 
-    const fireFrom = gameState.mousePosition ?? ORIGIN;
-
-    targets.forEach((p) => {
-      this.fireworks.create(fireFrom, p);
-
-      var i = gameState.scoreJustAchieved ?? 0;
-
-      while (i--) {
-        this.fireworks.create(
-          this.fireworks.randomOrigin(this.mainAreaRect),
-          p
+      gameState.fireworkTilePositions.forEach((tp) => {
+        const p = plus(
+          this.tileGrid.tilePositionToScreenCoords(tp, gameState),
+          tileOffset
         );
-      }
-    });
+        this.fireworks.create(fireFrom, p);
+
+        var i = gameState.scoreJustAchieved ?? 0;
+
+        while (i--) {
+          this.fireworks.create(
+            this.fireworks.randomOrigin(this.mainAreaRect),
+            p
+          );
+        }
+      });
+      gameState.fireworkTilePositions = List();
+    }
 
     if (gameState.scoreJustAchieved > 0) {
       this.sounds.rises(gameState.scoreJustAchieved);
+      gameState.scoreJustAchieved = 0;
     }
-
-    return {
-      ...gameState,
-      fireworkTilePositions: List(),
-      scoreJustAchieved: 0,
-    };
   }
-}
-
-function updateGameState(
-  initial: GameState,
-  ...updaters: IGameStateUpdater[]
-): GameState {
-  var state: GameState = { ...initial };
-
-  for (const updater of updaters) {
-    state = updater.update(state);
-  }
-
-  return state;
 }
 
 interface MainState {
@@ -116,8 +106,8 @@ interface MainState {
   currentUser: User | undefined;
   isConnected: boolean;
   isStarted: boolean;
-  enabledButtonTags: Set<ButtonTag>;
-  visibleButtonTags: Set<ButtonTag>;
+  enabledButtonTags: ImmSet<ButtonTag>;
+  visibleButtonTags: ImmSet<ButtonTag>;
   userInControl: string | undefined;
 }
 
@@ -134,17 +124,17 @@ class Main
       userList: Map(),
       isConnected: false,
       isStarted: false,
-      enabledButtonTags: Set(),
-      visibleButtonTags: Set(),
+      enabledButtonTags: ImmSet(),
+      visibleButtonTags: ImmSet(),
       currentUser: undefined,
       userInControl: undefined,
     };
   }
 
-  private buttonsClicked: Set<ButtonTag> = Set();
+  private buttonsClicked: Array<ButtonTag> = [];
 
   onClickButton(buttonTag: ButtonTag): () => void {
-    return () => (this.buttonsClicked = this.buttonsClicked.add(buttonTag));
+    return () => this.buttonsClicked.push(buttonTag);
   }
 
   private shouldUpdateState(gameState: GameState): boolean {
@@ -159,13 +149,16 @@ class Main
     );
   }
 
-  update(gameState: GameState): GameState {
-    const buttonsPressed = this.buttonsClicked;
-    this.buttonsClicked = Set();
-    return { ...gameState, pressedButtonTags: buttonsPressed };
+  update(gameState: GameState): void {
+    if (this.buttonsClicked.length > 0) {
+      gameState.pressedButtonTags = ImmSet(this.buttonsClicked);
+      this.buttonsClicked = [];
+    } else {
+      gameState.pressedButtonTags = ImmSet();
+    }
   }
 
-  updateReactState(gameState: GameState, callback: () => void): void {
+  updateReactState(gameState: GameState, deps: GameDependencies): void {
     if (this.shouldUpdateState(gameState)) {
       this.setState(
         {
@@ -179,15 +172,19 @@ class Main
         },
         () => {
           console.log(`react state update ${JSON.stringify(this.state)}`);
-          callback();
+          this.frameId = requestAnimationFrame((_) =>
+            this.frame(gameState, deps)
+          );
         }
       );
     } else {
-      callback();
+      this.frameId = requestAnimationFrame((_) => this.frame(gameState, deps));
     }
   }
 
   private frameId: number | undefined;
+
+  private counter: number = 0;
 
   frame(gameState: GameState, deps: GameDependencies): void {
     deps.context.clearRect(
@@ -196,35 +193,37 @@ class Main
       deps.context.canvas.width,
       deps.context.canvas.height
     );
-    const nextState = updateGameState(
-      {
-        ...gameState,
-        mainAreaBounds: rectFromElement(deps.mainArea),
-        bottomPanelBounds: rectFromElement(deps.bottomPanel),
-      },
-      this,
-      deps.network,
-      deps.mouse,
-      deps.panel,
-      deps.tileGrid,
-      deps.gameLogic,
-      deps.fireworkUpdater
-    );
-    deps.tileGrid.draw(deps.context, nextState);
-    deps.panel.draw(deps.context, nextState);
-    deps.score.draw(deps.context, nextState);
-    deps.fireworks.updateAndDraw(deps.context);
+    gameState.mainAreaBounds = rectFromElement(deps.mainArea);
+    gameState.bottomPanelBounds = rectFromElement(deps.bottomPanel);
 
-    this.updateReactState(nextState, () => {
-      this.frameId = requestAnimationFrame((_) => this.frame(nextState, deps));
-    });
+    this.update(gameState);
+    deps.network.update(gameState);
+    deps.mouse.update(gameState);
+    deps.panel.update(gameState);
+    deps.tileGrid.update(gameState);
+    deps.gameLogic.update(gameState);
+    deps.fireworkUpdater.update(gameState);
+
+    deps.tileGrid.draw(deps.context, gameState);
+    deps.panel.draw(deps.context, gameState);
+    deps.score.draw(deps.context, gameState);
+    deps.fireworks.updateAndDraw(deps.context);
+    this.counter++;
+    this.counter = this.counter % 100;
+
+    if (this.counter === 0) {
+      this.frameId = requestAnimationFrame((_) =>
+        this.updateReactState(gameState, deps)
+      );
+    } else {
+      this.frameId = requestAnimationFrame((_) => this.frame(gameState, deps));
+    }
   }
 
   async componentDidMount() {
     const canvas = document.querySelector("#game") as HTMLCanvasElement;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
     const mainArea = document.querySelector("#mainArea") as HTMLElement;
     const bottomPanel = document.querySelector("#bottomPanel") as HTMLElement;
 
@@ -256,7 +255,7 @@ class Main
 
     const dependencies: GameDependencies = {
       canvas,
-      context,
+      context: canvas.getContext("2d") as CanvasRenderingContext2D,
       mainArea,
       bottomPanel,
       panel: new PanelGraphics(tileGraphics),
@@ -278,7 +277,7 @@ class Main
 
     this.frameId = requestAnimationFrame((_) =>
       this.frame(
-        GameState.initial(
+        initialGameState(
           this.props.gameKey,
           user,
           rectFromElement(mainArea),

@@ -1,4 +1,3 @@
-import { List } from "immutable";
 import { Rect } from "../tiles/domain";
 import { random } from "../tiles/utility";
 import { Firework } from "./Firework";
@@ -6,11 +5,11 @@ import { Particle } from "./Particle";
 import { Position } from "../../../shared/Domain";
 
 export class Fireworks {
-  private fireworks: List<Firework> = List();
-  private particles: List<Particle> = List();
+  private fireworks: Array<Firework> = new Array(100);
+  private particles: Array<Particle> = new Array(500);
 
   create(start: Position, target: Position): void {
-    this.fireworks = this.fireworks.concat(new Firework(start, target));
+    this.fireworks.push(new Firework(start, target));
   }
 
   randomOrigin(rect: Rect): Position {
@@ -40,13 +39,11 @@ export class Fireworks {
       f.draw(context);
 
       if (f.update()) {
-        this.fireworks = this.fireworks.remove(i);
-        this.particles = this.particles.withMutations((m) => {
-          var i: number = 60;
-          while (i--) {
-            m.concat(new Particle(f.target));
-          }
-        });
+        this.fireworks.splice(i, 1);
+        var i: number = 50;
+        while (i--) {
+          this.particles.push(new Particle(f.target));
+        }
       }
     });
 
@@ -54,7 +51,7 @@ export class Fireworks {
       p.draw(context);
 
       if (p.update()) {
-        this.particles = this.particles.remove(i);
+        this.particles.splice(i, 1);
       }
     });
   }
