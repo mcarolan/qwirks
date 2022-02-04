@@ -6,6 +6,7 @@ import {
   allTileColours,
   allTileShapes,
   Position,
+  divideScalar,
 } from "../../../shared/Domain";
 
 async function loadImageCache(): Promise<
@@ -132,9 +133,11 @@ export class TileGraphics {
     return { x: mid.x + tileX, y: mid.y + tileY };
   }
 
-  positionFromScreen(screen: Position, mid: Position): Position {
-    const tileX = (screen.x - mid.x) / (this.tileWidth + TileGraphics.PADDING);
-    const tileY = (screen.y - mid.y) / (this.tileHeight + TileGraphics.PADDING);
+  positionFromScreen(screen: Position, mid: Position, scale: number): Position {
+    const tileX =
+      (screen.x / scale - mid.x) / (this.tileWidth + TileGraphics.PADDING);
+    const tileY =
+      (screen.y / scale - mid.y) / (this.tileHeight + TileGraphics.PADDING);
     return { x: Math.floor(tileX), y: Math.floor(tileY) };
   }
 }

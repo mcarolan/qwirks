@@ -97,6 +97,19 @@ export function plus(a: Position, b: Position): Position {
   };
 }
 
+export function mul(p: Position, n: number): Position {
+  return {
+    x: p.x * n,
+    y: p.y * n,
+  };
+}
+export function divideScalar(p: Position, n: number): Position {
+  return {
+    x: p.x / n,
+    y: p.y / n,
+  };
+}
+
 export function distanceBetween(a: Position, b: Position): number {
   const xDistance = a.x - b.x;
   const yDistance = a.y - b.y;

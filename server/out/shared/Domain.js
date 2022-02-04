@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.prettyPrint = exports.distanceBetween = exports.plus = exports.minus = exports.right = exports.left = exports.above = exports.below = exports.allTileShapes = exports.TileShape = exports.allTileColours = exports.TileColour = void 0;
+exports.prettyPrint = exports.distanceBetween = exports.divideScalar = exports.mul = exports.plus = exports.minus = exports.right = exports.left = exports.above = exports.below = exports.allTileShapes = exports.TileShape = exports.allTileColours = exports.TileColour = void 0;
 var TileColour;
 (function (TileColour) {
     TileColour["Yellow"] = "yellow";
@@ -71,6 +71,20 @@ function plus(a, b) {
     };
 }
 exports.plus = plus;
+function mul(p, n) {
+    return {
+        x: p.x * n,
+        y: p.y * n,
+    };
+}
+exports.mul = mul;
+function divideScalar(p, n) {
+    return {
+        x: p.x / n,
+        y: p.y / n,
+    };
+}
+exports.divideScalar = divideScalar;
 function distanceBetween(a, b) {
     const xDistance = a.x - b.x;
     const yDistance = a.y - b.y;

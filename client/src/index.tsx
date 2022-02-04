@@ -29,6 +29,7 @@ import { User, UserWithStatus } from "../../shared/User";
 import { loadImage } from "./tiles/utility";
 import { UserHand } from "./UserHand";
 import { GameStatus } from "./GameStatus";
+import { ZoomControls } from "./ZoomControls";
 
 export enum ButtonTag {
   Start = "start",
@@ -126,6 +127,8 @@ class Main
 
   private buttonsClicked: ImmSet<ButtonTag> = ImmSet();
   private handTilesClicked: Array<number> = [];
+  private zoomInPressed: number = 0;
+  private zoomOutPressed: number = 0;
 
   onClickButton(buttonTag: ButtonTag): () => void {
     return () => (this.buttonsClicked = this.buttonsClicked.add(buttonTag));
@@ -171,6 +174,17 @@ class Main
       );
       this.handTilesClicked = [];
     }
+
+    const netZoomChange = this.zoomInPressed + this.zoomOutPressed * -1;
+
+    if (netZoomChange != 0) {
+      gameState.scale = Math.min(
+        Math.max(gameState.scale + netZoomChange * 0.1, 0.5),
+        1.5
+      );
+      this.zoomInPressed = 0;
+      this.zoomOutPressed = 0;
+    }
   }
 
   updateReactState(gameState: GameState, deps: GameDependencies): void {
@@ -204,6 +218,7 @@ class Main
   frame(gameState: GameState, deps: GameDependencies): void {
     gameState.mainAreaBounds = rectFromElement(deps.mainArea);
 
+    deps.context.save();
     deps.canvas.width = gameState.mainAreaBounds.width;
     deps.canvas.height = gameState.mainAreaBounds.height;
     deps.context.clearRect(
@@ -220,8 +235,11 @@ class Main
     deps.gameLogic.update(gameState);
     deps.fireworkUpdater.update(gameState);
 
+    deps.context.scale(gameState.scale, gameState.scale);
     deps.tileGrid.draw(deps.context, gameState);
     deps.fireworks.updateAndDraw(deps.context);
+
+    deps.context.restore();
 
     this.frameId = requestAnimationFrame((_) =>
       this.updateReactState(gameState, deps)
@@ -317,6 +335,10 @@ class Main
             isStarted={this.state.isStarted}
           />
           <div id="buttonsContainer">
+            <ZoomControls
+              zoomIn={() => (this.zoomInPressed += 1)}
+              zoomOut={() => (this.zoomOutPressed += 1)}
+            />
             <div className="main-buttons">
               <Button
                 visible={isVisible(ButtonTag.Start)}

@@ -4,7 +4,6 @@ import { MouseDrag } from "./Mouse";
 import { TileGraphics } from "./TileGraphics";
 import { Position, Tile, minus, plus } from "../../../shared/Domain";
 import { middle, rectContains } from "./domain";
-import { fromJS, Set } from "immutable";
 
 export class TileGridGraphics implements IGameStateUpdater {
   private offset: Position;
@@ -50,7 +49,8 @@ export class TileGridGraphics implements IGameStateUpdater {
         if (rectContains(gameState.mainAreaBounds, e.position)) {
           const xy = this.tileGraphics.positionFromScreen(
             e.position,
-            this.mid(gameState)
+            this.mid(gameState),
+            gameState.scale
           );
           gameState.tilePositionsPressed.push(xy);
         }
@@ -101,7 +101,8 @@ export class TileGridGraphics implements IGameStateUpdater {
 
     const hoveringTilePosition = this.tileGraphics.positionFromScreen(
       state.mousePosition,
-      mid
+      mid,
+      state.scale
     );
 
     context.fillStyle = "#eeeeee";
