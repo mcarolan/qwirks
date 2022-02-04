@@ -28,6 +28,7 @@ import { Button } from "./Button";
 import { User, UserWithStatus } from "../../shared/User";
 import { loadImage } from "./tiles/utility";
 import { UserHand } from "./UserHand";
+import { GameStatus } from "./GameStatus";
 
 export enum ButtonTag {
   Start = "start",
@@ -40,7 +41,6 @@ interface GameDependencies {
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
   mainArea: HTMLElement;
-  bottomPanel: HTMLElement;
   tileGrid: TileGridGraphics;
   mouse: Mouse;
   score: Score;
@@ -58,7 +58,6 @@ class FireworkUpdater implements IGameStateUpdater {
     private tileGraphics: TileGraphics,
     private tileGrid: TileGridGraphics,
     private fireworks: Fireworks,
-    private mainAreaRect: Rect,
     private sounds: Sounds
   ) {}
 
@@ -80,15 +79,6 @@ class FireworkUpdater implements IGameStateUpdater {
           tileOffset
         );
         this.fireworks.create(fireFrom, p);
-
-        var i = gameState.scoreJustAchieved ?? 0;
-
-        while (i--) {
-          this.fireworks.create(
-            this.fireworks.randomOrigin(this.mainAreaRect),
-            p
-          );
-        }
       });
       gameState.fireworkTilePositions = List();
     }
@@ -213,6 +203,7 @@ class Main
 
   frame(gameState: GameState, deps: GameDependencies): void {
     gameState.mainAreaBounds = rectFromElement(deps.mainArea);
+
     deps.canvas.width = gameState.mainAreaBounds.width;
     deps.canvas.height = gameState.mainAreaBounds.height;
     deps.context.clearRect(
@@ -221,7 +212,6 @@ class Main
       deps.context.canvas.width,
       deps.context.canvas.height
     );
-    gameState.bottomPanelBounds = rectFromElement(deps.bottomPanel);
 
     this.update(gameState);
     deps.network.update(gameState);
@@ -231,7 +221,6 @@ class Main
     deps.fireworkUpdater.update(gameState);
 
     deps.tileGrid.draw(deps.context, gameState);
-    deps.score.draw(deps.context, gameState);
     deps.fireworks.updateAndDraw(deps.context);
 
     this.frameId = requestAnimationFrame((_) =>
@@ -242,7 +231,7 @@ class Main
   async componentDidMount() {
     const canvas = document.querySelector("#game") as HTMLCanvasElement;
     const mainArea = document.querySelector("#mainArea") as HTMLElement;
-    const bottomPanel = document.querySelector("#bottomPanel") as HTMLElement;
+    const mainAreaBounds: Rect = rectFromElement(mainArea);
 
     canvas.width = mainArea.clientWidth;
     canvas.height = mainArea.clientHeight;
@@ -269,7 +258,6 @@ class Main
       tileGraphics,
       tileGrid,
       fireworks,
-      rectFromElement(mainArea),
       sounds
     );
 
@@ -277,7 +265,6 @@ class Main
       canvas,
       context: canvas.getContext("2d") as CanvasRenderingContext2D,
       mainArea,
-      bottomPanel,
       tileGrid,
       mouse,
       score,
@@ -296,12 +283,7 @@ class Main
 
     this.frameId = requestAnimationFrame((_) =>
       this.frame(
-        initialGameState(
-          this.props.gameKey,
-          user,
-          rectFromElement(mainArea),
-          rectFromElement(bottomPanel)
-        ),
+        initialGameState(this.props.gameKey, user, mainAreaBounds),
         dependencies
       )
     );
@@ -323,6 +305,17 @@ class Main
     return (
       <div id="wrapper">
         <div id="mainArea">
+          <GameStatus
+            userIsInControl={
+              this.state.userInControl === this.state.currentUser?.userId
+            }
+            waitingForUsername={
+              this.state.userInControl
+                ? this.state.userList.get(this.state.userInControl)?.username
+                : undefined
+            }
+            isStarted={this.state.isStarted}
+          />
           <div id="buttonsContainer">
             <div className="main-buttons">
               <Button

@@ -98,14 +98,6 @@ export class TileGridGraphics implements IGameStateUpdater {
     }
 
     context.save();
-    const clippingRect = new Path2D();
-    clippingRect.rect(
-      state.mainAreaBounds.position.x,
-      state.mainAreaBounds.position.y,
-      state.mainAreaBounds.width,
-      state.mainAreaBounds.height
-    );
-    context.clip(clippingRect);
 
     const hoveringTilePosition = this.tileGraphics.positionFromScreen(
       state.mousePosition,

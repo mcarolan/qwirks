@@ -32,7 +32,6 @@ export interface GameState {
   fireworkTilePositions: List<Position>;
   currentPlacement: CurrentPlacementState;
   mainAreaBounds: Rect;
-  bottomPanelBounds: Rect;
   currentUser: User;
   userList: Map<string, UserWithStatus>;
   userInControl: string | undefined;
@@ -57,8 +56,7 @@ export function singleActiveTile(
 export function initialGameState(
   gameKey: string,
   user: User,
-  mainAreaBounds: Rect,
-  bottomPanelBounds: Rect
+  mainAreaBounds: Rect
 ): GameState {
   return {
     gameKey: gameKey,
@@ -85,7 +83,6 @@ export function initialGameState(
       lines: ImmSet.of(),
     },
     mainAreaBounds,
-    bottomPanelBounds,
     currentUser: user,
     userList: Map(),
     userInControl: undefined,
