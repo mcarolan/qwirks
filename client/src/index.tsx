@@ -320,6 +320,10 @@ class Main
     const isVisible = (tag: ButtonTag) =>
       this.state.visibleButtonTags.contains(tag);
 
+    const bottomClasses = this.state.isStarted
+      ? "bottom-visible"
+      : "bottom-invisible";
+
     return (
       <div id="wrapper">
         <div id="mainArea">
@@ -385,7 +389,7 @@ class Main
             userInControl={this.state.userInControl}
           />
         </div>
-        <div id="bottom">
+        <div id="bottom" className={bottomClasses}>
           <div id="bottomPanel">
             <UserHand
               isEnabled={

@@ -122,7 +122,23 @@
     #bottom {
       grid-row: 6;
       grid-column: 1 / 7;
-      background-color: white;
+    }
+
+    .bottom-invisible {
+      opacity: 0;
+    }
+
+    .bottom-visible {
+      animation: fadein 2s;
+    }
+
+    @keyframes fadein {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
     }
 
     .userListUser {
