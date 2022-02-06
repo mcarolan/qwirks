@@ -360,8 +360,8 @@ class Main
                 <Button
                   visible={isVisible(ButtonTag.Accept)}
                   onClick={this.onClickButton(ButtonTag.Accept)}
-                  text="Accept"
-                  className="squareButton acceptButton"
+                  text={<img src="./images/accept.png" />}
+                  className="squareButton"
                   enabled={isEnabled(ButtonTag.Accept)}
                 />
               </div>
@@ -369,8 +369,8 @@ class Main
                 <Button
                   visible={isVisible(ButtonTag.Swap)}
                   onClick={this.onClickButton(ButtonTag.Swap)}
-                  text="Swap"
-                  className="squareButton emojiButton"
+                  text={<img src="./images/swap.png" />}
+                  className="squareButton"
                   enabled={isEnabled(ButtonTag.Swap)}
                 />
               </div>
@@ -378,8 +378,8 @@ class Main
                 <Button
                   visible={isVisible(ButtonTag.Cancel)}
                   onClick={this.onClickButton(ButtonTag.Cancel)}
-                  text="Cancel"
-                  className="squareButton emojiButton"
+                  text={<img src="./images/cross.png" />}
+                  className="squareButton"
                   enabled={isEnabled(ButtonTag.Cancel)}
                 />
               </div>
