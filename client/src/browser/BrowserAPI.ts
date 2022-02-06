@@ -19,6 +19,11 @@ export function loadUserFromLocalStorage(): User {
   };
 }
 
+export function changeUsernameInLocalStorage(newUsername: string) {
+  const localStorageUsernameKey = "username";
+  localStorage.setItem(localStorageUsernameKey, newUsername);
+}
+
 export function getGameKeyFromURL(): string | null {
   const url = new URL(document.location.toString());
   return url.searchParams.get("gameKey");

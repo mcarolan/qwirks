@@ -85,5 +85,11 @@ export class Network implements IGameStateUpdater {
       this.socket.emit("game.swap", gameState.tilesToSwap);
       gameState.tilesToSwap = undefined;
     }
+
+    if (gameState.setUsername != undefined) {
+      console.log("set username");
+      this.socket.emit("user.setusername", gameState.setUsername);
+      gameState.setUsername = undefined;
+    }
   }
 }

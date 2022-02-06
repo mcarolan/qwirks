@@ -189,6 +189,25 @@ io.on("connection", (s) => {
     }
   });
 
+  s.on("user.setusername", (newUsername: string) => {
+    const gk = gameKey;
+    const uid = userId;
+    if (gk && uid) {
+      upsert(
+        games,
+        gk,
+        () => initialGame(gk),
+        (g) => {
+          const user = g.users.get(uid);
+          if (user) {
+            g.users.set(uid, { ...user, username: newUsername });
+            io.to(gk).emit("user.list", [...g.users.entries()]);
+          }
+        }
+      );
+    }
+  });
+
   s.on("game.swap", (tiles: Tile[]) => {
     const gk = gameKey;
     const uid = userId;

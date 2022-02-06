@@ -37,6 +37,7 @@ export interface GameState {
   userList: Map<string, UserWithStatus>;
   userInControl: string | undefined;
   mouseDragInProgress: MouseDrag | undefined;
+  setUsername: string | undefined;
 }
 
 export function singleActiveTile(
@@ -89,5 +90,6 @@ export function initialGameState(
     userList: Map(),
     userInControl: undefined,
     mouseDragInProgress: undefined,
+    setUsername: undefined,
   };
 }

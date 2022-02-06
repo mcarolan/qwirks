@@ -125,6 +125,19 @@ io.on("connection", (s) => {
             });
         }
     });
+    s.on("user.setusername", (newUsername) => {
+        const gk = gameKey;
+        const uid = userId;
+        if (gk && uid) {
+            upsert(games, gk, () => initialGame(gk), (g) => {
+                const user = g.users.get(uid);
+                if (user) {
+                    g.users.set(uid, Object.assign(Object.assign({}, user), { username: newUsername }));
+                    io.to(gk).emit("user.list", [...g.users.entries()]);
+                }
+            });
+        }
+    });
     s.on("game.swap", (tiles) => {
         const gk = gameKey;
         const uid = userId;

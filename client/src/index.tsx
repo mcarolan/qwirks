@@ -19,6 +19,7 @@ import { UsernamePanel } from "./UsernamePanel";
 import { IGameStateUpdater } from "./IGameStateUpdater";
 import { UserList } from "./UserList";
 import {
+  changeUsernameInLocalStorage,
   generateNewURLWithGameKey,
   getGameKeyFromURL,
   loadUserFromLocalStorage,
@@ -93,7 +94,7 @@ class FireworkUpdater implements IGameStateUpdater {
 
 interface MainState {
   userList: Map<string, UserWithStatus>;
-  currentUser: User | undefined;
+  currentUser: User;
   isConnected: boolean;
   isStarted: boolean;
   enabledButtonTags: ImmSet<ButtonTag>;
@@ -105,6 +106,7 @@ interface MainState {
 
 interface MainProps {
   gameKey: string;
+  user: User;
 }
 
 class Main
@@ -120,7 +122,7 @@ class Main
       visibleButtonTags: ImmSet(),
       hand: List(),
       activeTileIndicies: ImmSet(),
-      currentUser: undefined,
+      currentUser: props.user,
       userInControl: undefined,
     };
   }
@@ -129,6 +131,7 @@ class Main
   private handTilesClicked: Array<number> = [];
   private zoomInPressed: number = 0;
   private zoomOutPressed: number = 0;
+  private setUsername: string | undefined = undefined;
 
   onClickButton(buttonTag: ButtonTag): () => void {
     return () => (this.buttonsClicked = this.buttonsClicked.add(buttonTag));
@@ -184,6 +187,17 @@ class Main
       );
       this.zoomInPressed = 0;
       this.zoomOutPressed = 0;
+    }
+
+    if (this.setUsername) {
+      gameState.setUsername = this.setUsername;
+      gameState.currentUser = {
+        ...gameState.currentUser,
+        username: this.setUsername,
+      };
+      changeUsernameInLocalStorage(this.setUsername);
+      console.log("setting to " + this.setUsername);
+      this.setUsername = undefined;
     }
   }
 
@@ -260,8 +274,6 @@ class Main
 
     const socket = io("http://localhost:3000");
 
-    const user = loadUserFromLocalStorage();
-
     const mouse = new Mouse();
 
     const firstTileImage = await loadImage("./images/first-tile.png");
@@ -288,8 +300,8 @@ class Main
       score,
       fireworks,
       socket,
-      user,
-      network: new Network(socket, user, this.props.gameKey),
+      user: this.props.user,
+      network: new Network(socket, this.props.user, this.props.gameKey),
       sounds,
       gameLogic: new GameLogic(),
       fireworkUpdater,
@@ -301,7 +313,7 @@ class Main
 
     this.frameId = requestAnimationFrame((_) =>
       this.frame(
-        initialGameState(this.props.gameKey, user, mainAreaBounds),
+        initialGameState(this.props.gameKey, this.props.user, mainAreaBounds),
         dependencies
       )
     );
@@ -387,7 +399,10 @@ class Main
           </div>
         </div>
         <div id="sidebarRight">
-          <UsernamePanel currentUser={this.state.currentUser} />
+          <UsernamePanel
+            currentUser={this.state.currentUser}
+            onChangeUsername={(newName: string) => (this.setUsername = newName)}
+          />
           <div id="userList">
             <UserList
               userList={this.state.userList}
@@ -418,7 +433,10 @@ window.onload = () => {
 
   if (gameKey) {
     const mainContainer = document.querySelector("#mainContainer");
-    ReactDOM.render(<Main gameKey={gameKey} />, mainContainer);
+    ReactDOM.render(
+      <Main gameKey={gameKey} user={loadUserFromLocalStorage()} />,
+      mainContainer
+    );
   } else {
     window.location.assign(generateNewURLWithGameKey());
   }
