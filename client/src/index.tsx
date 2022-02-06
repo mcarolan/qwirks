@@ -321,73 +321,79 @@ class Main
       this.state.visibleButtonTags.contains(tag);
 
     const bottomClasses = this.state.isStarted
-      ? "bottom-visible"
-      : "bottom-invisible";
+      ? "bottom-expand"
+      : "bottom-contracted";
+
+    const firstRowClasses = this.state.isStarted
+      ? "firstRow-expand"
+      : "firstRow-contracted";
 
     return (
       <div id="wrapper">
-        <div id="mainArea">
-          <GameStatus
-            userIsInControl={
-              this.state.userInControl === this.state.currentUser?.userId
-            }
-            waitingForUsername={
-              this.state.userInControl
-                ? this.state.userList.get(this.state.userInControl)?.username
-                : undefined
-            }
-            isStarted={this.state.isStarted}
-          />
-          <div id="buttonsContainer">
-            <ZoomControls
-              zoomIn={() => (this.zoomInPressed += 1)}
-              zoomOut={() => (this.zoomOutPressed += 1)}
+        <div id="firstRow" className={firstRowClasses}>
+          <div id="mainArea">
+            <GameStatus
+              userIsInControl={
+                this.state.userInControl === this.state.currentUser?.userId
+              }
+              waitingForUsername={
+                this.state.userInControl
+                  ? this.state.userList.get(this.state.userInControl)?.username
+                  : undefined
+              }
+              isStarted={this.state.isStarted}
             />
-            <div className="main-buttons">
-              <Button
-                visible={isVisible(ButtonTag.Start)}
-                onClick={this.onClickButton(ButtonTag.Start)}
-                text="Start"
-                enabled={isEnabled(ButtonTag.Start)}
+            <div id="buttonsContainer">
+              <ZoomControls
+                zoomIn={() => (this.zoomInPressed += 1)}
+                zoomOut={() => (this.zoomOutPressed += 1)}
               />
-            </div>
-            <div className="right-side-buttons">
-              <div>
+              <div className="main-buttons">
                 <Button
-                  visible={isVisible(ButtonTag.Accept)}
-                  onClick={this.onClickButton(ButtonTag.Accept)}
-                  text="Accept"
-                  className="squareButton acceptButton"
-                  enabled={isEnabled(ButtonTag.Accept)}
+                  visible={isVisible(ButtonTag.Start)}
+                  onClick={this.onClickButton(ButtonTag.Start)}
+                  text="Start"
+                  enabled={isEnabled(ButtonTag.Start)}
                 />
               </div>
-              <div>
-                <Button
-                  visible={isVisible(ButtonTag.Swap)}
-                  onClick={this.onClickButton(ButtonTag.Swap)}
-                  text="Swap"
-                  className="squareButton emojiButton"
-                  enabled={isEnabled(ButtonTag.Swap)}
-                />
-              </div>
-              <div>
-                <Button
-                  visible={isVisible(ButtonTag.Cancel)}
-                  onClick={this.onClickButton(ButtonTag.Cancel)}
-                  text="Cancel"
-                  className="squareButton emojiButton"
-                  enabled={isEnabled(ButtonTag.Cancel)}
-                />
+              <div className="right-side-buttons">
+                <div>
+                  <Button
+                    visible={isVisible(ButtonTag.Accept)}
+                    onClick={this.onClickButton(ButtonTag.Accept)}
+                    text="Accept"
+                    className="squareButton acceptButton"
+                    enabled={isEnabled(ButtonTag.Accept)}
+                  />
+                </div>
+                <div>
+                  <Button
+                    visible={isVisible(ButtonTag.Swap)}
+                    onClick={this.onClickButton(ButtonTag.Swap)}
+                    text="Swap"
+                    className="squareButton emojiButton"
+                    enabled={isEnabled(ButtonTag.Swap)}
+                  />
+                </div>
+                <div>
+                  <Button
+                    visible={isVisible(ButtonTag.Cancel)}
+                    onClick={this.onClickButton(ButtonTag.Cancel)}
+                    text="Cancel"
+                    className="squareButton emojiButton"
+                    enabled={isEnabled(ButtonTag.Cancel)}
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div id="sidebarRight">
-          <UsernamePanel currentUser={this.state.currentUser} />
-          <UserList
-            userList={this.state.userList}
-            userInControl={this.state.userInControl}
-          />
+          <div id="sidebarRight">
+            <UsernamePanel currentUser={this.state.currentUser} />
+            <UserList
+              userList={this.state.userList}
+              userInControl={this.state.userInControl}
+            />
+          </div>
         </div>
         <div id="bottom" className={bottomClasses}>
           <div id="bottomPanel">

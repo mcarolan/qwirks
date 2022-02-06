@@ -42,7 +42,7 @@
 
     .zoom-controls {
       background-color: white;
-      z-index: 4;
+      z-index: 3;
       position: absolute;
       right: 0;
       bottom: 0;
@@ -61,9 +61,8 @@
       margin: auto;
       width: 473px;
       height: 129px;
-      position: relative;
-      top: 50%;
-      transform: translateY(-50%);
+      margin-top: 30px;
+      margin-bottom: 30px;
       background: #feac5e; /* fallback for old browsers */
       background: -webkit-linear-gradient(
         to right,
@@ -88,9 +87,8 @@
     }
 
     #wrapper {
-      display: grid;
+      width: 100%;
       height: 100%;
-      gap: 20px;
       background: #feac5e; /* fallback for old browsers */
       background: -webkit-linear-gradient(
         to right,
@@ -106,38 +104,58 @@
       ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
     }
 
+    #firstRow {
+      width: 100%;
+    }
+
+    .firstRow-expand {
+      animation: firstRowExpand 2s;
+      height: 80%;
+    }
+
+    .firstRow-contracted {
+      height: 100%;
+    }
+
+    @keyframes firstRowExpand {
+      from {
+        height: 100%;
+      }
+      to {
+        height: 80%;
+      }
+    }
+
     #mainArea {
-      grid-row: 1 / 6;
-      grid-column: 1 / 6;
+      float: left;
       background-color: white;
       position: relative;
+      width: 79%;
+      height: 100%;
     }
 
     #sidebarRight {
-      grid-row: 1 / 6;
-      grid-column: 6;
+      width: 20%;
+      height: 100%;
+      float: right;
       background-color: white;
     }
 
-    #bottom {
-      grid-row: 6;
-      grid-column: 1 / 7;
+    .bottom-expand {
+      animation: bottomExpand 2s;
+      height: 20%;
     }
 
-    .bottom-invisible {
-      opacity: 0;
+    .bottom-contracted {
+      display: none;
     }
 
-    .bottom-visible {
-      animation: fadein 2s;
-    }
-
-    @keyframes fadein {
+    @keyframes bottomExpand {
       from {
-        opacity: 0;
+        height: 0px;
       }
       to {
-        opacity: 1;
+        height: 20%;
       }
     }
 
@@ -186,7 +204,7 @@
 
     .connectionStatusContainer {
       background-color: rgba(0, 0, 0, 0.9);
-      z-index: 3;
+      z-index: 4;
       position: absolute;
       top: 0;
       left: 0;
