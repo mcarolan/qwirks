@@ -1,5 +1,10 @@
 {
+  "scripts": {
+    "build": "tsc -p server",
+    "postinstall": "npm run build"
+  },
   "devDependencies": {
-    "@types/jest": "^27.4.0"
+    "@types/jest": "^27.4.0",
+    "typescript": "^4.5.5"
   }
 }
