@@ -1,7 +1,7 @@
 {
   "scripts": {
     "build": "tsc -p server",
-    "postinstall": "npm run build"
+    "postinstall": "npm --prefix server run build"
   },
   "devDependencies": {
     "@types/jest": "^27.4.0",
