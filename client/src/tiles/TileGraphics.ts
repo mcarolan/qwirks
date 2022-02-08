@@ -32,6 +32,9 @@ export async function loadTileGraphics(): Promise<TileGraphics> {
   const blankTileImage = await loadImage("./images/blank-tile.png");
   const hoverTileImage = await loadImage("./images/hover-tile.png");
   const activeTileImage = await loadImage("./images/active-tile.png");
+  const lastPlacementTileImage = await loadImage(
+    "./images/lastplacement-tile.png"
+  );
   const symWidth = emptyTileImage.width / 2;
   const symHeight = emptyTileImage.height / 2;
 
@@ -41,6 +44,7 @@ export async function loadTileGraphics(): Promise<TileGraphics> {
     blankTileImage,
     hoverTileImage,
     activeTileImage,
+    lastPlacementTileImage,
     symWidth,
     symHeight
   );
@@ -54,6 +58,7 @@ export class TileGraphics {
     readonly blankTileImage: HTMLImageElement,
     readonly hoverTileImage: HTMLImageElement,
     readonly activeTileImage: HTMLImageElement,
+    readonly lastPlacementTileImage: HTMLImageElement,
     readonly symWidth: number,
     readonly symHeight: number
   ) {}
@@ -97,6 +102,14 @@ export class TileGraphics {
     tile: Tile
   ): void {
     this.drawTile(context, position, tile, this.activeTileImage);
+  }
+
+  drawLastPlacementTile(
+    context: CanvasRenderingContext2D,
+    position: Position,
+    tile: Tile
+  ): void {
+    this.drawTile(context, position, tile, this.lastPlacementTileImage);
   }
 
   private drawTile(

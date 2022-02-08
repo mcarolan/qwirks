@@ -4,6 +4,7 @@ import { MouseDrag } from "./Mouse";
 import { TileGraphics } from "./TileGraphics";
 import { Position, Tile, minus, plus } from "../../../shared/Domain";
 import { middle, rectContains } from "./domain";
+import { fromJS } from "immutable";
 
 export class TileGridGraphics implements IGameStateUpdater {
   private offset: Position;
@@ -135,6 +136,10 @@ export class TileGridGraphics implements IGameStateUpdater {
       const coords = this.tileGraphics.screenCoords(pt.position, mid);
       if (state.currentPlacement.placedTiles.contains(pt)) {
         this.tileGraphics.drawHoverTile(context, coords, pt);
+      } else if (
+        state.tilesLastPlaced.map((x) => fromJS(x)).contains(fromJS(pt))
+      ) {
+        this.tileGraphics.drawLastPlacementTile(context, coords, pt);
       } else {
         this.tileGraphics.drawInactiveTile(context, coords, pt);
       }

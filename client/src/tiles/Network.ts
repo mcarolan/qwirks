@@ -1,7 +1,7 @@
 import { Socket } from "socket.io-client";
 import { IGameStateUpdater } from "~/IGameStateUpdater";
 import { GameState } from "./GameState";
-import { List, Map } from "immutable";
+import { List, Map, Set } from "immutable";
 import { User, UserWithStatus } from "../../../shared/User";
 import { ButtonTag } from "..";
 import { PositionedTile, Tile } from "../../../shared/Domain";
@@ -13,6 +13,7 @@ export class Network implements IGameStateUpdater {
   private hand: List<Tile> | undefined;
   private setUserInControl: string | undefined;
   private setTiles: PositionedTile[] | undefined;
+  private setTilesLastPlaced: Set<PositionedTile> | undefined;
 
   constructor(private socket: Socket, private user: User, gameKey: string) {
     this.socket.on("connect", () => {
@@ -35,10 +36,15 @@ export class Network implements IGameStateUpdater {
         this.setGameStarted = true;
       });
 
-      this.socket.on("game.tiles", (tiles: PositionedTile[]) => {
-        console.log("game tiles update");
-        this.setTiles = tiles;
-      });
+      this.socket.on(
+        "game.tiles",
+        (tiles: PositionedTile[], tilesLastPlaced: PositionedTile[]) => {
+          console.log("game tiles update");
+          this.setTiles = tiles;
+          this.setTilesLastPlaced = Set(tilesLastPlaced);
+          console.log(tilesLastPlaced);
+        }
+      );
 
       this.socket.on("user.incontrol", (userId: string) => {
         console.log("user in control update");
@@ -57,6 +63,8 @@ export class Network implements IGameStateUpdater {
     gameState.isStarted = this.setGameStarted ?? gameState.isStarted;
     gameState.hand = this.hand ?? gameState.hand;
     gameState.tilesApplied = this.setTiles ?? gameState.tilesApplied;
+    gameState.tilesLastPlaced =
+      this.setTilesLastPlaced ?? gameState.tilesLastPlaced;
     const previousUserInControl = gameState.userInControl;
     gameState.userInControl = this.setUserInControl ?? gameState.userInControl;
 

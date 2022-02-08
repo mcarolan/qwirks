@@ -21,6 +21,7 @@ export interface GameState {
   hand: List<Tile>;
   tilesToDisplay: PositionedTile[];
   tilesApplied: PositionedTile[];
+  tilesLastPlaced: ImmSet<PositionedTile>;
   tilesToApply: PositionedTile[] | undefined;
   tilesToSwap: Tile[] | undefined;
   mousePosition: Position;
@@ -70,6 +71,7 @@ export function initialGameState(
     hand: List.of(),
     tilesToDisplay: [],
     tilesApplied: [],
+    tilesLastPlaced: ImmSet(),
     tilesToApply: undefined,
     tilesToSwap: undefined,
     mousePosition: { x: 0, y: 0 },

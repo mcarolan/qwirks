@@ -36,6 +36,7 @@ function initialGame(gameKey) {
         sockets: new Map(),
         hands: new Map(),
         tiles: [],
+        tilesLastPlaced: (0, immutable_1.Set)(),
         userInControl: undefined,
     };
 }
@@ -102,7 +103,7 @@ io.on("connection", (s) => {
                 s.emit("user.incontrol", g.userInControl);
             }
             if (g.tiles.length > 0) {
-                s.emit("game.tiles", g.tiles);
+                s.emit("game.tiles", g.tiles, g.tilesLastPlaced.toArray());
             }
             const hand = g.hands.get(user.userId);
             if (hand) {
@@ -163,7 +164,8 @@ io.on("connection", (s) => {
         if (gk && uid) {
             upsert(games, gk, () => initialGame(gk), (g) => {
                 if (g.userInControl === uid) {
-                    const res = new TileGrid_1.TileGrid(g.tiles).place((0, immutable_1.Set)(tiles));
+                    const placement = (0, immutable_1.Set)(tiles);
+                    const res = new TileGrid_1.TileGrid(g.tiles).place(placement);
                     if (res.type === "Success") {
                         const hand = g.hands.get(uid);
                         if (hand) {
@@ -173,13 +175,14 @@ io.on("connection", (s) => {
                             s.emit("user.hand", nextHand.toArray());
                         }
                         g.tiles = res.tileGrid.tiles;
+                        g.tilesLastPlaced = placement;
                         const user = g.users.get(uid);
                         if (user) {
                             g.users.set(uid, Object.assign(Object.assign({}, user), { score: user.score + res.score }));
                             io.to(gk).emit("user.list", [...g.users.entries()]);
                         }
                         g.userInControl = nextUserInControl(g);
-                        io.to(gk).emit("game.tiles", g.tiles);
+                        io.to(gk).emit("game.tiles", g.tiles, g.tilesLastPlaced.toArray());
                         io.to(gk).emit("user.incontrol", g.userInControl);
                     }
                 }

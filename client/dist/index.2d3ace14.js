@@ -1174,7 +1174,7 @@ class Main extends _reactDefault.default.Component {
         canvas.height = mainArea.clientHeight;
         const tileGraphics = await _tileGraphics.loadTileGraphics();
         const score = new _score.Score();
-        const socket = _socketIoClient.io("https://qwirks-server.herokuapp.com/");
+        const socket = _socketIoClient.io("http://localhost:3000");
         const mouse = new _mouse.Mouse();
         const firstTileImage = await _utility.loadImage("./images/first-tile.png");
         const tileGrid = new _tileGridGraphics.TileGridGraphics(tileGraphics, firstTileImage);
@@ -8349,6 +8349,7 @@ parcelHelpers.export(exports, "TileGridGraphics", ()=>TileGridGraphics
 var _gameState = require("./GameState");
 var _domain = require("../../../shared/Domain");
 var _domain1 = require("./domain");
+var _immutable = require("immutable");
 class TileGridGraphics {
     constructor(tileGraphics, firstTileImage){
         this.tileGraphics = tileGraphics;
@@ -8417,13 +8418,15 @@ class TileGridGraphics {
         for (const pt of state.tilesToDisplay){
             const coords = this.tileGraphics.screenCoords(pt.position, mid);
             if (state.currentPlacement.placedTiles.contains(pt)) this.tileGraphics.drawHoverTile(context, coords, pt);
+            else if (state.tilesLastPlaced.map((x)=>_immutable.fromJS(x)
+            ).contains(_immutable.fromJS(pt))) this.tileGraphics.drawLastPlacementTile(context, coords, pt);
             else this.tileGraphics.drawInactiveTile(context, coords, pt);
         }
         context.restore();
     }
 }
 
-},{"./GameState":"fRHsT","../../../shared/Domain":"2iCCP","./domain":"1dMwI","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fRHsT":[function(require,module,exports) {
+},{"./GameState":"fRHsT","../../../shared/Domain":"2iCCP","./domain":"1dMwI","immutable":"iIkjt","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fRHsT":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "singleActiveTile", ()=>singleActiveTile
@@ -8452,6 +8455,7 @@ function initialGameState(gameKey, user, mainAreaBounds) {
         hand: _immutable.List.of(),
         tilesToDisplay: [],
         tilesApplied: [],
+        tilesLastPlaced: _immutable.Set(),
         tilesToApply: undefined,
         tilesToSwap: undefined,
         mousePosition: {
@@ -27712,17 +27716,19 @@ async function loadTileGraphics() {
     const blankTileImage = await _utility.loadImage("./images/blank-tile.png");
     const hoverTileImage = await _utility.loadImage("./images/hover-tile.png");
     const activeTileImage = await _utility.loadImage("./images/active-tile.png");
+    const lastPlacementTileImage = await _utility.loadImage("./images/lastplacement-tile.png");
     const symWidth = emptyTileImage.width / 2;
     const symHeight = emptyTileImage.height / 2;
-    return new TileGraphics(imageCache, emptyTileImage, blankTileImage, hoverTileImage, activeTileImage, symWidth, symHeight);
+    return new TileGraphics(imageCache, emptyTileImage, blankTileImage, hoverTileImage, activeTileImage, lastPlacementTileImage, symWidth, symHeight);
 }
 class TileGraphics {
-    constructor(imageCache, emptyTileImage, blankTileImage, hoverTileImage, activeTileImage, symWidth, symHeight){
+    constructor(imageCache, emptyTileImage, blankTileImage, hoverTileImage, activeTileImage, lastPlacementTileImage, symWidth, symHeight){
         this.imageCache = imageCache;
         this.emptyTileImage = emptyTileImage;
         this.blankTileImage = blankTileImage;
         this.hoverTileImage = hoverTileImage;
         this.activeTileImage = activeTileImage;
+        this.lastPlacementTileImage = lastPlacementTileImage;
         this.symWidth = symWidth;
         this.symHeight = symHeight;
     }
@@ -27743,6 +27749,9 @@ class TileGraphics {
     }
     drawActiveTile(context, position, tile) {
         this.drawTile(context, position, tile, this.activeTileImage);
+    }
+    drawLastPlacementTile(context, position, tile) {
+        this.drawTile(context, position, tile, this.lastPlacementTileImage);
     }
     drawTile(context, position, tile, tileBackground) {
         context.drawImage(tileBackground, position.x, position.y, this.blankTileImage.width, this.blankTileImage.height);
@@ -32146,9 +32155,11 @@ class Network {
                 console.log("game started update");
                 this.setGameStarted = true;
             });
-            this.socket.on("game.tiles", (tiles)=>{
+            this.socket.on("game.tiles", (tiles, tilesLastPlaced)=>{
                 console.log("game tiles update");
                 this.setTiles = tiles;
+                this.setTilesLastPlaced = _immutable.Set(tilesLastPlaced);
+                console.log(tilesLastPlaced);
             });
             this.socket.on("user.incontrol", (userId)=>{
                 console.log("user in control update");
@@ -32165,6 +32176,7 @@ class Network {
         gameState.isStarted = this.setGameStarted ?? gameState.isStarted;
         gameState.hand = this.hand ?? gameState.hand;
         gameState.tilesApplied = this.setTiles ?? gameState.tilesApplied;
+        gameState.tilesLastPlaced = this.setTilesLastPlaced ?? gameState.tilesLastPlaced;
         const previousUserInControl = gameState.userInControl;
         gameState.userInControl = this.setUserInControl ?? gameState.userInControl;
         if (previousUserInControl != gameState.currentUser.userId && gameState.userInControl === gameState.currentUser.userId) gameState.playYourGoSound = true;
@@ -57165,8 +57177,8 @@ Stream.prototype.pipe = function(dest, options) {
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;
@@ -58568,8 +58580,8 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
     this.chunk = chunk;

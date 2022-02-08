@@ -40,6 +40,7 @@ interface Game {
   >;
   hands: Map<string, List<Tile>>;
   tiles: PositionedTile[];
+  tilesLastPlaced: Set<PositionedTile>;
   userInControl: string | undefined;
 }
 const games = new Map<string, Game>();
@@ -65,6 +66,7 @@ function initialGame(gameKey: string): Game {
     sockets: new Map(),
     hands: new Map(),
     tiles: [],
+    tilesLastPlaced: Set(),
     userInControl: undefined,
   };
 }
@@ -156,7 +158,7 @@ io.on("connection", (s) => {
         }
 
         if (g.tiles.length > 0) {
-          s.emit("game.tiles", g.tiles);
+          s.emit("game.tiles", g.tiles, g.tilesLastPlaced.toArray());
         }
 
         const hand = g.hands.get(user.userId);
@@ -244,7 +246,8 @@ io.on("connection", (s) => {
         () => initialGame(gk),
         (g) => {
           if (g.userInControl === uid) {
-            const res = new TileGrid(g.tiles).place(Set(tiles));
+            const placement = Set(tiles);
+            const res = new TileGrid(g.tiles).place(placement);
             if (res.type === "Success") {
               const hand = g.hands.get(uid);
               if (hand) {
@@ -255,6 +258,7 @@ io.on("connection", (s) => {
               }
 
               g.tiles = res.tileGrid.tiles;
+              g.tilesLastPlaced = placement;
               const user = g.users.get(uid);
               if (user) {
                 g.users.set(uid, {
@@ -264,7 +268,11 @@ io.on("connection", (s) => {
                 io.to(gk).emit("user.list", [...g.users.entries()]);
               }
               g.userInControl = nextUserInControl(g);
-              io.to(gk).emit("game.tiles", g.tiles);
+              io.to(gk).emit(
+                "game.tiles",
+                g.tiles,
+                g.tilesLastPlaced.toArray()
+              );
               io.to(gk).emit("user.incontrol", g.userInControl);
             }
           }

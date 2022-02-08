@@ -2,7 +2,7 @@
 set -e
 
 cd client && npm run start &
-cd server && npm run start &
+cd server && npm run build && npm run start &
 
 read
 
