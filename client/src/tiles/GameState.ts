@@ -13,6 +13,7 @@ export interface CurrentPlacementState {
 }
 
 export interface GameState {
+  playYourGoSound: boolean;
   scale: number;
   gameKey: string;
   isStarted: boolean;
@@ -61,6 +62,7 @@ export function initialGameState(
   mainAreaBounds: Rect
 ): GameState {
   return {
+    playYourGoSound: false,
     scale: 1,
     gameKey: gameKey,
     isStarted: false,

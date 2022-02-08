@@ -84,11 +84,6 @@ class FireworkUpdater implements IGameStateUpdater {
       });
       gameState.fireworkTilePositions = List();
     }
-
-    if (gameState.scoreJustAchieved > 0) {
-      this.sounds.rises(gameState.scoreJustAchieved);
-      gameState.scoreJustAchieved = 0;
-    }
   }
 }
 
@@ -248,6 +243,7 @@ class Main
     deps.tileGrid.update(gameState);
     deps.gameLogic.update(gameState);
     deps.fireworkUpdater.update(gameState);
+    deps.sounds.update(gameState);
 
     deps.context.scale(gameState.scale, gameState.scale);
     deps.tileGrid.draw(deps.context, gameState);

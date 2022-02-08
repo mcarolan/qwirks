@@ -1,4 +1,6 @@
 import _ from "lodash";
+import { IGameStateUpdater } from "~/IGameStateUpdater";
+import { GameState } from "./GameState";
 import { loadSound } from "./utility";
 
 const fx01 = loadSound("sounds/FX01.mp3");
@@ -6,16 +8,32 @@ const rise01 = loadSound("");
 const rise02 = loadSound("sounds/Rise02.mp3");
 const rise03 = loadSound("sounds/Rise03.mp3");
 
-export class Sounds {
+export class Sounds implements IGameStateUpdater {
   private readonly playlist: Array<HTMLAudioElement> = [];
   private readonly rise1: HTMLAudioElement;
   private readonly rise2: HTMLAudioElement;
   private readonly rise3: HTMLAudioElement;
+  private readonly yourgo1: HTMLAudioElement;
+  private readonly yourgo2: HTMLAudioElement;
+  private readonly yourgo3: HTMLAudioElement;
+
+  private retryPlay(audio: HTMLAudioElement, counter: number): void {
+    if (counter === 0) {
+      console.log("Stopping retry of autoplay");
+    } else {
+      audio.play().catch((e) => {
+        if (e.name === "NotAllowedError") {
+          console.log("WOAH! autoplay disabled");
+          setTimeout(() => this.retryPlay(audio, counter - 1), 1000);
+        }
+      });
+    }
+  }
 
   private playNext(): void {
     const next = this.playlist.pop();
     if (next) {
-      next.play();
+      this.retryPlay(next, 10);
     }
   }
 
@@ -29,6 +47,32 @@ export class Sounds {
     this.rise1 = this.loadAndRegister("sounds/rise1.mp3");
     this.rise2 = this.loadAndRegister("sounds/rise2.mp3");
     this.rise3 = this.loadAndRegister("sounds/rise3.mp3");
+    this.yourgo1 = this.loadAndRegister("sounds/yourgo-1.mp3");
+    this.yourgo2 = this.loadAndRegister("sounds/yourgo-2.mp3");
+    this.yourgo3 = this.loadAndRegister("sounds/yourgo-3.mp3");
+  }
+
+  update(gameState: GameState): void {
+    if (gameState.scoreJustAchieved > 0) {
+      this.rises(gameState.scoreJustAchieved);
+      gameState.scoreJustAchieved = 0;
+    }
+
+    if (gameState.playYourGoSound) {
+      this.yourgo();
+      gameState.playYourGoSound = false;
+    }
+  }
+
+  yourgo(): void {
+    const emptyPlaylist = this.playlist.length == 0;
+    this.playlist.push(
+      _.shuffle([this.yourgo1, this.yourgo2, this.yourgo3])[0]
+    );
+
+    if (emptyPlaylist) {
+      this.playNext();
+    }
   }
 
   rises(n: number): void {

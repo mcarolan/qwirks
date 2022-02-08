@@ -1066,10 +1066,6 @@ class FireworkUpdater {
             });
             gameState.fireworkTilePositions = _immutable.List();
         }
-        if (gameState.scoreJustAchieved > 0) {
-            this.sounds.rises(gameState.scoreJustAchieved);
-            gameState.scoreJustAchieved = 0;
-        }
     }
 }
 class Main extends _reactDefault.default.Component {
@@ -1162,6 +1158,7 @@ class Main extends _reactDefault.default.Component {
         deps.tileGrid.update(gameState);
         deps.gameLogic.update(gameState);
         deps.fireworkUpdater.update(gameState);
+        deps.sounds.update(gameState);
         deps.context.scale(gameState.scale, gameState.scale);
         deps.tileGrid.draw(deps.context, gameState);
         deps.fireworks.updateAndDraw(deps.context);
@@ -1177,7 +1174,7 @@ class Main extends _reactDefault.default.Component {
         canvas.height = mainArea.clientHeight;
         const tileGraphics = await _tileGraphics.loadTileGraphics();
         const score = new _score.Score();
-        const socket = _socketIoClient.io("http://localhost:3000");
+        const socket = _socketIoClient.io("https://qwirks-server.herokuapp.com/");
         const mouse = new _mouse.Mouse();
         const firstTileImage = await _utility.loadImage("./images/first-tile.png");
         const tileGrid = new _tileGridGraphics.TileGridGraphics(tileGraphics, firstTileImage);
@@ -1228,7 +1225,7 @@ class Main extends _reactDefault.default.Component {
                             isStarted: this.state.isStarted
                         }, void 0, false, {
                             fileName: "src/index.tsx",
-                            lineNumber: 346,
+                            lineNumber: 342,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1240,7 +1237,7 @@ class Main extends _reactDefault.default.Component {
                                     zoomOut: ()=>this.zoomOutPressed += 1
                                 }, void 0, false, {
                                     fileName: "src/index.tsx",
-                                    lineNumber: 358,
+                                    lineNumber: 354,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1252,12 +1249,12 @@ class Main extends _reactDefault.default.Component {
                                         enabled: isEnabled(ButtonTag.Start)
                                     }, void 0, false, {
                                         fileName: "src/index.tsx",
-                                        lineNumber: 363,
+                                        lineNumber: 359,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "src/index.tsx",
-                                    lineNumber: 362,
+                                    lineNumber: 358,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1274,12 +1271,12 @@ class Main extends _reactDefault.default.Component {
                                                 enabled: isEnabled(ButtonTag.Accept)
                                             }, void 0, false, {
                                                 fileName: "src/index.tsx",
-                                                lineNumber: 372,
+                                                lineNumber: 368,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/index.tsx",
-                                            lineNumber: 371,
+                                            lineNumber: 367,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1293,12 +1290,12 @@ class Main extends _reactDefault.default.Component {
                                                 enabled: isEnabled(ButtonTag.Swap)
                                             }, void 0, false, {
                                                 fileName: "src/index.tsx",
-                                                lineNumber: 381,
+                                                lineNumber: 377,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/index.tsx",
-                                            lineNumber: 380,
+                                            lineNumber: 376,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1312,30 +1309,30 @@ class Main extends _reactDefault.default.Component {
                                                 enabled: isEnabled(ButtonTag.Cancel)
                                             }, void 0, false, {
                                                 fileName: "src/index.tsx",
-                                                lineNumber: 390,
+                                                lineNumber: 386,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/index.tsx",
-                                            lineNumber: 389,
+                                            lineNumber: 385,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "src/index.tsx",
-                                    lineNumber: 370,
+                                    lineNumber: 366,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "src/index.tsx",
-                            lineNumber: 357,
+                            lineNumber: 353,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "src/index.tsx",
-                    lineNumber: 345,
+                    lineNumber: 341,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1346,7 +1343,7 @@ class Main extends _reactDefault.default.Component {
                             onChangeUsername: (newName)=>this.setUsername = newName
                         }, void 0, false, {
                             fileName: "src/index.tsx",
-                            lineNumber: 402,
+                            lineNumber: 398,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1356,18 +1353,18 @@ class Main extends _reactDefault.default.Component {
                                 userInControl: this.state.userInControl
                             }, void 0, false, {
                                 fileName: "src/index.tsx",
-                                lineNumber: 407,
+                                lineNumber: 403,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "src/index.tsx",
-                            lineNumber: 406,
+                            lineNumber: 402,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "src/index.tsx",
-                    lineNumber: 401,
+                    lineNumber: 397,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1382,30 +1379,30 @@ class Main extends _reactDefault.default.Component {
                             onPressed: (i)=>this.onHandTileClicked(i)
                         }, void 0, false, {
                             fileName: "src/index.tsx",
-                            lineNumber: 415,
+                            lineNumber: 411,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "src/index.tsx",
-                        lineNumber: 414,
+                        lineNumber: 410,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "src/index.tsx",
-                    lineNumber: 413,
+                    lineNumber: 409,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_connectionStatus.ConnectionStatus, {
                     isConnected: this.state.isConnected
                 }, void 0, false, {
                     fileName: "src/index.tsx",
-                    lineNumber: 425,
+                    lineNumber: 421,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "src/index.tsx",
-            lineNumber: 344,
+            lineNumber: 340,
             columnNumber: 7
         }, this));
     }
@@ -1419,7 +1416,7 @@ window.onload = ()=>{
             user: _browserAPI.loadUserFromLocalStorage()
         }, void 0, false, {
             fileName: "src/index.tsx",
-            lineNumber: 437,
+            lineNumber: 433,
             columnNumber: 7
         }, undefined), mainContainer);
     } else window.location.assign(_browserAPI.generateNewURLWithGameKey());
@@ -8447,6 +8444,7 @@ function singleActiveTile(gameState) {
 }
 function initialGameState(gameKey, user, mainAreaBounds) {
     return {
+        playYourGoSound: false,
         scale: 1,
         gameKey: gameKey,
         isStarted: false,
@@ -8808,7 +8806,7 @@ class TileGrid {
     }
 }
 
-},{"trampoline-ts":"guf4a","./Domain":"2iCCP","immutable":"ePTEh","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"guf4a":[function(require,module,exports) {
+},{"trampoline-ts":"5b1j8","./Domain":"2iCCP","immutable":"iunuN","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"5b1j8":[function(require,module,exports) {
 "use strict";
 function __export(m) {
     for(var p in m)if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -8819,7 +8817,7 @@ Object.defineProperty(exports, "__esModule", {
 __export(require("./thunk"));
 __export(require("./trampoline"));
 
-},{"./thunk":"aqKfS","./trampoline":"3nIXD"}],"aqKfS":[function(require,module,exports) {
+},{"./thunk":"dajNK","./trampoline":"hvPXH"}],"dajNK":[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -8835,7 +8833,7 @@ exports.toThunk = (fn)=>{
     return thunk;
 };
 
-},{}],"3nIXD":[function(require,module,exports) {
+},{}],"hvPXH":[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -8866,7 +8864,7 @@ exports.trampolineAsync = (fn)=>{
     });
 };
 
-},{"./thunk":"aqKfS"}],"ePTEh":[function(require,module,exports) {
+},{"./thunk":"dajNK"}],"iunuN":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Collection", ()=>Collection
@@ -13182,9 +13180,19 @@ const rise01 = _utility.loadSound("");
 const rise02 = _utility.loadSound("sounds/Rise02.mp3");
 const rise03 = _utility.loadSound("sounds/Rise03.mp3");
 class Sounds {
+    retryPlay(audio, counter) {
+        if (counter === 0) console.log("Stopping retry of autoplay");
+        else audio.play().catch((e)=>{
+            if (e.name === "NotAllowedError") {
+                console.log("WOAH! autoplay disabled");
+                setTimeout(()=>this.retryPlay(audio, counter - 1)
+                , 1000);
+            }
+        });
+    }
     playNext() {
         const next = this.playlist.pop();
-        if (next) next.play();
+        if (next) this.retryPlay(next, 10);
     }
     loadAndRegister(path) {
         const audio = _utility.loadSound(path);
@@ -13197,6 +13205,28 @@ class Sounds {
         this.rise1 = this.loadAndRegister("sounds/rise1.mp3");
         this.rise2 = this.loadAndRegister("sounds/rise2.mp3");
         this.rise3 = this.loadAndRegister("sounds/rise3.mp3");
+        this.yourgo1 = this.loadAndRegister("sounds/yourgo-1.mp3");
+        this.yourgo2 = this.loadAndRegister("sounds/yourgo-2.mp3");
+        this.yourgo3 = this.loadAndRegister("sounds/yourgo-3.mp3");
+    }
+    update(gameState) {
+        if (gameState.scoreJustAchieved > 0) {
+            this.rises(gameState.scoreJustAchieved);
+            gameState.scoreJustAchieved = 0;
+        }
+        if (gameState.playYourGoSound) {
+            this.yourgo();
+            gameState.playYourGoSound = false;
+        }
+    }
+    yourgo() {
+        const emptyPlaylist = this.playlist.length == 0;
+        this.playlist.push(_lodashDefault.default.shuffle([
+            this.yourgo1,
+            this.yourgo2,
+            this.yourgo3
+        ])[0]);
+        if (emptyPlaylist) this.playNext();
     }
     rises(n) {
         const emptyPlaylist = this.playlist.length == 0;
@@ -13219,9 +13249,9 @@ class Sounds {
 var global = arguments[3];
 (function() {
     /** Used as a safe reference for `undefined` in pre-ES5 environments. */ var undefined;
-    /** Used as the semantic version number. */ var VERSION = '4.17.20';
+    /** Used as the semantic version number. */ var VERSION = '4.17.21';
     /** Used as the size to enable large array optimizations. */ var LARGE_ARRAY_SIZE = 200;
-    /** Error message constants. */ var CORE_ERROR_TEXT = 'Unsupported core-js use. Try https://npms.io/search?q=ponyfill.', FUNC_ERROR_TEXT = 'Expected a function';
+    /** Error message constants. */ var CORE_ERROR_TEXT = 'Unsupported core-js use. Try https://npms.io/search?q=ponyfill.', FUNC_ERROR_TEXT = 'Expected a function', INVALID_TEMPL_VAR_ERROR_TEXT = 'Invalid `variable` option passed into `_.template`';
     /** Used to stand-in for `undefined` hash values. */ var HASH_UNDEFINED = '__lodash_hash_undefined__';
     /** Used as the maximum memoize cache size. */ var MAX_MEMOIZE_SIZE = 500;
     /** Used as the internal argument placeholder. */ var PLACEHOLDER = '__lodash_placeholder__';
@@ -13281,9 +13311,20 @@ var global = arguments[3];
    * Used to match `RegExp`
    * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
    */ var reRegExpChar = /[\\^$.*+?()[\]{}|]/g, reHasRegExpChar = RegExp(reRegExpChar.source);
-    /** Used to match leading and trailing whitespace. */ var reTrim = /^\s+|\s+$/g, reTrimStart = /^\s+/, reTrimEnd = /\s+$/;
+    /** Used to match leading whitespace. */ var reTrimStart = /^\s+/;
+    /** Used to match a single whitespace character. */ var reWhitespace = /\s/;
     /** Used to match wrap detail comments. */ var reWrapComment = /\{(?:\n\/\* \[wrapped with .+\] \*\/)?\n?/, reWrapDetails = /\{\n\/\* \[wrapped with (.+)\] \*/, reSplitDetails = /,? & /;
     /** Used to match words composed of alphanumeric characters. */ var reAsciiWord = /[^\x00-\x2f\x3a-\x40\x5b-\x60\x7b-\x7f]+/g;
+    /**
+   * Used to validate the `validate` option in `_.template` variable.
+   *
+   * Forbids characters which could potentially change the meaning of the function argument definition:
+   * - "()," (modification of function parameters)
+   * - "=" (default value)
+   * - "[]{}" (destructuring of function parameters)
+   * - "/" (beginning of a comment)
+   * - whitespace
+   */ var reForbiddenIdentifierChars = /[()=,{}\[\]\/\s]/;
     /** Used to match backslashes in property paths. */ var reEscapeChar = /\\(\\)?/g;
     /**
    * Used to match
@@ -14031,6 +14072,15 @@ var global = arguments[3];
         });
     }
     /**
+   * The base implementation of `_.trim`.
+   *
+   * @private
+   * @param {string} string The string to trim.
+   * @returns {string} Returns the trimmed string.
+   */ function baseTrim(string) {
+        return string ? string.slice(0, trimmedEndIndex(string) + 1).replace(reTrimStart, '') : string;
+    }
+    /**
    * The base implementation of `_.unary` without support for storing metadata.
    *
    * @private
@@ -14291,6 +14341,18 @@ var global = arguments[3];
    * @returns {Array} Returns the converted array.
    */ function stringToArray(string) {
         return hasUnicode(string) ? unicodeToArray(string) : asciiToArray(string);
+    }
+    /**
+   * Used by `_.trim` and `_.trimEnd` to get the index of the last non-whitespace
+   * character of `string`.
+   *
+   * @private
+   * @param {string} string The string to inspect.
+   * @returns {number} Returns the index of the last non-whitespace character.
+   */ function trimmedEndIndex(string) {
+        var index = string.length;
+        while(index-- && reWhitespace.test(string.charAt(index)));
+        return index;
     }
     /**
    * Used by `_.unescape` to convert HTML entities to characters.
@@ -23316,7 +23378,7 @@ var global = arguments[3];
                 value = isObject(other) ? other + '' : other;
             }
             if (typeof value != 'string') return value === 0 ? value : +value;
-            value = value.replace(reTrim, '');
+            value = baseTrim(value);
             var isBinary = reIsBinary.test(value);
             return isBinary || reIsOctal.test(value) ? freeParseInt(value.slice(2), isBinary ? 2 : 8) : reIsBadHex.test(value) ? NAN : +value;
         }
@@ -25421,6 +25483,7 @@ var global = arguments[3];
             // code to add the data object to the top of the scope chain.
             var variable = hasOwnProperty.call(options, 'variable') && options.variable;
             if (!variable) source = 'with (obj) {\n' + source + '\n}\n';
+            else if (reForbiddenIdentifierChars.test(variable)) throw new Error(INVALID_TEMPL_VAR_ERROR_TEXT);
             // Cleanup code by stripping empty strings.
             source = (isEvaluating ? source.replace(reEmptyStringLeading, '') : source).replace(reEmptyStringMiddle, '$1').replace(reEmptyStringTrailing, '$1;');
             // Frame code as the function body.
@@ -25503,7 +25566,7 @@ var global = arguments[3];
      * // => ['foo', 'bar']
      */ function trim(string, chars, guard) {
             string = toString(string);
-            if (string && (guard || chars === undefined)) return string.replace(reTrim, '');
+            if (string && (guard || chars === undefined)) return baseTrim(string);
             if (!string || !(chars = baseToString(chars))) return string;
             var strSymbols = stringToArray(string), chrSymbols = stringToArray(chars), start = charsStartIndex(strSymbols, chrSymbols), end = charsEndIndex(strSymbols, chrSymbols) + 1;
             return castSlice(strSymbols, start, end).join('');
@@ -25528,7 +25591,7 @@ var global = arguments[3];
      * // => '-_-abc'
      */ function trimEnd(string, chars, guard) {
             string = toString(string);
-            if (string && (guard || chars === undefined)) return string.replace(reTrimEnd, '');
+            if (string && (guard || chars === undefined)) return string.slice(0, trimmedEndIndex(string) + 1);
             if (!string || !(chars = baseToString(chars))) return string;
             var strSymbols = stringToArray(string), end = charsEndIndex(strSymbols, stringToArray(chars)) + 1;
             return castSlice(strSymbols, 0, end).join('');
@@ -32101,8 +32164,10 @@ class Network {
         gameState.isConnected = this.setConnected ?? gameState.isConnected;
         gameState.isStarted = this.setGameStarted ?? gameState.isStarted;
         gameState.hand = this.hand ?? gameState.hand;
-        gameState.userInControl = this.setUserInControl ?? gameState.userInControl;
         gameState.tilesApplied = this.setTiles ?? gameState.tilesApplied;
+        const previousUserInControl = gameState.userInControl;
+        gameState.userInControl = this.setUserInControl ?? gameState.userInControl;
+        if (previousUserInControl != gameState.currentUser.userId && gameState.userInControl === gameState.currentUser.userId) gameState.playYourGoSound = true;
         this.setGameStarted = undefined;
         this.setConnected = undefined;
         this.setGameStarted = undefined;
@@ -54257,8 +54322,8 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
     this.chunk = chunk;
@@ -57100,8 +57165,8 @@ Stream.prototype.pipe = function(dest, options) {
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;
@@ -59978,8 +60043,8 @@ exports.pbkdf2 = require('./lib/async');
 exports.pbkdf2Sync = require('./lib/sync');
 
 },{"./lib/async":"aqdig","./lib/sync":"lh9gw"}],"aqdig":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 var Buffer = require('safe-buffer').Buffer;
 var checkParameters = require('./precondition');
 var defaultEncoding = require('./default-encoding');
@@ -69569,8 +69634,8 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
     this.chunk = chunk;

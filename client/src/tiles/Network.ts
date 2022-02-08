@@ -56,8 +56,16 @@ export class Network implements IGameStateUpdater {
     gameState.isConnected = this.setConnected ?? gameState.isConnected;
     gameState.isStarted = this.setGameStarted ?? gameState.isStarted;
     gameState.hand = this.hand ?? gameState.hand;
-    gameState.userInControl = this.setUserInControl ?? gameState.userInControl;
     gameState.tilesApplied = this.setTiles ?? gameState.tilesApplied;
+    const previousUserInControl = gameState.userInControl;
+    gameState.userInControl = this.setUserInControl ?? gameState.userInControl;
+
+    if (
+      previousUserInControl != gameState.currentUser.userId &&
+      gameState.userInControl === gameState.currentUser.userId
+    ) {
+      gameState.playYourGoSound = true;
+    }
 
     this.setGameStarted = undefined;
     this.setConnected = undefined;
