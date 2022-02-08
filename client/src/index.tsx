@@ -272,7 +272,7 @@ class Main
 
     const score = new Score();
 
-    const socket = io("http://localhost:3000");
+    const socket = io("https://qwirks-server.herokuapp.com/");
 
     const mouse = new Mouse();
 

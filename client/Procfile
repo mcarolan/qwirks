@@ -1,1 +1,1 @@
-qwirks-client: npm run start
+web: npm --prefix client run start
