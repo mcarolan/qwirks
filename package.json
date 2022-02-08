@@ -1,4 +1,7 @@
 {
   "name": "qwirks",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "scripts": {
+	  "build": "npm --prefix server install && npm --prefix server run build"
+  }
 }
