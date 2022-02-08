@@ -5,7 +5,7 @@
   "scripts": {
     "test": "jest",
     "start": "parcel serve src/index.html src/images/*.png src/sounds/*.mp3",
-    "ship": "parcel build --public-url https://mcarolan.net/qwirks/client/dist/ src/index.html src/images/*.png src/sounds/*.mp3"
+    "ship": "parcel build --public-url https://mcarolan.net/qwirks src/index.html src/images/*.png src/sounds/*.mp3 && git subtree push --prefix dist origin gh-pages"
   },
   "author": "",
   "license": "ISC",
