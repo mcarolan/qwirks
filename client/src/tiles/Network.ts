@@ -14,6 +14,7 @@ export class Network implements IGameStateUpdater {
   private setUserInControl: string | undefined;
   private setTiles: PositionedTile[] | undefined;
   private setTilesLastPlaced: Set<PositionedTile> | undefined;
+  private setWinner: string | undefined;
 
   constructor(private socket: Socket, private user: User, gameKey: string) {
     this.socket.on("connect", () => {
@@ -34,6 +35,11 @@ export class Network implements IGameStateUpdater {
       this.socket.on("game.started", () => {
         console.log("game started update");
         this.setGameStarted = true;
+      });
+
+      this.socket.on("game.over", (winner: string) => {
+        console.log(`winner ${winner}`);
+        this.setWinner = winner;
       });
 
       this.socket.on(
@@ -67,6 +73,7 @@ export class Network implements IGameStateUpdater {
       this.setTilesLastPlaced ?? gameState.tilesLastPlaced;
     const previousUserInControl = gameState.userInControl;
     gameState.userInControl = this.setUserInControl ?? gameState.userInControl;
+    gameState.winner = this.setWinner ?? gameState.winner;
 
     if (
       previousUserInControl != gameState.currentUser.userId &&
@@ -81,6 +88,7 @@ export class Network implements IGameStateUpdater {
     this.hand = undefined;
     this.setUserInControl = undefined;
     this.setTiles = undefined;
+    this.setWinner = undefined;
 
     if (
       !gameState.isStarted &&

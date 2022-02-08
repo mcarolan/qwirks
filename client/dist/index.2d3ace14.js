@@ -1043,11 +1043,10 @@ let ButtonTag;
 })(ButtonTag || (ButtonTag = {
 }));
 class FireworkUpdater {
-    constructor(tileGraphics, tileGrid, fireworks, sounds){
+    constructor(tileGraphics, tileGrid, fireworks){
         this.tileGraphics = tileGraphics;
         this.tileGrid = tileGrid;
         this.fireworks = fireworks;
-        this.sounds = sounds;
     }
     update(gameState) {
         if (!gameState.fireworkTilePositions.isEmpty()) {
@@ -1065,6 +1064,16 @@ class FireworkUpdater {
                 this.fireworks.create(fireFrom, p);
             });
             gameState.fireworkTilePositions = _immutable.List();
+        }
+        if (gameState.winner) {
+            if (this.fireworks.size < 10) {
+                const fireFrom = {
+                    x: Math.random() * gameState.mainAreaBounds.width,
+                    y: 0
+                };
+                const fireAt = this.fireworks.randomOrigin(gameState.mainAreaBounds);
+                this.fireworks.create(fireFrom, fireAt);
+            }
         }
     }
 }
@@ -1085,7 +1094,9 @@ class Main extends _reactDefault.default.Component {
             hand: _immutable.List(),
             activeTileIndicies: _immutable.Set(),
             currentUser: props.user,
-            userInControl: undefined
+            userInControl: undefined,
+            tilesPlaced: 0,
+            winner: undefined
         };
     }
     onClickButton(buttonTag) {
@@ -1096,7 +1107,7 @@ class Main extends _reactDefault.default.Component {
         this.handTilesClicked.push(i);
     }
     shouldUpdateState(gameState) {
-        return !_immutable.is(this.state.currentUser, gameState.currentUser) || !_immutable.is(this.state.userList, gameState.userList) || !_immutable.is(this.state.isConnected, gameState.isConnected) || !_immutable.is(this.state.isStarted, gameState.isStarted) || !_immutable.is(this.state.enabledButtonTags, gameState.enabledButtonTags) || !_immutable.is(this.state.visibleButtonTags, gameState.visibleButtonTags) || !_immutable.is(this.state.userInControl, gameState.userInControl) || !_immutable.is(this.state.hand, gameState.hand) || !_immutable.is(this.state.activeTileIndicies, gameState.panelActiveTileIndicies);
+        return !_immutable.is(this.state.currentUser, gameState.currentUser) || !_immutable.is(this.state.userList, gameState.userList) || !_immutable.is(this.state.isConnected, gameState.isConnected) || !_immutable.is(this.state.isStarted, gameState.isStarted) || !_immutable.is(this.state.enabledButtonTags, gameState.enabledButtonTags) || !_immutable.is(this.state.visibleButtonTags, gameState.visibleButtonTags) || !_immutable.is(this.state.userInControl, gameState.userInControl) || !_immutable.is(this.state.hand, gameState.hand) || !_immutable.is(this.state.activeTileIndicies, gameState.panelActiveTileIndicies) || !_immutable.is(this.state.tilesPlaced, gameState.tilesApplied.length) || !_immutable.is(this.state.activeTileIndicies, gameState.winner);
     }
     update(gameState) {
         if (this.buttonsClicked.size > 0) {
@@ -1137,7 +1148,9 @@ class Main extends _reactDefault.default.Component {
             visibleButtonTags: gameState.visibleButtonTags,
             userInControl: gameState.userInControl,
             hand: gameState.hand,
-            activeTileIndicies: gameState.panelActiveTileIndicies
+            activeTileIndicies: gameState.panelActiveTileIndicies,
+            tilesPlaced: gameState.tilesApplied.length,
+            winner: gameState.winner
         }, ()=>{
             console.log(`react state update ${JSON.stringify(this.state)}`);
             this.frameId = requestAnimationFrame((_)=>this.frame(gameState, deps)
@@ -1180,7 +1193,7 @@ class Main extends _reactDefault.default.Component {
         const tileGrid = new _tileGridGraphics.TileGridGraphics(tileGraphics, firstTileImage);
         const fireworks = new _fireworks.Fireworks();
         const sounds = new _sounds.Sounds();
-        const fireworkUpdater = new FireworkUpdater(tileGraphics, tileGrid, fireworks, sounds);
+        const fireworkUpdater = new FireworkUpdater(tileGraphics, tileGrid, fireworks);
         const dependencies = {
             canvas,
             context: canvas.getContext("2d"),
@@ -1222,10 +1235,11 @@ class Main extends _reactDefault.default.Component {
                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_gameStatus.GameStatus, {
                             userIsInControl: this.state.userInControl === this.state.currentUser?.userId,
                             waitingForUsername: this.state.userInControl ? this.state.userList.get(this.state.userInControl)?.username : undefined,
+                            winningUsername: this.state.winner ? this.state.userList.get(this.state.winner)?.username : undefined,
                             isStarted: this.state.isStarted
                         }, void 0, false, {
                             fileName: "src/index.tsx",
-                            lineNumber: 342,
+                            lineNumber: 359,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1237,7 +1251,7 @@ class Main extends _reactDefault.default.Component {
                                     zoomOut: ()=>this.zoomOutPressed += 1
                                 }, void 0, false, {
                                     fileName: "src/index.tsx",
-                                    lineNumber: 354,
+                                    lineNumber: 376,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1249,12 +1263,12 @@ class Main extends _reactDefault.default.Component {
                                         enabled: isEnabled(ButtonTag.Start)
                                     }, void 0, false, {
                                         fileName: "src/index.tsx",
-                                        lineNumber: 359,
+                                        lineNumber: 381,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "src/index.tsx",
-                                    lineNumber: 358,
+                                    lineNumber: 380,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1271,12 +1285,12 @@ class Main extends _reactDefault.default.Component {
                                                 enabled: isEnabled(ButtonTag.Accept)
                                             }, void 0, false, {
                                                 fileName: "src/index.tsx",
-                                                lineNumber: 368,
+                                                lineNumber: 390,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/index.tsx",
-                                            lineNumber: 367,
+                                            lineNumber: 389,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1290,12 +1304,12 @@ class Main extends _reactDefault.default.Component {
                                                 enabled: isEnabled(ButtonTag.Swap)
                                             }, void 0, false, {
                                                 fileName: "src/index.tsx",
-                                                lineNumber: 377,
+                                                lineNumber: 399,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/index.tsx",
-                                            lineNumber: 376,
+                                            lineNumber: 398,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1309,30 +1323,48 @@ class Main extends _reactDefault.default.Component {
                                                 enabled: isEnabled(ButtonTag.Cancel)
                                             }, void 0, false, {
                                                 fileName: "src/index.tsx",
-                                                lineNumber: 386,
+                                                lineNumber: 408,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/index.tsx",
-                                            lineNumber: 385,
+                                            lineNumber: 407,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                                            className: "tilesRemainingWrapper",
+                                            children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                                                className: "tilesRemaining",
+                                                children: [
+                                                    108 - this.state.tilesPlaced,
+                                                    " tiles to place"
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "src/index.tsx",
+                                                lineNumber: 417,
+                                                columnNumber: 17
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "src/index.tsx",
+                                            lineNumber: 416,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "src/index.tsx",
-                                    lineNumber: 366,
+                                    lineNumber: 388,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "src/index.tsx",
-                            lineNumber: 353,
+                            lineNumber: 375,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "src/index.tsx",
-                    lineNumber: 341,
+                    lineNumber: 358,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1343,7 +1375,7 @@ class Main extends _reactDefault.default.Component {
                             onChangeUsername: (newName)=>this.setUsername = newName
                         }, void 0, false, {
                             fileName: "src/index.tsx",
-                            lineNumber: 398,
+                            lineNumber: 425,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1353,18 +1385,18 @@ class Main extends _reactDefault.default.Component {
                                 userInControl: this.state.userInControl
                             }, void 0, false, {
                                 fileName: "src/index.tsx",
-                                lineNumber: 403,
+                                lineNumber: 430,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "src/index.tsx",
-                            lineNumber: 402,
+                            lineNumber: 429,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "src/index.tsx",
-                    lineNumber: 397,
+                    lineNumber: 424,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1379,30 +1411,30 @@ class Main extends _reactDefault.default.Component {
                             onPressed: (i)=>this.onHandTileClicked(i)
                         }, void 0, false, {
                             fileName: "src/index.tsx",
-                            lineNumber: 411,
+                            lineNumber: 438,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "src/index.tsx",
-                        lineNumber: 410,
+                        lineNumber: 437,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "src/index.tsx",
-                    lineNumber: 409,
+                    lineNumber: 436,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_connectionStatus.ConnectionStatus, {
                     isConnected: this.state.isConnected
                 }, void 0, false, {
                     fileName: "src/index.tsx",
-                    lineNumber: 421,
+                    lineNumber: 448,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "src/index.tsx",
-            lineNumber: 340,
+            lineNumber: 357,
             columnNumber: 7
         }, this));
     }
@@ -1416,7 +1448,7 @@ window.onload = ()=>{
             user: _browserAPI.loadUserFromLocalStorage()
         }, void 0, false, {
             fileName: "src/index.tsx",
-            lineNumber: 433,
+            lineNumber: 460,
             columnNumber: 7
         }, undefined), mainContainer);
     } else window.location.assign(_browserAPI.generateNewURLWithGameKey());
@@ -8481,7 +8513,8 @@ function initialGameState(gameKey, user, mainAreaBounds) {
         userList: _immutable.Map(),
         userInControl: undefined,
         mouseDragInProgress: undefined,
-        setUsername: undefined
+        setUsername: undefined,
+        winner: undefined
     };
 }
 
@@ -8634,6 +8667,7 @@ class GameLogic {
             gameState.tilesToApply = gameState.currentPlacement.placedTiles.toArray();
             gameState.currentPlacement.tiles = [];
             gameState.currentPlacement.placedTiles = _immutable.Set();
+            gameState.panelActiveTileIndicies = _immutable.Set();
             gameState.userInControl = undefined;
         } else if (gameState.pressedButtonTags.contains(_index.ButtonTag.Swap) && !(gameState.panelActiveTileIndicies.size === 0)) {
             const toSwap = new Array();
@@ -8642,12 +8676,12 @@ class GameLogic {
                 if (t) toSwap.push(t);
             }
             gameState.tilesToSwap = toSwap;
-            gameState.panelActiveTileIndicies.clear();
+            gameState.panelActiveTileIndicies = _immutable.Set();
             gameState.userInControl = undefined;
         } else if (gameState.pressedButtonTags.contains(_index.ButtonTag.Cancel) && !(gameState.currentPlacement.tiles.length === 0)) {
-            const newHand = gameState.hand.concat(gameState.currentPlacement.tiles);
+            const newHand = gameState.hand.concat(gameState.currentPlacement.placedTiles);
             gameState.hand = newHand;
-            gameState.currentPlacement.tiles = [];
+            gameState.currentPlacement.placedTiles = _immutable.Set();
         }
         const placementButtonsEnabled = !(gameState.currentPlacement.tiles.length === 0);
         const cancelButtonEnabled = !(gameState.panelActiveTileIndicies.size === 0) && gameState.currentPlacement.tiles.length === 0;
@@ -27556,6 +27590,9 @@ class Fireworks {
     create(start, target) {
         this.fireworks.push(new _firework.Firework(start, target));
     }
+    get size() {
+        return this.fireworks.length;
+    }
     randomOrigin(rect) {
         if (Math.round(_utility.random(0, 1))) {
             if (Math.round(_utility.random(0, 1))) return {
@@ -27592,8 +27629,8 @@ class Fireworks {
         });
     }
     constructor(){
-        this.fireworks = new Array(100);
-        this.particles = new Array(500);
+        this.fireworks = new Array();
+        this.particles = new Array();
     }
 }
 
@@ -32155,6 +32192,10 @@ class Network {
                 console.log("game started update");
                 this.setGameStarted = true;
             });
+            this.socket.on("game.over", (winner)=>{
+                console.log(`winner ${winner}`);
+                this.setWinner = winner;
+            });
             this.socket.on("game.tiles", (tiles, tilesLastPlaced)=>{
                 console.log("game tiles update");
                 this.setTiles = tiles;
@@ -32179,6 +32220,7 @@ class Network {
         gameState.tilesLastPlaced = this.setTilesLastPlaced ?? gameState.tilesLastPlaced;
         const previousUserInControl = gameState.userInControl;
         gameState.userInControl = this.setUserInControl ?? gameState.userInControl;
+        gameState.winner = this.setWinner ?? gameState.winner;
         if (previousUserInControl != gameState.currentUser.userId && gameState.userInControl === gameState.currentUser.userId) gameState.playYourGoSound = true;
         this.setGameStarted = undefined;
         this.setConnected = undefined;
@@ -32186,6 +32228,7 @@ class Network {
         this.hand = undefined;
         this.setUserInControl = undefined;
         this.setTiles = undefined;
+        this.setWinner = undefined;
         if (!gameState.isStarted && gameState.pressedButtonTags.contains(_.ButtonTag.Start)) {
             console.log("game start");
             this.socket.emit("game.start");
@@ -52030,8 +52073,8 @@ exports.constants = {
 
 },{"randombytes":"8hjhE","create-hash":"2WyL8","create-hmac":"k1utz","browserify-sign/algos":"busIB","pbkdf2":"g38Hg","browserify-cipher":"d4idn","diffie-hellman":"hwD3y","browserify-sign":"jbRNy","create-ecdh":"9Rcg1","public-encrypt":"h9Rdh","randomfill":"k3tsT"}],"8hjhE":[function(require,module,exports) {
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 // limit of Crypto.getRandomValues()
 // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
 var MAX_BYTES = 65536;
@@ -54334,8 +54377,8 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
     this.chunk = chunk;
@@ -57177,8 +57220,8 @@ Stream.prototype.pipe = function(dest, options) {
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;
@@ -60055,8 +60098,8 @@ exports.pbkdf2 = require('./lib/async');
 exports.pbkdf2Sync = require('./lib/sync');
 
 },{"./lib/async":"aqdig","./lib/sync":"lh9gw"}],"aqdig":[function(require,module,exports) {
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 var Buffer = require('safe-buffer').Buffer;
 var checkParameters = require('./precondition');
 var defaultEncoding = require('./default-encoding');
@@ -91575,13 +91618,16 @@ var _jsxDevRuntime = require("react/jsx-dev-runtime");
 var _react = require("react");
 var _reactDefault = parcelHelpers.interopDefault(_react);
 function GameStatus(props) {
-    const status = props.isStarted ? props.userIsInControl ? "It's your go!" : `Waiting for ${props.waitingForUsername}...` : "Invite 2-4 players and press start!";
+    let status = "Invite 2-4 players and press start!";
+    if (props.userIsInControl) status = "It's your go!";
+    if (props.waitingForUsername) status = `Waiting for ${props.waitingForUsername}...`;
+    if (props.winningUsername) status = `Well done ${props.winningUsername}`;
     return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
         className: "gameStatus",
         children: status
     }, void 0, false, {
         fileName: "src/GameStatus.tsx",
-        lineNumber: 15,
+        lineNumber: 25,
         columnNumber: 10
     }, this));
 }

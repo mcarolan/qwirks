@@ -59,8 +59,7 @@ class FireworkUpdater implements IGameStateUpdater {
   constructor(
     private tileGraphics: TileGraphics,
     private tileGrid: TileGridGraphics,
-    private fireworks: Fireworks,
-    private sounds: Sounds
+    private fireworks: Fireworks
   ) {}
 
   update(gameState: GameState): void {
@@ -84,6 +83,17 @@ class FireworkUpdater implements IGameStateUpdater {
       });
       gameState.fireworkTilePositions = List();
     }
+
+    if (gameState.winner) {
+      if (this.fireworks.size < 10) {
+        const fireFrom = {
+          x: Math.random() * gameState.mainAreaBounds.width,
+          y: 0,
+        };
+        const fireAt = this.fireworks.randomOrigin(gameState.mainAreaBounds);
+        this.fireworks.create(fireFrom, fireAt);
+      }
+    }
   }
 }
 
@@ -97,6 +107,8 @@ interface MainState {
   userInControl: string | undefined;
   hand: List<Tile>;
   activeTileIndicies: ImmSet<number>;
+  tilesPlaced: number;
+  winner: string | undefined;
 }
 
 interface MainProps {
@@ -119,6 +131,8 @@ class Main
       activeTileIndicies: ImmSet(),
       currentUser: props.user,
       userInControl: undefined,
+      tilesPlaced: 0,
+      winner: undefined,
     };
   }
 
@@ -146,7 +160,9 @@ class Main
       !is(this.state.visibleButtonTags, gameState.visibleButtonTags) ||
       !is(this.state.userInControl, gameState.userInControl) ||
       !is(this.state.hand, gameState.hand) ||
-      !is(this.state.activeTileIndicies, gameState.panelActiveTileIndicies)
+      !is(this.state.activeTileIndicies, gameState.panelActiveTileIndicies) ||
+      !is(this.state.tilesPlaced, gameState.tilesApplied.length) ||
+      !is(this.state.activeTileIndicies, gameState.winner)
     );
   }
 
@@ -209,6 +225,8 @@ class Main
           userInControl: gameState.userInControl,
           hand: gameState.hand,
           activeTileIndicies: gameState.panelActiveTileIndicies,
+          tilesPlaced: gameState.tilesApplied.length,
+          winner: gameState.winner,
         },
         () => {
           console.log(`react state update ${JSON.stringify(this.state)}`);
@@ -283,8 +301,7 @@ class Main
     const fireworkUpdater = new FireworkUpdater(
       tileGraphics,
       tileGrid,
-      fireworks,
-      sounds
+      fireworks
     );
 
     const dependencies: GameDependencies = {
@@ -348,6 +365,11 @@ class Main
                 ? this.state.userList.get(this.state.userInControl)?.username
                 : undefined
             }
+            winningUsername={
+              this.state.winner
+                ? this.state.userList.get(this.state.winner)?.username
+                : undefined
+            }
             isStarted={this.state.isStarted}
           />
           <div id="buttonsContainer">
@@ -390,6 +412,11 @@ class Main
                   className="squareButton"
                   enabled={isEnabled(ButtonTag.Cancel)}
                 />
+              </div>
+              <div className="tilesRemainingWrapper">
+                <div className="tilesRemaining">
+                  {108 - this.state.tilesPlaced} tiles to place
+                </div>
               </div>
             </div>
           </div>

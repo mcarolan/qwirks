@@ -66,6 +66,7 @@ export class GameLogic implements IGameStateUpdater {
       gameState.tilesToApply = gameState.currentPlacement.placedTiles.toArray();
       gameState.currentPlacement.tiles = [];
       gameState.currentPlacement.placedTiles = Set();
+      gameState.panelActiveTileIndicies = Set();
       gameState.userInControl = undefined;
     } else if (
       gameState.pressedButtonTags.contains(ButtonTag.Swap) &&
@@ -79,15 +80,17 @@ export class GameLogic implements IGameStateUpdater {
         }
       }
       gameState.tilesToSwap = toSwap;
-      gameState.panelActiveTileIndicies.clear();
+      gameState.panelActiveTileIndicies = Set();
       gameState.userInControl = undefined;
     } else if (
       gameState.pressedButtonTags.contains(ButtonTag.Cancel) &&
       !(gameState.currentPlacement.tiles.length === 0)
     ) {
-      const newHand = gameState.hand.concat(gameState.currentPlacement.tiles);
+      const newHand = gameState.hand.concat(
+        gameState.currentPlacement.placedTiles
+      );
       gameState.hand = newHand;
-      gameState.currentPlacement.tiles = [];
+      gameState.currentPlacement.placedTiles = Set();
     }
 
     const placementButtonsEnabled = !(

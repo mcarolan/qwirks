@@ -33,6 +33,7 @@ interface Game {
   gameKey: string;
   users: Map<string, UserWithStatus>;
   isStarted: boolean;
+  isOver: boolean;
   tileBag: TileBag;
   sockets: Map<
     string,
@@ -62,6 +63,7 @@ function initialGame(gameKey: string): Game {
     gameKey,
     users: new Map(),
     isStarted: false,
+    isOver: false,
     tileBag: TileBag.full(),
     sockets: new Map(),
     hands: new Map(),
@@ -79,13 +81,18 @@ function nextUserInControl(game: Game): string | undefined {
   if (!game.userInControl) {
     return undefined;
   }
-  const l = List(game.users.keys()).sort();
-  const i = l.indexOf(game.userInControl);
+  const l = List(game.users.keys())
+    .filter((uid) => {
+      const h = game.hands.get(uid);
+      return h && h.size > 0;
+    })
+    .sort();
 
-  if (i === -1 || i === l.size - 1) {
-    return l.first();
+  if (l.size === 0) {
+    return undefined;
   } else {
-    return l.get(i + 1);
+    const n = l.find((uid) => !game.userInControl || uid > game.userInControl);
+    return n ?? l.first();
   }
 }
 
@@ -151,6 +158,13 @@ io.on("connection", (s) => {
 
         if (g.isStarted) {
           s.emit("game.started");
+        }
+
+        if (g.isOver) {
+          s.emit(
+            "game.over",
+            List(g.users.entries()).maxBy(([_, u]) => u.score)?.[0]
+          );
         }
 
         if (g.userInControl) {
@@ -223,7 +237,7 @@ io.on("connection", (s) => {
             const hand = g.hands.get(uid);
             if (hand) {
               const [nextHand, newTileBag] = newHand(g.tileBag, hand, tiles);
-              g.tileBag = newTileBag;
+              g.tileBag = newTileBag.add(List(tiles));
               g.hands.set(uid, nextHand);
               s.emit("user.hand", nextHand.toArray());
               g.userInControl = nextUserInControl(g);
@@ -273,6 +287,14 @@ io.on("connection", (s) => {
                 g.tiles,
                 g.tilesLastPlaced.toArray()
               );
+
+              if (g.userInControl === undefined) {
+                g.isOver = true;
+                io.to(gk).emit(
+                  "game.over",
+                  List(g.users.entries()).maxBy(([_, u]) => u.score)?.[0]
+                );
+              }
               io.to(gk).emit("user.incontrol", g.userInControl);
             }
           }

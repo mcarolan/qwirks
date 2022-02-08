@@ -5,11 +5,15 @@ import { Particle } from "./Particle";
 import { Position } from "../../../shared/Domain";
 
 export class Fireworks {
-  private fireworks: Array<Firework> = new Array(100);
-  private particles: Array<Particle> = new Array(500);
+  private fireworks: Array<Firework> = new Array();
+  private particles: Array<Particle> = new Array();
 
   create(start: Position, target: Position): void {
     this.fireworks.push(new Firework(start, target));
+  }
+
+  get size(): number {
+    return this.fireworks.length;
   }
 
   randomOrigin(rect: Rect): Position {

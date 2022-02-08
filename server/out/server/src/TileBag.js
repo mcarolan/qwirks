@@ -11,6 +11,9 @@ class TileBag {
         const took = this.contents.take(n);
         return [took, new TileBag(this.contents.skip(n))];
     }
+    add(tiles) {
+        return new TileBag(this.contents.concat(tiles).sortBy(Math.random));
+    }
     static everyTile() {
         return (0, immutable_1.List)().withMutations((mutable) => {
             (0, Domain_1.allTileColours)().forEach((colour) => {

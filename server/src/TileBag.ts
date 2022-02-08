@@ -8,6 +8,10 @@ export class TileBag {
     return [took, new TileBag(this.contents.skip(n))];
   }
 
+  add(tiles: List<Tile>): TileBag {
+    return new TileBag(this.contents.concat(tiles).sortBy(Math.random));
+  }
+
   private static everyTile(): List<Tile> {
     return List<Tile>().withMutations((mutable) => {
       allTileColours().forEach((colour) => {

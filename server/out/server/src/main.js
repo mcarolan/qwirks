@@ -32,6 +32,7 @@ function initialGame(gameKey) {
         gameKey,
         users: new Map(),
         isStarted: false,
+        isOver: false,
         tileBag: TileBag_1.TileBag.full(),
         sockets: new Map(),
         hands: new Map(),
@@ -47,13 +48,18 @@ function nextUserInControl(game) {
     if (!game.userInControl) {
         return undefined;
     }
-    const l = (0, immutable_1.List)(game.users.keys()).sort();
-    const i = l.indexOf(game.userInControl);
-    if (i === -1 || i === l.size - 1) {
-        return l.first();
+    const l = (0, immutable_1.List)(game.users.keys())
+        .filter((uid) => {
+        const h = game.hands.get(uid);
+        return h && h.size > 0;
+    })
+        .sort();
+    if (l.size === 0) {
+        return undefined;
     }
     else {
-        return l.get(i + 1);
+        const n = l.find((uid) => !game.userInControl || uid > game.userInControl);
+        return n !== null && n !== void 0 ? n : l.first();
     }
 }
 function sendStartingHands(game) {
@@ -93,11 +99,14 @@ io.on("connection", (s) => {
         gameKey = joiningGameKey;
         s.join(joiningGameKey);
         upsert(games, gameKey, () => initialGame(joiningGameKey), (g) => {
-            var _a, _b;
+            var _a, _b, _c;
             g.users.set(user.userId, Object.assign(Object.assign({}, user), { onlineStatus: User_1.OnlineStatus.online, userType: User_1.UserType.Player, score: (_b = (_a = g.users.get(user.userId)) === null || _a === void 0 ? void 0 : _a.score) !== null && _b !== void 0 ? _b : 0 }));
             g.sockets.set(user.userId, s);
             if (g.isStarted) {
                 s.emit("game.started");
+            }
+            if (g.isOver) {
+                s.emit("game.over", (_c = (0, immutable_1.List)(g.users.entries()).maxBy(([_, u]) => u.score)) === null || _c === void 0 ? void 0 : _c[0]);
             }
             if (g.userInControl) {
                 s.emit("user.incontrol", g.userInControl);
@@ -148,7 +157,7 @@ io.on("connection", (s) => {
                     const hand = g.hands.get(uid);
                     if (hand) {
                         const [nextHand, newTileBag] = newHand(g.tileBag, hand, tiles);
-                        g.tileBag = newTileBag;
+                        g.tileBag = newTileBag.add((0, immutable_1.List)(tiles));
                         g.hands.set(uid, nextHand);
                         s.emit("user.hand", nextHand.toArray());
                         g.userInControl = nextUserInControl(g);
@@ -163,6 +172,7 @@ io.on("connection", (s) => {
         const uid = userId;
         if (gk && uid) {
             upsert(games, gk, () => initialGame(gk), (g) => {
+                var _a;
                 if (g.userInControl === uid) {
                     const placement = (0, immutable_1.Set)(tiles);
                     const res = new TileGrid_1.TileGrid(g.tiles).place(placement);
@@ -183,6 +193,9 @@ io.on("connection", (s) => {
                         }
                         g.userInControl = nextUserInControl(g);
                         io.to(gk).emit("game.tiles", g.tiles, g.tilesLastPlaced.toArray());
+                        if (g.userInControl === undefined) {
+                            s.emit("game.over", (_a = (0, immutable_1.List)(g.users.entries()).maxBy(([_, u]) => u.score)) === null || _a === void 0 ? void 0 : _a[0]);
+                        }
                         io.to(gk).emit("user.incontrol", g.userInControl);
                     }
                 }

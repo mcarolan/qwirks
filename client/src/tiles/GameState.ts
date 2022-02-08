@@ -40,6 +40,7 @@ export interface GameState {
   userInControl: string | undefined;
   mouseDragInProgress: MouseDrag | undefined;
   setUsername: string | undefined;
+  winner: string | undefined;
 }
 
 export function singleActiveTile(
@@ -95,5 +96,6 @@ export function initialGameState(
     userInControl: undefined,
     mouseDragInProgress: undefined,
     setUsername: undefined,
+    winner: undefined,
   };
 }
