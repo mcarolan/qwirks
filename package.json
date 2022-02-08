@@ -2,6 +2,9 @@
   "name": "qwirks",
   "version": "1.0.0",
   "scripts": {
-	  "build": "npm --prefix server install"
+    "build": "npm --prefix server install"
+  },
+  "dependencies": {
+    "typescript": "^4.5.5"
   }
 }
