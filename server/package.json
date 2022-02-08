@@ -4,8 +4,7 @@
   "description": "",
   "scripts": {
     "start": "node out/server/src/main.js",
-    "build": "tsc",
-    "postinstall": "npm run build"
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
