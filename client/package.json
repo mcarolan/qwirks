@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "start": "parcel serve src/index.html src/images/*.png src/sounds/*.mp3"
+    "start": "parcel serve --host 0.0.0.0 src/index.html src/images/*.png src/sounds/*.mp3"
   },
   "author": "",
   "license": "ISC",
