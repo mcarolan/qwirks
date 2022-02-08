@@ -2,7 +2,7 @@
   "name": "qwirks",
   "version": "1.0.0",
   "scripts": {
-    "build": "npm --prefix server install"
+    "build": "npm --prefix server install && npm --prefix client install"
   },
   "dependencies": {
     "immutable": "^4.0.0",
