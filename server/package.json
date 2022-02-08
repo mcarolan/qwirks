@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "node out/server/src/main.js"
+    "start": "node out/server/src/main.js",
+    "build": "true"
   },
   "author": "",
   "license": "ISC",
