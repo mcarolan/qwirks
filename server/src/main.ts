@@ -9,8 +9,8 @@ import {
   Position,
   TileColour,
   TileShape,
-} from "./Domain";
-import { TileGrid } from "./TileGrid";
+} from "../../shared/Domain";
+import { TileGrid } from "../../shared/TileGrid";
 import {
   OnlineStatus,
   User,
