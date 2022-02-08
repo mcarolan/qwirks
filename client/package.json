@@ -2,10 +2,10 @@
   "name": "ts-parcel",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "test": "jest",
-    "start": "parcel serve --host 0.0.0.0 src/index.html src/images/*.png src/sounds/*.mp3"
+    "start": "parcel serve src/index.html src/images/*.png src/sounds/*.mp3",
+    "ship": "parcel build src/index.html src/images/*.png src/sounds/*.mp3"
   },
   "author": "",
   "license": "ISC",
@@ -37,13 +37,14 @@
   "dependencies": {
     "@types/lodash": "^4.14.177",
     "immutable": "^4.0.0",
+    "lodash": "^4.17.21",
+    "parcel-bundler": "^1.12.5",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "socket.io": "^4.4.1",
     "socket.io-client": "^4.4.1",
     "trampoline-ts": "^1.1.0",
     "unique-username-generator": "^1.0.1",
-    "uuid": "^8.3.2",
-    "parcel-bundler": "^1.12.5"
+    "uuid": "^8.3.2"
   }
 }
