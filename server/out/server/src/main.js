@@ -194,7 +194,8 @@ io.on("connection", (s) => {
                         g.userInControl = nextUserInControl(g);
                         io.to(gk).emit("game.tiles", g.tiles, g.tilesLastPlaced.toArray());
                         if (g.userInControl === undefined) {
-                            s.emit("game.over", (_a = (0, immutable_1.List)(g.users.entries()).maxBy(([_, u]) => u.score)) === null || _a === void 0 ? void 0 : _a[0]);
+                            g.isOver = true;
+                            io.to(gk).emit("game.over", (_a = (0, immutable_1.List)(g.users.entries()).maxBy(([_, u]) => u.score)) === null || _a === void 0 ? void 0 : _a[0]);
                         }
                         io.to(gk).emit("user.incontrol", g.userInControl);
                     }
