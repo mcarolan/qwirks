@@ -286,7 +286,7 @@ class Main
 
     const score = new Score();
 
-    const socket = io("https://qwirks-server.herokuapp.com/");
+    const socket = io("https://qwirksbackend.mcarolan.net");
 
     const mouse = new Mouse();
 
