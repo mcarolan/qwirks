@@ -43,6 +43,10 @@ export interface GameState {
   winner: string | undefined;
 }
 
+export function capScale(scale: number): number {
+  return Math.min(Math.max(scale, 0.25), 2);
+}
+
 export function singleActiveTile(
   gameState: GameState
 ): [number, Tile] | undefined {

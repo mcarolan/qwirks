@@ -1123,7 +1123,7 @@ class Main extends _reactDefault.default.Component {
         }
         const netZoomChange = this.zoomInPressed + this.zoomOutPressed * -1;
         if (netZoomChange != 0) {
-            gameState.scale = Math.min(Math.max(gameState.scale + netZoomChange * 0.1, 0.5), 1.5);
+            gameState.scale = _gameState.capScale(gameState.scale + netZoomChange * 0.1);
             this.zoomInPressed = 0;
             this.zoomOutPressed = 0;
         }
@@ -1187,7 +1187,7 @@ class Main extends _reactDefault.default.Component {
         canvas.height = mainArea.clientHeight;
         const tileGraphics = await _tileGraphics.loadTileGraphics();
         const score = new _score.Score();
-        const socket = _socketIoClient.io("http://localhost:3000");
+        const socket = _socketIoClient.io("https://qwirksbackend.mcarolan.net");
         const mouse = new _mouse.Mouse();
         const firstTileImage = await _utility.loadImage("./images/first-tile.png");
         const tileGrid = new _tileGridGraphics.TileGridGraphics(tileGraphics, firstTileImage);
@@ -1212,6 +1212,7 @@ class Main extends _reactDefault.default.Component {
         document.addEventListener("mousedown", _mouse.Mouse.updateMouseDown(mouse));
         document.addEventListener("mouseup", _mouse.Mouse.updateMouseUp(mouse));
         document.addEventListener("mousemove", _mouse.Mouse.updateMousePosition(mouse));
+        document.addEventListener("wheel", _mouse.Mouse.updateMouseWheel(mouse));
         this.frameId = requestAnimationFrame((_)=>this.frame(_gameState.initialGameState(this.props.gameKey, this.props.user, mainAreaBounds), dependencies)
         );
     }
@@ -1239,7 +1240,7 @@ class Main extends _reactDefault.default.Component {
                             isStarted: this.state.isStarted
                         }, void 0, false, {
                             fileName: "src/index.tsx",
-                            lineNumber: 359,
+                            lineNumber: 357,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1251,7 +1252,7 @@ class Main extends _reactDefault.default.Component {
                                     zoomOut: ()=>this.zoomOutPressed += 1
                                 }, void 0, false, {
                                     fileName: "src/index.tsx",
-                                    lineNumber: 376,
+                                    lineNumber: 374,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1263,12 +1264,12 @@ class Main extends _reactDefault.default.Component {
                                         enabled: isEnabled(ButtonTag.Start)
                                     }, void 0, false, {
                                         fileName: "src/index.tsx",
-                                        lineNumber: 381,
+                                        lineNumber: 379,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "src/index.tsx",
-                                    lineNumber: 380,
+                                    lineNumber: 378,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1285,12 +1286,12 @@ class Main extends _reactDefault.default.Component {
                                                 enabled: isEnabled(ButtonTag.Accept)
                                             }, void 0, false, {
                                                 fileName: "src/index.tsx",
-                                                lineNumber: 390,
+                                                lineNumber: 388,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/index.tsx",
-                                            lineNumber: 389,
+                                            lineNumber: 387,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1304,12 +1305,12 @@ class Main extends _reactDefault.default.Component {
                                                 enabled: isEnabled(ButtonTag.Swap)
                                             }, void 0, false, {
                                                 fileName: "src/index.tsx",
-                                                lineNumber: 399,
+                                                lineNumber: 397,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/index.tsx",
-                                            lineNumber: 398,
+                                            lineNumber: 396,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1323,12 +1324,12 @@ class Main extends _reactDefault.default.Component {
                                                 enabled: isEnabled(ButtonTag.Cancel)
                                             }, void 0, false, {
                                                 fileName: "src/index.tsx",
-                                                lineNumber: 408,
+                                                lineNumber: 406,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/index.tsx",
-                                            lineNumber: 407,
+                                            lineNumber: 405,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1341,30 +1342,30 @@ class Main extends _reactDefault.default.Component {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "src/index.tsx",
-                                                lineNumber: 417,
+                                                lineNumber: 415,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/index.tsx",
-                                            lineNumber: 416,
+                                            lineNumber: 414,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "src/index.tsx",
-                                    lineNumber: 388,
+                                    lineNumber: 386,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "src/index.tsx",
-                            lineNumber: 375,
+                            lineNumber: 373,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "src/index.tsx",
-                    lineNumber: 358,
+                    lineNumber: 356,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1375,7 +1376,7 @@ class Main extends _reactDefault.default.Component {
                             onChangeUsername: (newName)=>this.setUsername = newName
                         }, void 0, false, {
                             fileName: "src/index.tsx",
-                            lineNumber: 425,
+                            lineNumber: 423,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1385,18 +1386,18 @@ class Main extends _reactDefault.default.Component {
                                 userInControl: this.state.userInControl
                             }, void 0, false, {
                                 fileName: "src/index.tsx",
-                                lineNumber: 430,
+                                lineNumber: 428,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "src/index.tsx",
-                            lineNumber: 429,
+                            lineNumber: 427,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "src/index.tsx",
-                    lineNumber: 424,
+                    lineNumber: 422,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -1411,30 +1412,30 @@ class Main extends _reactDefault.default.Component {
                             onPressed: (i)=>this.onHandTileClicked(i)
                         }, void 0, false, {
                             fileName: "src/index.tsx",
-                            lineNumber: 438,
+                            lineNumber: 436,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "src/index.tsx",
-                        lineNumber: 437,
+                        lineNumber: 435,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "src/index.tsx",
-                    lineNumber: 436,
+                    lineNumber: 434,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_connectionStatus.ConnectionStatus, {
                     isConnected: this.state.isConnected
                 }, void 0, false, {
                     fileName: "src/index.tsx",
-                    lineNumber: 448,
+                    lineNumber: 446,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "src/index.tsx",
-            lineNumber: 357,
+            lineNumber: 355,
             columnNumber: 7
         }, this));
     }
@@ -1448,7 +1449,7 @@ window.onload = ()=>{
             user: _browserAPI.loadUserFromLocalStorage()
         }, void 0, false, {
             fileName: "src/index.tsx",
-            lineNumber: 460,
+            lineNumber: 458,
             columnNumber: 7
         }, undefined), mainContainer);
     } else window.location.assign(_browserAPI.generateNewURLWithGameKey());
@@ -8461,11 +8462,16 @@ class TileGridGraphics {
 },{"./GameState":"fRHsT","../../../shared/Domain":"2iCCP","./domain":"1dMwI","immutable":"iIkjt","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fRHsT":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "capScale", ()=>capScale
+);
 parcelHelpers.export(exports, "singleActiveTile", ()=>singleActiveTile
 );
 parcelHelpers.export(exports, "initialGameState", ()=>initialGameState
 );
 var _immutable = require("immutable");
+function capScale(scale) {
+    return Math.min(Math.max(scale, 0.25), 2);
+}
 function singleActiveTile(gameState) {
     if (gameState.panelActiveTileIndicies.size === 1) {
         const index = gameState.panelActiveTileIndicies.toArray().at(0);
@@ -8523,58 +8529,65 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Mouse", ()=>Mouse
 );
+var _gameState = require("./GameState");
 class Mouse {
-    isMouseDown() {
-        return this.mouseDownCounter != undefined && this.mouseDownCounter != 0;
+    setPrimaryMouseButtonDown(e) {
+        const flags = e.buttons !== undefined ? e.buttons : e.which;
+        const downBefore = this.primaryMouseButtonDown;
+        this.primaryMouseButtonDown = (flags & 1) === 1;
+        if (this.primaryMouseButtonDown && this.mouseDragStart && !this.isDragging) {
+            const dx = Math.abs(this.mouseDragStart.x - this.mousePosition.x);
+            const dy = Math.abs(this.mouseDragStart.y - this.mousePosition.y);
+            if (dx > 5 || dy > 5) this.isDragging = true;
+        } else if (this.isDragging && this.mouseDragStart && downBefore && !this.primaryMouseButtonDown) {
+            this.isDragging = false;
+            const e = {
+                type: "MouseDrag",
+                from: this.mouseDragStart,
+                to: {
+                    x: this.mousePosition.x,
+                    y: this.mousePosition.y
+                }
+            };
+            this.events.push(e);
+            this.mouseDragStart = undefined;
+        } else if (!downBefore && this.primaryMouseButtonDown && this.mousePosition && this.mouseDragStart === undefined) this.mouseDragStart = {
+            x: this.mousePosition.x,
+            y: this.mousePosition.y
+        };
+        else if (downBefore && !this.primaryMouseButtonDown) {
+            const e = {
+                type: "MouseClick",
+                position: {
+                    x: this.mousePosition.x,
+                    y: this.mousePosition.y
+                }
+            };
+            this.mouseDragStart = undefined;
+            this.events.push(e);
+        }
+    }
+    static updateMouseWheel(mouse) {
+        return (e)=>{
+            e.preventDefault();
+            mouse.wheelDelta += e.deltaY;
+        };
     }
     static updateMouseUp(mouse) {
-        return ()=>{
-            const downBefore = mouse.isMouseDown();
-            mouse.mouseDownCounter = (mouse.mouseDownCounter ?? 0) - 1;
-            if (mouse.isDragging && mouse.mouseDragStart && downBefore && !mouse.isMouseDown()) {
-                mouse.isDragging = false;
-                const e = {
-                    type: "MouseDrag",
-                    from: mouse.mouseDragStart,
-                    to: {
-                        x: mouse.mousePosition.x,
-                        y: mouse.mousePosition.y
-                    }
-                };
-                mouse.events.push(e);
-                mouse.mouseDragStart = undefined;
-            } else if (downBefore && !mouse.isMouseDown()) {
-                const e = {
-                    type: "MouseClick",
-                    position: {
-                        x: mouse.mousePosition.x,
-                        y: mouse.mousePosition.y
-                    }
-                };
-                mouse.mouseDragStart = undefined;
-                mouse.events.push(e);
-            }
+        return (e)=>{
+            mouse.setPrimaryMouseButtonDown(e);
         };
     }
     static updateMouseDown(mouse) {
-        return ()=>{
-            const downBefore = mouse.isMouseDown();
-            mouse.mouseDownCounter = (mouse.mouseDownCounter ?? 0) + 1;
-            if (!downBefore && mouse.isMouseDown() && mouse.mousePosition && mouse.mouseDragStart == undefined) mouse.mouseDragStart = {
-                x: mouse.mousePosition.x,
-                y: mouse.mousePosition.y
-            };
+        return (e)=>{
+            mouse.setPrimaryMouseButtonDown(e);
         };
     }
     static updateMousePosition(mouse) {
         return (e)=>{
             mouse.mousePosition.x = e.pageX;
             mouse.mousePosition.y = e.pageY;
-            if (mouse.isMouseDown() && mouse.mouseDragStart && !mouse.isDragging) {
-                const dx = Math.abs(mouse.mouseDragStart.x - mouse.mousePosition.x);
-                const dy = Math.abs(mouse.mouseDragStart.y - mouse.mousePosition.y);
-                if (dx > 5 || dy > 5) mouse.isDragging = true;
-            }
+            mouse.setPrimaryMouseButtonDown(e);
         };
     }
     update(gameState) {
@@ -8593,6 +8606,8 @@ class Mouse {
         };
         gameState.mouseEvents = this.events;
         gameState.mouseDragInProgress = drag;
+        gameState.scale = _gameState.capScale(gameState.scale + this.wheelDelta * 0.001);
+        this.wheelDelta = 0;
         this.events = [];
     }
     constructor(){
@@ -8600,12 +8615,14 @@ class Mouse {
             x: 0,
             y: 0
         };
+        this.primaryMouseButtonDown = false;
         this.isDragging = false;
         this.events = Array();
+        this.wheelDelta = 0;
     }
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"iJe0M":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./GameState":"fRHsT"}],"iJe0M":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "GameLogic", ()=>GameLogic
@@ -8844,7 +8861,7 @@ class TileGrid {
     }
 }
 
-},{"trampoline-ts":"5b1j8","./Domain":"2iCCP","immutable":"iunuN","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"5b1j8":[function(require,module,exports) {
+},{"trampoline-ts":"guf4a","./Domain":"2iCCP","immutable":"ePTEh","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"guf4a":[function(require,module,exports) {
 "use strict";
 function __export(m) {
     for(var p in m)if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -8855,7 +8872,7 @@ Object.defineProperty(exports, "__esModule", {
 __export(require("./thunk"));
 __export(require("./trampoline"));
 
-},{"./thunk":"dajNK","./trampoline":"hvPXH"}],"dajNK":[function(require,module,exports) {
+},{"./thunk":"aqKfS","./trampoline":"3nIXD"}],"aqKfS":[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -8871,7 +8888,7 @@ exports.toThunk = (fn)=>{
     return thunk;
 };
 
-},{}],"hvPXH":[function(require,module,exports) {
+},{}],"3nIXD":[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -8902,7 +8919,7 @@ exports.trampolineAsync = (fn)=>{
     });
 };
 
-},{"./thunk":"dajNK"}],"iunuN":[function(require,module,exports) {
+},{"./thunk":"aqKfS"}],"ePTEh":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Collection", ()=>Collection
@@ -52073,8 +52090,8 @@ exports.constants = {
 
 },{"randombytes":"8hjhE","create-hash":"2WyL8","create-hmac":"k1utz","browserify-sign/algos":"busIB","pbkdf2":"g38Hg","browserify-cipher":"d4idn","diffie-hellman":"hwD3y","browserify-sign":"jbRNy","create-ecdh":"9Rcg1","public-encrypt":"h9Rdh","randomfill":"k3tsT"}],"8hjhE":[function(require,module,exports) {
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 // limit of Crypto.getRandomValues()
 // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
 var MAX_BYTES = 65536;
@@ -54377,8 +54394,8 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
     this.chunk = chunk;
@@ -60098,8 +60115,8 @@ exports.pbkdf2 = require('./lib/async');
 exports.pbkdf2Sync = require('./lib/sync');
 
 },{"./lib/async":"aqdig","./lib/sync":"lh9gw"}],"aqdig":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 var Buffer = require('safe-buffer').Buffer;
 var checkParameters = require('./precondition');
 var defaultEncoding = require('./default-encoding');
@@ -68286,8 +68303,8 @@ exports.pipeline = require('./lib/internal/streams/pipeline.js');
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;
@@ -91230,8 +91247,8 @@ function compare(a, b) {
 
 },{"parse-asn1":"4Szbv","./mgf":"e2JgG","./xor":"iaxu0","bn.js":"3pDum","browserify-rsa":"e594P","create-hash":"2WyL8","./withPublic":"fFkPV","safe-buffer":"eW7r9"}],"k3tsT":[function(require,module,exports) {
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 function oldBrowser() {
     throw new Error('secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11');
 }
@@ -91618,16 +91635,17 @@ var _jsxDevRuntime = require("react/jsx-dev-runtime");
 var _react = require("react");
 var _reactDefault = parcelHelpers.interopDefault(_react);
 function GameStatus(props) {
-    let status = "Invite 2-4 players and press start!";
-    if (props.userIsInControl) status = "It's your go!";
-    if (props.waitingForUsername) status = `Waiting for ${props.waitingForUsername}...`;
-    if (props.winningUsername) status = `Well done ${props.winningUsername}`;
+    let status = "";
+    if (!props.isStarted) status = "Invite 2-4 players and press start!";
+    else if (props.winningUsername) status = `Well done ${props.winningUsername}`;
+    else if (props.userIsInControl) status = "It's your go!";
+    else if (props.waitingForUsername) status = `Waiting for ${props.waitingForUsername}...`;
     return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
         className: "gameStatus",
         children: status
     }, void 0, false, {
         fileName: "src/GameStatus.tsx",
-        lineNumber: 25,
+        lineNumber: 22,
         columnNumber: 10
     }, this));
 }

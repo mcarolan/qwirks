@@ -3,7 +3,7 @@ import { Rect, rectFromElement } from "./tiles/domain";
 import { plus, Tile } from "../../shared/Domain";
 import { Map, Set as ImmSet } from "immutable";
 import { TileGridGraphics } from "./tiles/TileGridGraphics";
-import { GameState, initialGameState } from "./tiles/GameState";
+import { capScale, GameState, initialGameState } from "./tiles/GameState";
 import { Mouse } from "./tiles/Mouse";
 import { GameLogic } from "./tiles/GameLogic";
 import { Score } from "./tiles/Score";
@@ -192,10 +192,7 @@ class Main
     const netZoomChange = this.zoomInPressed + this.zoomOutPressed * -1;
 
     if (netZoomChange != 0) {
-      gameState.scale = Math.min(
-        Math.max(gameState.scale + netZoomChange * 0.1, 0.5),
-        1.5
-      );
+      gameState.scale = capScale(gameState.scale + netZoomChange * 0.1);
       this.zoomInPressed = 0;
       this.zoomOutPressed = 0;
     }
@@ -323,6 +320,7 @@ class Main
     document.addEventListener("mousedown", Mouse.updateMouseDown(mouse));
     document.addEventListener("mouseup", Mouse.updateMouseUp(mouse));
     document.addEventListener("mousemove", Mouse.updateMousePosition(mouse));
+    document.addEventListener("wheel", Mouse.updateMouseWheel(mouse));
 
     this.frameId = requestAnimationFrame((_) =>
       this.frame(

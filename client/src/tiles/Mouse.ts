@@ -1,6 +1,6 @@
 import { IGameStateUpdater } from "~/IGameStateUpdater";
 import { Position } from "../../../shared/Domain";
-import { GameState } from "./GameState";
+import { capScale, GameState } from "./GameState";
 
 export interface MouseClick {
   type: "MouseClick";
@@ -17,63 +17,81 @@ export type MouseClickOrDrag = MouseClick | MouseDrag;
 
 export class Mouse implements IGameStateUpdater {
   private mousePosition: Position = { x: 0, y: 0 };
-  private mouseDownCounter: number | undefined;
+  private primaryMouseButtonDown = false;
 
   private isDragging: boolean = false;
   private mouseDragStart: Position | undefined;
 
   private events = Array<MouseClickOrDrag>();
 
-  private isMouseDown(): boolean {
-    return this.mouseDownCounter != undefined && this.mouseDownCounter != 0;
+  private wheelDelta: number = 0;
+
+  private setPrimaryMouseButtonDown(e: MouseEvent): void {
+    const flags = e.buttons !== undefined ? e.buttons : e.which;
+    const downBefore = this.primaryMouseButtonDown;
+    this.primaryMouseButtonDown = (flags & 1) === 1;
+
+    if (
+      this.primaryMouseButtonDown &&
+      this.mouseDragStart &&
+      !this.isDragging
+    ) {
+      const dx = Math.abs(this.mouseDragStart.x - this.mousePosition.x);
+      const dy = Math.abs(this.mouseDragStart.y - this.mousePosition.y);
+
+      if (dx > 5 || dy > 5) {
+        this.isDragging = true;
+      }
+    } else if (
+      this.isDragging &&
+      this.mouseDragStart &&
+      downBefore &&
+      !this.primaryMouseButtonDown
+    ) {
+      this.isDragging = false;
+      const e: MouseDrag = {
+        type: "MouseDrag",
+        from: this.mouseDragStart,
+        to: { x: this.mousePosition.x, y: this.mousePosition.y },
+      };
+      this.events.push(e);
+      this.mouseDragStart = undefined;
+    } else if (
+      !downBefore &&
+      this.primaryMouseButtonDown &&
+      this.mousePosition &&
+      this.mouseDragStart === undefined
+    ) {
+      this.mouseDragStart = {
+        x: this.mousePosition.x,
+        y: this.mousePosition.y,
+      };
+    } else if (downBefore && !this.primaryMouseButtonDown) {
+      const e: MouseClick = {
+        type: "MouseClick",
+        position: { x: this.mousePosition.x, y: this.mousePosition.y },
+      };
+      this.mouseDragStart = undefined;
+      this.events.push(e);
+    }
   }
 
-  static updateMouseUp(mouse: Mouse): () => void {
-    return () => {
-      const downBefore = mouse.isMouseDown();
-
-      mouse.mouseDownCounter = (mouse.mouseDownCounter ?? 0) - 1;
-
-      if (
-        mouse.isDragging &&
-        mouse.mouseDragStart &&
-        downBefore &&
-        !mouse.isMouseDown()
-      ) {
-        mouse.isDragging = false;
-        const e: MouseDrag = {
-          type: "MouseDrag",
-          from: mouse.mouseDragStart,
-          to: { x: mouse.mousePosition.x, y: mouse.mousePosition.y },
-        };
-        mouse.events.push(e);
-        mouse.mouseDragStart = undefined;
-      } else if (downBefore && !mouse.isMouseDown()) {
-        const e: MouseClick = {
-          type: "MouseClick",
-          position: { x: mouse.mousePosition.x, y: mouse.mousePosition.y },
-        };
-        mouse.mouseDragStart = undefined;
-        mouse.events.push(e);
-      }
+  static updateMouseWheel(mouse: Mouse): (e: WheelEvent) => void {
+    return (e: WheelEvent) => {
+      e.preventDefault();
+      mouse.wheelDelta += e.deltaY;
     };
   }
 
-  static updateMouseDown(mouse: Mouse): () => void {
-    return () => {
-      const downBefore = mouse.isMouseDown();
-      mouse.mouseDownCounter = (mouse.mouseDownCounter ?? 0) + 1;
-      if (
-        !downBefore &&
-        mouse.isMouseDown() &&
-        mouse.mousePosition &&
-        mouse.mouseDragStart == undefined
-      ) {
-        mouse.mouseDragStart = {
-          x: mouse.mousePosition.x,
-          y: mouse.mousePosition.y,
-        };
-      }
+  static updateMouseUp(mouse: Mouse): (e: MouseEvent) => void {
+    return (e: MouseEvent) => {
+      mouse.setPrimaryMouseButtonDown(e);
+    };
+  }
+
+  static updateMouseDown(mouse: Mouse): (e: MouseEvent) => void {
+    return (e: MouseEvent) => {
+      mouse.setPrimaryMouseButtonDown(e);
     };
   }
 
@@ -82,14 +100,7 @@ export class Mouse implements IGameStateUpdater {
       mouse.mousePosition.x = e.pageX;
       mouse.mousePosition.y = e.pageY;
 
-      if (mouse.isMouseDown() && mouse.mouseDragStart && !mouse.isDragging) {
-        const dx = Math.abs(mouse.mouseDragStart.x - mouse.mousePosition.x);
-        const dy = Math.abs(mouse.mouseDragStart.y - mouse.mousePosition.y);
-
-        if (dx > 5 || dy > 5) {
-          mouse.isDragging = true;
-        }
-      }
+      mouse.setPrimaryMouseButtonDown(e);
     };
   }
 
@@ -111,6 +122,10 @@ export class Mouse implements IGameStateUpdater {
     };
     gameState.mouseEvents = this.events;
     gameState.mouseDragInProgress = drag;
+
+    gameState.scale = capScale(gameState.scale + this.wheelDelta * 0.001);
+    this.wheelDelta = 0;
+
     this.events = [];
   }
 }
