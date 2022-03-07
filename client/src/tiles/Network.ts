@@ -95,7 +95,7 @@ export class Network implements IGameStateUpdater {
       gameState.pressedButtonTags.contains(ButtonTag.Start)
     ) {
       console.log("game start");
-      this.socket.emit("game.start");
+      this.socket.emit("game.start", 5000);
     }
 
     if (gameState.tilesToApply != undefined) {

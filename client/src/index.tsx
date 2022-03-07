@@ -283,7 +283,7 @@ class Main
 
     const score = new Score();
 
-    const socket = io("https://qwirksbackend.mcarolan.net");
+    const socket = io("http://localhost:3000");
 
     const mouse = new Mouse();
 

@@ -132,6 +132,24 @@ function newHand(
   return [newHand.concat(replacements), newTileBag];
 }
 
+function forceNextPlayer(gameKey: string, roundTimer: number): () => void {
+  return () => {
+    const game = upsert(
+      games,
+      gameKey,
+      () => initialGame(gameKey),
+      (g) => {
+        g.userInControl = nextUserInControl(g);
+        io.to(gameKey).emit("user.incontrol", g.userInControl);
+      }
+    );
+
+    if (!game.isOver) {
+      setTimeout(forceNextPlayer(gameKey, roundTimer), roundTimer);
+    }
+  };
+}
+
 io.on("connection", (s) => {
   var userId: string | undefined;
   var gameKey: string | undefined;
@@ -157,7 +175,7 @@ io.on("connection", (s) => {
         g.sockets.set(user.userId, s);
 
         if (g.isStarted) {
-          s.emit("game.started");
+          s.emit("game.started", undefined);
         }
 
         if (g.isOver) {
@@ -185,7 +203,7 @@ io.on("connection", (s) => {
     );
   });
 
-  s.on("game.start", () => {
+  s.on("game.start", (roundTimer: number | undefined) => {
     const gk = gameKey;
     if (gk) {
       upsert(
@@ -198,7 +216,10 @@ io.on("connection", (s) => {
             g.userInControl = firstUserInControl(g);
             io.to(gk).emit("user.incontrol", g.userInControl);
             g.isStarted = true;
-            io.to(gk).emit("game.started");
+            io.to(gk).emit("game.started", roundTimer);
+            if (roundTimer) {
+              setTimeout(forceNextPlayer(gk, roundTimer), roundTimer);
+            }
           }
         }
       );
