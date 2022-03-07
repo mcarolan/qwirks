@@ -59,200 +59,57 @@
       font-size: larger;
     }
 
+    #bottomPanel {
+      margin: auto;
+      width: 473px;
+      height: 129px;
+      margin-top: 30px;
+      margin-bottom: 30px;
+      background: #feac5e; /* fallback for old browsers */
+      background: -webkit-linear-gradient(
+        to right,
+        #4bc0c8,
+        #c779d0,
+        #feac5e
+      ); /* Chrome 10-25, Safari 5.1-6 */
+      background: linear-gradient(
+        to right,
+        #4bc0c8,
+        #c779d0,
+        #feac5e
+      ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+      border-radius: 30px;
+      box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    }
+
     #mainContainer {
       width: 100%;
       height: 100%;
     }
 
-    @media only screen and (min-width: 501px) {
-      #wrapper {
-        width: 100%;
-        height: 100%;
-        background: #feac5e; /* fallback for old browsers */
-        background: -webkit-linear-gradient(
-          to right,
-          #4bc0c8,
-          #c779d0,
-          #feac5e
-        ); /* Chrome 10-25, Safari 5.1-6 */
-        background: linear-gradient(
-          to right,
-          #4bc0c8,
-          #c779d0,
-          #feac5e
-        ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-        display: grid;
-        grid-template-areas:
-          "main sidebar"
-          "bottom bottom";
-        grid-template-columns: 4fr 1fr;
-        gap: 10px;
-      }
-
-      .squareButton {
-        width: 64px;
-        height: 64px;
-      }
-
-      .squareButton img {
-        width: 32px;
-        height: 32px;
-      }
-
-      .smallSquareButton {
-        width: 32px;
-        height: 32px;
-      }
-
-      .tile {
-        width: 64px;
-        height: 64px;
-        position: relative;
-        top: 0;
-        left: 0;
-        float: left;
-        padding-left: 10px;
-      }
-
-      .tile .background {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 64px;
-        height: 64px;
-      }
-
-      .tile .emblem {
-        position: absolute;
-        width: 32px;
-        height: 32px;
-        top: 16px;
-        left: 16px;
-      }
-
-      .hand {
-        padding-top: 30px;
-        padding-left: 20px;
-      }
-
-      #bottomPanel {
-        margin: auto;
-        width: 100%;
-        height: 129px;
-        margin-top: 30px;
-        margin-bottom: 30px;
-        background: #feac5e; /* fallback for old browsers */
-        background: -webkit-linear-gradient(
-          to right,
-          #4bc0c8,
-          #c779d0,
-          #feac5e
-        ); /* Chrome 10-25, Safari 5.1-6 */
-        background: linear-gradient(
-          to right,
-          #4bc0c8,
-          #c779d0,
-          #feac5e
-        ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-
-        border-radius: 30px;
-        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-      }
-    }
-
-    @media only screen and (max-width: 500px) {
-      #wrapper {
-        width: 100%;
-        height: 100%;
-        background: #feac5e; /* fallback for old browsers */
-        background: -webkit-linear-gradient(
-          to right,
-          #4bc0c8,
-          #c779d0,
-          #feac5e
-        ); /* Chrome 10-25, Safari 5.1-6 */
-        background: linear-gradient(
-          to right,
-          #4bc0c8,
-          #c779d0,
-          #feac5e
-        ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-        display: grid;
-        grid-template-areas:
-          "main sidebar"
-          "bottom bottom";
-        grid-template-columns: 4fr 1fr;
-        gap: 0px;
-      }
-
-      .squareButton {
-        width: 32px;
-        height: 32px;
-      }
-
-      .squareButton img {
-        width: 16px;
-        height: 16px;
-      }
-
-      .smallSquareButton {
-        width: 16px;
-        height: 16px;
-      }
-
-      .tile {
-        width: 32px;
-        height: 32px;
-        position: relative;
-        top: 0;
-        left: 0;
-        float: left;
-        padding-left: 10px;
-      }
-
-      .tile .background {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 32px;
-        height: 32px;
-      }
-
-      .tile .emblem {
-        position: absolute;
-        width: 16px;
-        height: 16px;
-        top: 8px;
-        left: 8px;
-      }
-      .hand {
-        padding-top: 15px;
-        padding-left: 20px;
-      }
-
-      #bottomPanel {
-        margin: auto;
-        width: 100%;
-        height: 64px;
-        margin-top: 15px;
-        margin-bottom: 15px;
-        background: #feac5e; /* fallback for old browsers */
-        background: -webkit-linear-gradient(
-          to right,
-          #4bc0c8,
-          #c779d0,
-          #feac5e
-        ); /* Chrome 10-25, Safari 5.1-6 */
-        background: linear-gradient(
-          to right,
-          #4bc0c8,
-          #c779d0,
-          #feac5e
-        ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-
-        border-radius: 15px;
-        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-      }
+    #wrapper {
+      width: 100%;
+      height: 100%;
+      background: #feac5e; /* fallback for old browsers */
+      background: -webkit-linear-gradient(
+        to right,
+        #4bc0c8,
+        #c779d0,
+        #feac5e
+      ); /* Chrome 10-25, Safari 5.1-6 */
+      background: linear-gradient(
+        to right,
+        #4bc0c8,
+        #c779d0,
+        #feac5e
+      ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+      display: grid;
+      grid-template-areas:
+        "main sidebar"
+        "bottom bottom";
+      grid-template-columns: 4fr 1fr;
+      gap: 10px;
     }
 
     .wrapper-contracted {
@@ -405,8 +262,37 @@
       display: none;
     }
 
+    .tile {
+      width: 64px;
+      height: 64px;
+      position: relative;
+      top: 0;
+      left: 0;
+      float: left;
+      padding-left: 10px;
+    }
+
     .tile-disabled {
       opacity: 0.4;
+    }
+
+    .tile .background {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .tile .emblem {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      top: 16px;
+      left: 16px;
+    }
+
+    .hand {
+      padding-top: 30px;
+      padding-left: 20px;
     }
 
     button {
@@ -429,6 +315,21 @@
       padding: 10px;
       border-radius: 10px;
       box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    }
+
+    .squareButton {
+      width: 64px;
+      height: 64px;
+    }
+
+    .squareButton img {
+      width: 32px;
+      height: 32px;
+    }
+
+    .smallSquareButton {
+      width: 32px;
+      height: 32px;
     }
 
     .startButton-invisible {
