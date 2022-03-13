@@ -216,6 +216,7 @@ io.on("connection", (s) => {
             g.userInControl = firstUserInControl(g);
             io.to(gk).emit("user.incontrol", g.userInControl);
             g.isStarted = true;
+            console.log(`starting ${gk}, round timer is ${roundTimer}`);
             io.to(gk).emit("game.started", roundTimer);
             if (roundTimer) {
               setTimeout(forceNextPlayer(gk, roundTimer), roundTimer);

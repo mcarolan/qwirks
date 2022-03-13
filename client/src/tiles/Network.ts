@@ -95,7 +95,7 @@ export class Network implements IGameStateUpdater {
       gameState.pressedButtonTags.contains(ButtonTag.Start)
     ) {
       console.log("game start");
-      this.socket.emit("game.start", 5000);
+      this.socket.emit("game.start", gameState.roundTimerSelected);
     }
 
     if (gameState.tilesToApply != undefined) {

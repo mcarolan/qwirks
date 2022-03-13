@@ -41,6 +41,8 @@ export interface GameState {
   mouseDragInProgress: MouseDrag | undefined;
   setUsername: string | undefined;
   winner: string | undefined;
+  roundTimerSelected: number | undefined;
+  roundTimer: number | undefined;
 }
 
 export function capScale(scale: number): number {
@@ -101,5 +103,7 @@ export function initialGameState(
     mouseDragInProgress: undefined,
     setUsername: undefined,
     winner: undefined,
+    roundTimerSelected: undefined,
+    roundTimer: undefined
   };
 }

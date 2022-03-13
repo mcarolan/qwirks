@@ -109,6 +109,7 @@ interface MainState {
   activeTileIndicies: ImmSet<number>;
   tilesPlaced: number;
   winner: string | undefined;
+  roundTimerSelected: number | undefined;
 }
 
 interface MainProps {
@@ -133,6 +134,7 @@ class Main
       userInControl: undefined,
       tilesPlaced: 0,
       winner: undefined,
+      roundTimerSelected: undefined,
     };
   }
 
@@ -140,6 +142,7 @@ class Main
   private handTilesClicked: Array<number> = [];
   private zoomInPressed: number = 0;
   private zoomOutPressed: number = 0;
+  private selectedRoundTimer: number | undefined;
   private setUsername: string | undefined = undefined;
 
   onClickButton(buttonTag: ButtonTag): () => void {
@@ -207,6 +210,8 @@ class Main
       console.log("setting to " + this.setUsername);
       this.setUsername = undefined;
     }
+
+    gameState.roundTimerSelected = this.selectedRoundTimer;
   }
 
   updateReactState(gameState: GameState, deps: GameDependencies): void {
@@ -376,6 +381,22 @@ class Main
               zoomOut={() => (this.zoomOutPressed += 1)}
             />
             <div className="main-buttons">
+              <select
+                className={isVisible(ButtonTag.Start) ? "" : "displayNone"}
+                onChange={(e) => {
+                  const roundTimer: number | undefined = e.target.value
+                    ? parseInt(e.target.value)
+                    : undefined;
+                  this.selectedRoundTimer = roundTimer;
+                }}
+              >
+                <option value={undefined}>No round timer</option>
+                <option value={10000}>10 seconds</option>
+                <option value={20000}>20 seconds</option>
+                <option value={30000}>30 seconds</option>
+                <option value={60000}>1 minute</option>
+                <option value={120000}>2 minutes</option>
+              </select>
               <Button
                 visible={isVisible(ButtonTag.Start)}
                 onClick={this.onClickButton(ButtonTag.Start)}
