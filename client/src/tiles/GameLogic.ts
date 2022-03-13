@@ -93,6 +93,16 @@ export class GameLogic implements IGameStateUpdater {
       gameState.currentPlacement.placedTiles = Set();
     }
 
+    if (gameState.newUserInControl != undefined) {
+      const newHand = gameState.hand.concat(
+        gameState.currentPlacement.placedTiles
+      );
+      gameState.hand = newHand;
+      gameState.currentPlacement.placedTiles = Set();
+      gameState.currentPlacement.tiles = [];
+      gameState.panelActiveTileIndicies = Set();
+    }
+
     const placementButtonsEnabled = !(
       gameState.currentPlacement.tiles.length === 0
     );

@@ -15,6 +15,8 @@ export class Network implements IGameStateUpdater {
   private setTiles: PositionedTile[] | undefined;
   private setTilesLastPlaced: Set<PositionedTile> | undefined;
   private setWinner: string | undefined;
+  private setTurnStartTime: number | undefined;
+  private setTurnTimer: number | undefined;
 
   constructor(private socket: Socket, private user: User, gameKey: string) {
     this.socket.on("connect", () => {
@@ -32,9 +34,10 @@ export class Network implements IGameStateUpdater {
         this.hand = List(tiles);
       });
 
-      this.socket.on("game.started", () => {
+      this.socket.on("game.started", (turnTimer: number | undefined) => {
         console.log("game started update");
         this.setGameStarted = true;
+        this.setTurnTimer = turnTimer;
       });
 
       this.socket.on("game.over", (winner: string) => {
@@ -52,10 +55,13 @@ export class Network implements IGameStateUpdater {
         }
       );
 
-      this.socket.on("user.incontrol", (userId: string) => {
-        console.log("user in control update");
-        this.setUserInControl = userId;
-      });
+      this.socket.on(
+        "user.incontrol",
+        (userId: string, turnStartTime: number) => {
+          this.setUserInControl = userId;
+          this.setTurnStartTime = turnStartTime;
+        }
+      );
     });
 
     this.socket.on("disconnect", () => {
@@ -74,12 +80,15 @@ export class Network implements IGameStateUpdater {
     const previousUserInControl = gameState.userInControl;
     gameState.userInControl = this.setUserInControl ?? gameState.userInControl;
     gameState.winner = this.setWinner ?? gameState.winner;
+    gameState.turnStartTime = this.setTurnStartTime ?? gameState.turnStartTime;
+    gameState.turnTimer = this.setTurnTimer ?? gameState.turnTimer;
 
-    if (
-      previousUserInControl != gameState.currentUser.userId &&
-      gameState.userInControl === gameState.currentUser.userId
-    ) {
-      gameState.playYourGoSound = true;
+    if (gameState.newUserInControl != undefined) {
+      gameState.newUserInControl = undefined;
+    }
+
+    if (previousUserInControl != gameState.userInControl) {
+      gameState.newUserInControl = gameState.userInControl;
     }
 
     this.setGameStarted = undefined;
@@ -89,13 +98,15 @@ export class Network implements IGameStateUpdater {
     this.setUserInControl = undefined;
     this.setTiles = undefined;
     this.setWinner = undefined;
+    this.setTurnStartTime = undefined;
+    this.setTurnTimer = undefined;
 
     if (
       !gameState.isStarted &&
       gameState.pressedButtonTags.contains(ButtonTag.Start)
     ) {
       console.log("game start");
-      this.socket.emit("game.start", gameState.roundTimerSelected);
+      this.socket.emit("game.start", gameState.turnTimerSelected);
     }
 
     if (gameState.tilesToApply != undefined) {

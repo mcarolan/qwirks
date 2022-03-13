@@ -3,6 +3,7 @@ import http from "http";
 import { List, Set } from "immutable";
 import { Server, Socket } from "socket.io";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import { utcEpoch } from "../../shared/DateUtils";
 import {
   PositionedTile,
   Tile,
@@ -43,6 +44,9 @@ interface Game {
   tiles: PositionedTile[];
   tilesLastPlaced: Set<PositionedTile>;
   userInControl: string | undefined;
+  turnStartTime: number | undefined;
+  forceNextTimeout: NodeJS.Timeout | undefined;
+  turnTimer: number | undefined;
 }
 const games = new Map<string, Game>();
 
@@ -70,6 +74,9 @@ function initialGame(gameKey: string): Game {
     tiles: [],
     tilesLastPlaced: Set(),
     userInControl: undefined,
+    turnStartTime: undefined,
+    forceNextTimeout: undefined,
+    turnTimer: undefined,
   };
 }
 
@@ -132,22 +139,32 @@ function newHand(
   return [newHand.concat(replacements), newTileBag];
 }
 
-function forceNextPlayer(gameKey: string, roundTimer: number): () => void {
-  return () => {
-    const game = upsert(
-      games,
-      gameKey,
-      () => initialGame(gameKey),
-      (g) => {
+function nextPlayer(gameKey: string): void {
+  const game = upsert(
+    games,
+    gameKey,
+    () => initialGame(gameKey),
+    (g) => {
+      if (!g.userInControl) {
+        g.userInControl = firstUserInControl(g);
+      } else {
         g.userInControl = nextUserInControl(g);
-        io.to(gameKey).emit("user.incontrol", g.userInControl);
       }
-    );
-
-    if (!game.isOver) {
-      setTimeout(forceNextPlayer(gameKey, roundTimer), roundTimer);
+      g.turnStartTime = utcEpoch();
+      io.to(gameKey).emit("user.incontrol", g.userInControl, g.turnStartTime);
     }
-  };
+  );
+
+  if (game.forceNextTimeout) {
+    clearTimeout(game.forceNextTimeout);
+  }
+
+  if (!game.isOver && game.turnTimer) {
+    game.forceNextTimeout = setTimeout(
+      () => nextPlayer(gameKey),
+      game.turnTimer
+    );
+  }
 }
 
 io.on("connection", (s) => {
@@ -175,7 +192,7 @@ io.on("connection", (s) => {
         g.sockets.set(user.userId, s);
 
         if (g.isStarted) {
-          s.emit("game.started", undefined);
+          s.emit("game.started", g.turnTimer);
         }
 
         if (g.isOver) {
@@ -186,7 +203,7 @@ io.on("connection", (s) => {
         }
 
         if (g.userInControl) {
-          s.emit("user.incontrol", g.userInControl);
+          s.emit("user.incontrol", g.userInControl, g.turnStartTime);
         }
 
         if (g.tiles.length > 0) {
@@ -203,7 +220,7 @@ io.on("connection", (s) => {
     );
   });
 
-  s.on("game.start", (roundTimer: number | undefined) => {
+  s.on("game.start", (turnTimer: number | undefined) => {
     const gk = gameKey;
     if (gk) {
       upsert(
@@ -213,14 +230,11 @@ io.on("connection", (s) => {
         (g) => {
           if (!g.isStarted) {
             sendStartingHands(g);
-            g.userInControl = firstUserInControl(g);
-            io.to(gk).emit("user.incontrol", g.userInControl);
+            g.turnTimer = turnTimer;
+            nextPlayer(gk);
             g.isStarted = true;
-            console.log(`starting ${gk}, round timer is ${roundTimer}`);
-            io.to(gk).emit("game.started", roundTimer);
-            if (roundTimer) {
-              setTimeout(forceNextPlayer(gk, roundTimer), roundTimer);
-            }
+            console.log(`starting ${gk}, round timer is ${turnTimer}`);
+            io.to(gk).emit("game.started", turnTimer);
           }
         }
       );
@@ -262,8 +276,7 @@ io.on("connection", (s) => {
               g.tileBag = newTileBag.add(List(tiles));
               g.hands.set(uid, nextHand);
               s.emit("user.hand", nextHand.toArray());
-              g.userInControl = nextUserInControl(g);
-              io.to(gk).emit("user.incontrol", g.userInControl);
+              nextPlayer(gk);
             }
           }
         }
@@ -303,7 +316,6 @@ io.on("connection", (s) => {
                 });
                 io.to(gk).emit("user.list", [...g.users.entries()]);
               }
-              g.userInControl = nextUserInControl(g);
               io.to(gk).emit(
                 "game.tiles",
                 g.tiles,
@@ -317,7 +329,7 @@ io.on("connection", (s) => {
                   List(g.users.entries()).maxBy(([_, u]) => u.score)?.[0]
                 );
               }
-              io.to(gk).emit("user.incontrol", g.userInControl);
+              nextPlayer(gk);
             }
           }
         }

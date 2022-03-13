@@ -1,5 +1,6 @@
 import _ from "lodash";
 import { IGameStateUpdater } from "~/IGameStateUpdater";
+import { UserHand } from "~/UserHand";
 import { GameState } from "./GameState";
 import { loadSound } from "./utility";
 
@@ -58,9 +59,11 @@ export class Sounds implements IGameStateUpdater {
       gameState.scoreJustAchieved = 0;
     }
 
-    if (gameState.playYourGoSound) {
+    if (
+      gameState.newUserInControl != undefined &&
+      gameState.newUserInControl === gameState.currentUser.userId
+    ) {
       this.yourgo();
-      gameState.playYourGoSound = false;
     }
   }
 

@@ -109,7 +109,8 @@ interface MainState {
   activeTileIndicies: ImmSet<number>;
   tilesPlaced: number;
   winner: string | undefined;
-  roundTimerSelected: number | undefined;
+  turnTimer: number | undefined;
+  turnStartTime: number | undefined;
 }
 
 interface MainProps {
@@ -134,7 +135,8 @@ class Main
       userInControl: undefined,
       tilesPlaced: 0,
       winner: undefined,
-      roundTimerSelected: undefined,
+      turnTimer: undefined,
+      turnStartTime: undefined,
     };
   }
 
@@ -142,7 +144,7 @@ class Main
   private handTilesClicked: Array<number> = [];
   private zoomInPressed: number = 0;
   private zoomOutPressed: number = 0;
-  private selectedRoundTimer: number | undefined;
+  private selectedTurnTimer: number | undefined;
   private setUsername: string | undefined = undefined;
 
   onClickButton(buttonTag: ButtonTag): () => void {
@@ -165,7 +167,9 @@ class Main
       !is(this.state.hand, gameState.hand) ||
       !is(this.state.activeTileIndicies, gameState.panelActiveTileIndicies) ||
       !is(this.state.tilesPlaced, gameState.tilesApplied.length) ||
-      !is(this.state.activeTileIndicies, gameState.winner)
+      !is(this.state.activeTileIndicies, gameState.winner) ||
+      !is(this.state.turnStartTime, gameState.turnStartTime) ||
+      !is(this.state.turnTimer, gameState.turnTimer)
     );
   }
 
@@ -211,7 +215,7 @@ class Main
       this.setUsername = undefined;
     }
 
-    gameState.roundTimerSelected = this.selectedRoundTimer;
+    gameState.turnTimerSelected = this.selectedTurnTimer;
   }
 
   updateReactState(gameState: GameState, deps: GameDependencies): void {
@@ -229,6 +233,8 @@ class Main
           activeTileIndicies: gameState.panelActiveTileIndicies,
           tilesPlaced: gameState.tilesApplied.length,
           winner: gameState.winner,
+          turnStartTime: gameState.turnStartTime,
+          turnTimer: gameState.turnTimer,
         },
         () => {
           console.log(`react state update ${JSON.stringify(this.state)}`);
@@ -374,6 +380,8 @@ class Main
                 : undefined
             }
             isStarted={this.state.isStarted}
+            turnTimer={this.state.turnTimer}
+            turnStartTime={this.state.turnStartTime}
           />
           <div id="buttonsContainer">
             <ZoomControls
@@ -387,7 +395,7 @@ class Main
                   const roundTimer: number | undefined = e.target.value
                     ? parseInt(e.target.value)
                     : undefined;
-                  this.selectedRoundTimer = roundTimer;
+                  this.selectedTurnTimer = roundTimer;
                 }}
               >
                 <option value={undefined}>No round timer</option>

@@ -13,7 +13,6 @@ export interface CurrentPlacementState {
 }
 
 export interface GameState {
-  playYourGoSound: boolean;
   scale: number;
   gameKey: string;
   isStarted: boolean;
@@ -41,8 +40,10 @@ export interface GameState {
   mouseDragInProgress: MouseDrag | undefined;
   setUsername: string | undefined;
   winner: string | undefined;
-  roundTimerSelected: number | undefined;
-  roundTimer: number | undefined;
+  turnTimerSelected: number | undefined;
+  turnTimer: number | undefined;
+  turnStartTime: number | undefined;
+  newUserInControl: string | undefined;
 }
 
 export function capScale(scale: number): number {
@@ -70,7 +71,6 @@ export function initialGameState(
   mainAreaBounds: Rect
 ): GameState {
   return {
-    playYourGoSound: false,
     scale: 1,
     gameKey: gameKey,
     isStarted: false,
@@ -103,7 +103,9 @@ export function initialGameState(
     mouseDragInProgress: undefined,
     setUsername: undefined,
     winner: undefined,
-    roundTimerSelected: undefined,
-    roundTimer: undefined
+    turnTimerSelected: undefined,
+    turnTimer: undefined,
+    turnStartTime: undefined,
+    newUserInControl: undefined,
   };
 }
