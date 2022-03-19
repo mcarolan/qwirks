@@ -1,9 +1,9 @@
 import { List, Set as ImmSet, Map } from "immutable";
 import { User, UserWithStatus } from "~/../../shared/User";
-import { ButtonTag } from "..";
 import { Rect } from "./domain";
 import { MouseClickOrDrag, MouseDrag } from "./Mouse";
 import { Tile, PositionedTile, Position } from "../../../shared/Domain";
+import { ButtonTag } from "~/button/ButtonTag";
 
 export interface CurrentPlacementState {
   placedTiles: ImmSet<PositionedTile>;

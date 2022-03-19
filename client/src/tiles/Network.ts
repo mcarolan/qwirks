@@ -3,8 +3,8 @@ import { IGameStateUpdater } from "~/IGameStateUpdater";
 import { GameState } from "./GameState";
 import { List, Map, Set } from "immutable";
 import { User, UserWithStatus } from "../../../shared/User";
-import { ButtonTag } from "..";
 import { PositionedTile, Tile } from "../../../shared/Domain";
+import { ButtonTag } from "~/button/ButtonTag";
 
 export class Network implements IGameStateUpdater {
   private setUserList: Map<string, UserWithStatus> | undefined;
