@@ -1,5 +1,5 @@
-import { Rect } from "../tiles/domain";
-import { random } from "../tiles/utility";
+import { Rect } from "../graphics/domain";
+import { random } from "../game/utility";
 import { Firework } from "./Firework";
 import { Particle } from "./Particle";
 import { Position } from "../../../shared/Domain";

@@ -1,9 +1,9 @@
 import { List } from "immutable";
-import { plus } from "~/../../shared/Domain";
-import { IGameStateUpdater } from "~/IGameStateUpdater";
-import { GameState } from "~/tiles/GameState";
-import { TileGraphics } from "~/tiles/TileGraphics";
-import { TileGridGraphics } from "~/tiles/TileGridGraphics";
+import { plus } from "../../../shared/Domain";
+import { IGameStateUpdater } from "~/game/IGameStateUpdater";
+import { GameState } from "~/state/GameState";
+import { TileGraphics } from "~/graphics/TileGraphics";
+import { TileGridGraphics } from "~/graphics/TileGridGraphics";
 import { Fireworks } from "./Fireworks";
 
 export class FireworkUpdater implements IGameStateUpdater {

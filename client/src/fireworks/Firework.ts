@@ -1,5 +1,5 @@
 import { Position, plus, distanceBetween } from "../../../shared/Domain";
-import { random } from "../tiles/utility";
+import { random } from "../game/utility";
 
 export class Firework {
   private current: Position;

@@ -1,9 +1,9 @@
-import { GameState, singleActiveTile } from "./GameState";
+import { GameState, singleActiveTile } from "../state/GameState";
 import { Set } from "immutable";
-import { IGameStateUpdater } from "~/IGameStateUpdater";
+import { IGameStateUpdater } from "~/game/IGameStateUpdater";
 import { PositionedTile, prettyPrint, Tile } from "../../../shared/Domain";
 import { TileGrid } from "../../../shared/TileGrid";
-import { ButtonTag } from "~/button/ButtonTag";
+import { ButtonTag } from "../component/Button";
 
 function isValidPlacement(
   gameState: GameState,

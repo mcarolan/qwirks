@@ -1,5 +1,5 @@
 import { List, Set } from "immutable";
-import { Tile } from "../../shared/Domain";
+import { Tile } from "../../../shared/Domain";
 import React, { useState } from "react";
 
 interface UserHandProps {

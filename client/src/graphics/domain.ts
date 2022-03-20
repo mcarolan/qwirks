@@ -34,3 +34,17 @@ export function middle(rect: Rect): Position {
     y: rect.position.y + rect.height / 2,
   };
 }
+
+export function loadImage(src: string): Promise<HTMLImageElement> {
+  const img = new Image();
+  img.src = src;
+
+  const p = new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(`could not load ${src}`);
+    img.src = src;
+  });
+
+  return p;
+}

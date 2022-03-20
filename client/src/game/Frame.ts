@@ -1,30 +1,17 @@
 import { GameDependencies } from "./GameDependencies";
 import {
-  MainState,
-  reactStateFromGameState,
-  shouldUpdateState,
-} from "./MainState";
-import { rectFromElement } from "./tiles/domain";
-import { GameState } from "./tiles/GameState";
+  MainCompmonentState,
+  syncReactAndGameState,
+} from "../state/MainComponentState";
+import { rectFromElement } from "../graphics/domain";
+import { GameState } from "~/state/GameState";
 
 export interface MainStateFunctions {
-  state: MainState;
-  setState: (state: MainState, callback: () => void) => void;
-}
-
-function updateReactState(
-  gameState: GameState,
-  deps: GameDependencies,
-  mainState: MainStateFunctions
-): void {
-  if (shouldUpdateState(mainState.state, gameState)) {
-    mainState.setState(reactStateFromGameState(gameState), () => {
-      console.log(`react state update ${JSON.stringify(mainState.state)}`);
-      requestAnimationFrame((_) => frame(gameState, deps, mainState));
-    });
-  } else {
-    requestAnimationFrame((_) => frame(gameState, deps, mainState));
-  }
+  state: MainCompmonentState;
+  setState: (
+    stateFn: (state: Readonly<MainCompmonentState>) => MainCompmonentState,
+    callback: () => void
+  ) => void;
 }
 
 export function frame(
@@ -44,7 +31,6 @@ export function frame(
     deps.context.canvas.height
   );
 
-  deps.mainComponentStateUpdater.update(gameState);
   deps.network.update(gameState);
   deps.mouse.update(gameState);
   deps.tileGrid.update(gameState);
@@ -58,5 +44,7 @@ export function frame(
 
   deps.context.restore();
 
-  requestAnimationFrame((_) => updateReactState(gameState, deps, mainState));
+  syncReactAndGameState(mainState, gameState, () =>
+    requestAnimationFrame((_) => frame(gameState, deps, mainState))
+  );
 }

@@ -1,10 +1,10 @@
 import { Socket } from "socket.io-client";
-import { IGameStateUpdater } from "~/IGameStateUpdater";
-import { GameState } from "./GameState";
+import { IGameStateUpdater } from "~/game/IGameStateUpdater";
+import { GameState } from "~/state/GameState";
 import { List, Map, Set } from "immutable";
 import { User, UserWithStatus } from "../../../shared/User";
 import { PositionedTile, Tile } from "../../../shared/Domain";
-import { ButtonTag } from "~/button/ButtonTag";
+import { ButtonTag } from "../component/Button";
 
 export class Network implements IGameStateUpdater {
   private setUserList: Map<string, UserWithStatus> | undefined;

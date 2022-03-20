@@ -1,5 +1,5 @@
 import React from "react";
-import { utcEpoch } from "../../shared/DateUtils";
+import { utcEpoch } from "../../../shared/DateUtils";
 
 export interface GameStatusProps {
   isStarted: boolean;

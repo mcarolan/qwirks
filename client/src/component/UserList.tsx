@@ -1,6 +1,6 @@
 import { Map, List } from "immutable";
 import React from "react";
-import { UserWithStatus } from "../../shared/User";
+import { UserWithStatus } from "../../../shared/User";
 import { UserListUser } from "./UserListUser";
 
 interface UserListProps {

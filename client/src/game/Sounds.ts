@@ -1,7 +1,6 @@
 import _ from "lodash";
-import { IGameStateUpdater } from "~/IGameStateUpdater";
-import { UserHand } from "~/UserHand";
-import { GameState } from "./GameState";
+import { IGameStateUpdater } from "~/game/IGameStateUpdater";
+import { GameState } from "~/state/GameState";
 import { loadSound } from "./utility";
 
 const fx01 = loadSound("sounds/FX01.mp3");

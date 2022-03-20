@@ -1,10 +1,10 @@
-import { IGameStateUpdater } from "~/IGameStateUpdater";
-import { GameState, singleActiveTile } from "./GameState";
-import { MouseDrag } from "./Mouse";
-import { TileGraphics } from "./TileGraphics";
-import { Position, Tile, minus, plus } from "../../../shared/Domain";
-import { middle, rectContains } from "./domain";
 import { fromJS } from "immutable";
+import { minus, plus, Position, Tile } from "../../../shared/Domain";
+import { IGameStateUpdater } from "../game/IGameStateUpdater";
+import { MouseDrag } from "../game/Mouse";
+import { GameState, singleActiveTile } from "../state/GameState";
+import { middle, rectContains } from "./domain";
+import { TileGraphics } from "./TileGraphics";
 
 export class TileGridGraphics implements IGameStateUpdater {
   private offset: Position;

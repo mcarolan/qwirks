@@ -1,5 +1,12 @@
 import React from "react";
 
+export enum ButtonTag {
+  Start = "start",
+  Accept = "accept",
+  Swap = "swap",
+  Cancel = "cancel",
+}
+
 interface ButtonProps {
   visible: boolean;
   onClick: () => void;

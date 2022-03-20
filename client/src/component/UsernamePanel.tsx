@@ -1,5 +1,5 @@
 import React, { KeyboardEventHandler, useState } from "react";
-import { User } from "../../shared/User";
+import { User } from "../../../shared/User";
 import { Button } from "./Button";
 
 interface UsernamePanelProps {

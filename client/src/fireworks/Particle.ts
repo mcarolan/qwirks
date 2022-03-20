@@ -1,5 +1,5 @@
 import { Position, plus } from "../../../shared/Domain";
-import { random } from "../tiles/utility";
+import { random } from "../game/utility";
 
 export class Particle {
   private readonly coordinates: Array<Position>;

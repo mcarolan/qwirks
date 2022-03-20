@@ -1,19 +1,14 @@
 import { io, Socket } from "socket.io-client";
-import { Main } from ".";
-import { User } from "../../shared/User";
-import { loadUserFromLocalStorage } from "./browser/BrowserAPI";
-import { Fireworks } from "./fireworks/Fireworks";
-import { FireworkUpdater } from "./fireworks/FireworkUpdater";
-import { Rect, rectFromElement } from "./tiles/domain";
-import { GameLogic } from "./tiles/GameLogic";
-import { MainComponentStateUpdater } from "./tiles/MainComponentStateUpdater";
-import { Mouse } from "./tiles/Mouse";
-import { Network } from "./tiles/Network";
-import { Score } from "./tiles/Score";
-import { Sounds } from "./tiles/Sounds";
-import { loadTileGraphics } from "./tiles/TileGraphics";
-import { TileGridGraphics } from "./tiles/TileGridGraphics";
-import { loadImage } from "./tiles/utility";
+import { User } from "../../../shared/User";
+import { Fireworks } from "../fireworks/Fireworks";
+import { FireworkUpdater } from "../fireworks/FireworkUpdater";
+import { GameLogic } from "./GameLogic";
+import { Mouse } from "./Mouse";
+import { Network } from "./Network";
+import { Sounds } from "./Sounds";
+import { loadTileGraphics } from "../graphics/TileGraphics";
+import { TileGridGraphics } from "../graphics/TileGridGraphics";
+import { loadImage } from "../graphics/domain";
 
 export interface GameDependencies {
   canvas: HTMLCanvasElement;
@@ -21,7 +16,6 @@ export interface GameDependencies {
   mainArea: HTMLElement;
   tileGrid: TileGridGraphics;
   mouse: Mouse;
-  score: Score;
   fireworks: Fireworks;
   socket: Socket;
   user: User;
@@ -29,20 +23,16 @@ export interface GameDependencies {
   sounds: Sounds;
   gameLogic: GameLogic;
   fireworkUpdater: FireworkUpdater;
-  mainComponentStateUpdater: MainComponentStateUpdater;
 }
 
 export async function loadGameDependencies(
   user: User,
-  gameKey: string,
-  mainComponent: Main
+  gameKey: string
 ): Promise<GameDependencies> {
   const canvas = document.querySelector("#game") as HTMLCanvasElement;
   const mainArea = document.querySelector("#mainArea") as HTMLElement;
 
   const tileGraphics = await loadTileGraphics();
-
-  const score = new Score();
 
   const socket = io("http://localhost:3000");
 
@@ -68,7 +58,6 @@ export async function loadGameDependencies(
     mainArea,
     tileGrid,
     mouse,
-    score,
     fireworks,
     socket,
     user,
@@ -76,6 +65,5 @@ export async function loadGameDependencies(
     sounds,
     gameLogic: new GameLogic(),
     fireworkUpdater,
-    mainComponentStateUpdater: new MainComponentStateUpdater(mainComponent),
   };
 }

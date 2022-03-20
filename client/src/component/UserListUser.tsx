@@ -1,5 +1,5 @@
 import React from "react";
-import { OnlineStatus, UserWithStatus } from "../../shared/User";
+import { OnlineStatus, UserWithStatus } from "../../../shared/User";
 
 interface UserListUserProps {
   user: UserWithStatus;

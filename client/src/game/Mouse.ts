@@ -1,6 +1,6 @@
-import { IGameStateUpdater } from "~/IGameStateUpdater";
+import { IGameStateUpdater } from "~/game/IGameStateUpdater";
 import { Position } from "../../../shared/Domain";
-import { capScale, GameState } from "./GameState";
+import { capScale, GameState } from "../state/GameState";
 
 export interface MouseClick {
   type: "MouseClick";

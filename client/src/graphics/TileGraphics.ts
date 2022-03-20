@@ -1,13 +1,12 @@
-import { loadImage } from "./utility";
 import {
-  TileColour,
-  TileShape,
-  Tile,
   allTileColours,
   allTileShapes,
   Position,
-  divideScalar,
+  Tile,
+  TileColour,
+  TileShape,
 } from "../../../shared/Domain";
+import { loadImage } from "./domain";
 
 async function loadImageCache(): Promise<
   Map<TileColour, Map<TileShape, HTMLImageElement>>
