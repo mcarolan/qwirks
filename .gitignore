@@ -41,6 +41,5 @@ yarn.lock
 **/.cache/*
 **/ts-out/*
 **/.parcel-cache/*
-client/dist/*
 server/out/*
 .vscode/*
