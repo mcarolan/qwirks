@@ -34,7 +34,7 @@ export async function loadGameDependencies(
 
   const tileGraphics = await loadTileGraphics();
 
-  const socket = io("http://localhost:3000");
+  const socket = io("https://qwirksbackend.mcarolan.net");
 
   const mouse = new Mouse();
 
