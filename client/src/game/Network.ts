@@ -29,9 +29,11 @@ export class Network implements IGameStateUpdater {
         this.setUserList = Map(users);
       });
 
-      this.socket.on("user.hand", (tiles: Tile[]) => {
-        console.log("hand update");
-        this.hand = List(tiles);
+      this.socket.on("user.hand", (userId: string, tiles: Tile[]) => {
+        console.log(`hand update for ${userId}`);
+        if (userId === user.userId) {
+          this.hand = List(tiles);
+        }
       });
 
       this.socket.on("game.started", (turnTimer: number | undefined) => {
