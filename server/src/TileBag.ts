@@ -1,7 +1,24 @@
 import { List } from "immutable";
 import { allTileColours, allTileShapes, Tile } from "../../shared/Domain";
+
+export function removeFromHand<T extends Tile>(
+  tiles: List<T>,
+  toRemove: Iterable<T>
+): List<T> {
+  var removed = tiles;
+  for (const tile of toRemove) {
+    const index = removed.findIndex(
+      (t) => tile.shape === t.shape && tile.colour === t.colour
+    );
+    if (index > -1) {
+      removed = removed.remove(index);
+    }
+  }
+  return removed;
+}
+
 export class TileBag {
-  constructor(private readonly contents: List<Tile>) {}
+  constructor(readonly contents: List<Tile>) {}
 
   take(n: number): [List<Tile>, TileBag] {
     const took = this.contents.take(n);

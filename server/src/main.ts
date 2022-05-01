@@ -2,343 +2,178 @@ import express from "express";
 import http from "http";
 import { List, Set } from "immutable";
 import { Server } from "socket.io";
-import { utcEpoch } from "../../shared/DateUtils";
 import { PositionedTile, Tile } from "../../shared/Domain";
-import { TileGrid } from "../../shared/TileGrid";
+import { User } from "../../shared/User";
+import { Game, initialGame } from "./game";
 import {
-  OnlineStatus,
-  User,
-  UserType,
-  UserWithStatus,
-} from "../../shared/User";
-import { TileBag } from "./TileBag";
+  onApplyTiles,
+  onDisconnect,
+  onStart,
+  onSwap,
+  onUpdateUsername,
+  onUserJoin,
+} from "./logic";
+import {
+  afterDisconnect,
+  afterGameStart,
+  afterTilesApplied,
+  afterTileSwap,
+  afterUserJoin,
+  afterUsernameSet,
+  OutgoingMessage,
+} from "./outgoingmessage";
+import { Persistence, redisPersistence } from "./persistence";
 
-const app = express();
-const port = process.env.PORT ?? 3000;
+function main(persistence: Persistence) {
+  const app = express();
+  const port = process.env.PORT ?? 3000;
 
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-  },
-});
+  const server = http.createServer(app);
+  const io = new Server(server, {
+    cors: {
+      origin: "*",
+    },
+  });
 
-interface Game {
-  gameKey: string;
-  users: Map<string, UserWithStatus>;
-  isStarted: boolean;
-  isOver: boolean;
-  tileBag: TileBag;
-  hands: Map<string, List<Tile>>;
-  tiles: PositionedTile[];
-  tilesLastPlaced: Set<PositionedTile>;
-  userInControl: string | undefined;
-  turnStartTime: number | undefined;
-  forceNextTimeout: NodeJS.Timeout | undefined;
-  turnTimer: number | undefined;
-}
-const games = new Map<string, Game>();
+  const timeouts: Map<string, NodeJS.Timeout> = new Map();
 
-function upsert<K, V>(
-  map: Map<K, V>,
-  key: K,
-  initial: () => V,
-  f: (v: V) => void
-): V {
-  const v: V = map.get(key) ?? initial();
-  f(v);
-  map.set(key, v);
-  return v;
-}
-
-function initialGame(gameKey: string): Game {
-  return {
-    gameKey,
-    users: new Map(),
-    isStarted: false,
-    isOver: false,
-    tileBag: TileBag.full(),
-    hands: new Map(),
-    tiles: [],
-    tilesLastPlaced: Set(),
-    userInControl: undefined,
-    turnStartTime: undefined,
-    forceNextTimeout: undefined,
-    turnTimer: undefined,
-  };
-}
-
-function firstUserInControl(game: Game): string | undefined {
-  return List(game.users.keys()).sort().first();
-}
-
-function nextUserInControl(game: Game): string | undefined {
-  if (!game.userInControl) {
-    return undefined;
+  async function upsert(key: string, f: (v: Game) => Game): Promise<Game> {
+    const game = (await persistence.get(key)) ?? initialGame;
+    const nextGame = f(game);
+    const result = await persistence.persist(key, nextGame);
+    console.log(`persistence result for ${key} is ${result}`);
+    return nextGame;
   }
-  const l = List(game.users.keys())
-    .filter((uid) => {
-      const h = game.hands.get(uid);
-      return h && h.size > 0;
-    })
-    .sort();
 
-  if (l.size === 0) {
-    return undefined;
-  } else {
+  function clock(): number {
+    return new Date().getUTCMilliseconds();
+  }
+
+  function firstUserInControl(game: Game): string {
+    return List(game.users.keys()).sort().first() as string;
+  }
+
+  function nextUserInControl(game: Game): string {
+    const l = List(game.users.keys()).sort();
     const n = l.find((uid) => !game.userInControl || uid > game.userInControl);
     return n ?? l.first();
   }
-}
 
-function sendStartingHands(game: Game) {
-  var tb = game.tileBag;
-  for (const [userId, user] of game.users.entries()) {
-    if (user.userType === UserType.Player) {
-      const [hand, nextTb] = tb.take(6);
-      console.log(`${hand} tp ${userId}`);
-      game.hands.set(userId, hand);
-      io.to(game.gameKey).emit("user.hand", userId, hand.toArray());
-      tb = nextTb;
+  function send(message: OutgoingMessage, gameKey: string) {
+    console.log(`sending ${JSON.stringify(message)}`);
+    switch (message.type) {
+      case "GameOver":
+        io.to(gameKey).emit("game.over", message.winningUserId);
+        return;
+      case "GameStarted":
+        io.to(gameKey).emit("game.started", message.turnTimer);
+        return;
+      case "UpdateTiles":
+        io.to(gameKey).emit(
+          "game.tiles",
+          message.allTiles,
+          message.tilesLastPlaced
+        );
+        return;
+      case "UpdateUserHand":
+        io.to(gameKey).emit(
+          "user.hand",
+          message.userId,
+          message.hand.toArray()
+        );
+        return;
+      case "UpdateUserInControl":
+        io.to(gameKey).emit(
+          "user.incontrol",
+          message.userInControl,
+          message.turnStartTime
+        );
+        return;
+      case "UpdateUserList":
+        io.to(gameKey).emit("user.list", message.users);
+        return;
     }
   }
-  game.tileBag = tb;
-}
 
-function newHand(
-  tileBag: TileBag,
-  hand: List<Tile>,
-  tiles: Tile[]
-): [List<Tile>, TileBag] {
-  const [replacements, newTileBag] = tileBag.take(tiles.length);
-  let newHand = hand;
-  tiles.forEach((t) => {
-    const i = newHand.findIndex(
-      (ht) => ht.colour === t.colour && ht.shape === t.shape
-    );
-    if (i > -1) {
-      newHand = newHand.delete(i);
+  function sendAll(messages: Set<OutgoingMessage>, gameKey: string) {
+    for (const message of messages) {
+      send(message, gameKey);
     }
-  });
-
-  return [newHand.concat(replacements), newTileBag];
-}
-
-function nextPlayer(gameKey: string): void {
-  const game = upsert(
-    games,
-    gameKey,
-    () => initialGame(gameKey),
-    (g) => {
-      if (!g.userInControl) {
-        g.userInControl = firstUserInControl(g);
-      } else {
-        g.userInControl = nextUserInControl(g);
-      }
-      g.turnStartTime = utcEpoch();
-      io.to(gameKey).emit("user.incontrol", g.userInControl, g.turnStartTime);
-    }
-  );
-
-  if (game.forceNextTimeout) {
-    clearTimeout(game.forceNextTimeout);
   }
 
-  if (!game.isOver && game.turnTimer) {
-    game.forceNextTimeout = setTimeout(
-      () => nextPlayer(gameKey),
-      game.turnTimer
-    );
-  }
+  io.on("connection", (s) => {
+    var userId: string | undefined;
+    var gameKey: string | undefined;
+    console.log("a user connected");
+
+    s.on("user.identity", async (user: User, joiningGameKey: string) => {
+      gameKey = joiningGameKey;
+      userId = user.userId;
+      const game = await upsert(joiningGameKey, (game) =>
+        onUserJoin(user, game)
+      );
+      await s.join(joiningGameKey);
+      sendAll(afterUserJoin(game, user.userId), joiningGameKey);
+    });
+
+    s.on("game.start", async (turnTimer: number | undefined) => {
+      const gk = gameKey;
+      if (gk) {
+        const game = await upsert(gk, (game) =>
+          onStart(game, firstUserInControl, clock, turnTimer)
+        );
+        sendAll(afterGameStart(game), gk);
+      }
+    });
+
+    s.on("user.setusername", async (newUsername: string) => {
+      const gk = gameKey;
+      const uid = userId;
+      if (gk && uid) {
+        const game = await upsert(gk, (game) =>
+          onUpdateUsername(uid, game, newUsername)
+        );
+        sendAll(afterUsernameSet(game), gk);
+      }
+    });
+
+    s.on("game.swap", async (tiles: Tile[]) => {
+      const gk = gameKey;
+      const uid = userId;
+      if (gk && uid) {
+        const game = await upsert(gk, (game) =>
+          onSwap(game, uid, List(tiles), nextUserInControl, clock)
+        );
+        sendAll(afterTileSwap(game, uid), gk);
+      }
+    });
+
+    s.on("game.applytiles", async (tiles: PositionedTile[]) => {
+      const gk = gameKey;
+      const uid = userId;
+
+      if (gk && uid) {
+        const game = await upsert(gk, (game) =>
+          onApplyTiles(game, uid, Set(tiles), nextUserInControl, clock)
+        );
+        sendAll(afterTilesApplied(game, uid), gk);
+      }
+    });
+
+    s.on("disconnect", async () => {
+      const gk = gameKey;
+      const uid = userId;
+      if (gk && uid) {
+        const game = await upsert(gk, (game) => onDisconnect(uid, game));
+        sendAll(afterDisconnect(game), gk);
+      }
+    });
+  });
+
+  server.listen(port);
+  console.log(`listening on port ${port}`);
 }
 
-io.on("connection", (s) => {
-  var userId: string | undefined;
-  var gameKey: string | undefined;
-  console.log("a user connected");
-
-  s.on("user.identity", (user: User, joiningGameKey: string) => {
-    console.log(`user is ${JSON.stringify(user)} in ${joiningGameKey}`);
-    userId = user.userId;
-    gameKey = joiningGameKey;
-
-    s.join(joiningGameKey);
-    upsert(
-      games,
-      gameKey,
-      () => initialGame(joiningGameKey),
-      (g) => {
-        g.users.set(user.userId, {
-          ...user,
-          onlineStatus: OnlineStatus.online,
-          userType: UserType.Player,
-          score: g.users.get(user.userId)?.score ?? 0,
-        });
-
-        if (g.isStarted) {
-          s.emit("game.started", g.turnTimer);
-        }
-
-        if (g.isOver) {
-          s.emit(
-            "game.over",
-            List(g.users.entries()).maxBy(([_, u]) => u.score)?.[0]
-          );
-        }
-
-        if (g.userInControl) {
-          s.emit("user.incontrol", g.userInControl, g.turnStartTime);
-        }
-
-        if (g.tiles.length > 0) {
-          s.emit("game.tiles", g.tiles, g.tilesLastPlaced.toArray());
-        }
-
-        const hand = g.hands.get(user.userId);
-        if (hand) {
-          s.emit("user.hand", user.userId, hand.toArray());
-        }
-
-        io.to(joiningGameKey).emit("user.list", [...g.users.entries()]);
-      }
-    );
-  });
-
-  s.on("game.start", (turnTimer: number | undefined) => {
-    const gk = gameKey;
-    if (gk) {
-      upsert(
-        games,
-        gk,
-        () => initialGame(gk),
-        (g) => {
-          if (!g.isStarted) {
-            sendStartingHands(g);
-            g.turnTimer = turnTimer;
-            nextPlayer(gk);
-            g.isStarted = true;
-            console.log(`starting ${gk}, round timer is ${turnTimer}`);
-            io.to(gk).emit("game.started", turnTimer);
-          }
-        }
-      );
-    }
-  });
-
-  s.on("user.setusername", (newUsername: string) => {
-    const gk = gameKey;
-    const uid = userId;
-    if (gk && uid) {
-      upsert(
-        games,
-        gk,
-        () => initialGame(gk),
-        (g) => {
-          const user = g.users.get(uid);
-          if (user) {
-            g.users.set(uid, { ...user, username: newUsername });
-            io.to(gk).emit("user.list", [...g.users.entries()]);
-          }
-        }
-      );
-    }
-  });
-
-  s.on("game.swap", (tiles: Tile[]) => {
-    const gk = gameKey;
-    const uid = userId;
-    if (gk && uid) {
-      upsert(
-        games,
-        gk,
-        () => initialGame(gk),
-        (g) => {
-          if (g.userInControl === uid) {
-            const hand = g.hands.get(uid);
-            if (hand) {
-              const [nextHand, newTileBag] = newHand(g.tileBag, hand, tiles);
-              g.tileBag = newTileBag.add(List(tiles));
-              g.hands.set(uid, nextHand);
-              s.emit("user.hand", uid, nextHand.toArray());
-              nextPlayer(gk);
-            }
-          }
-        }
-      );
-    }
-  });
-
-  s.on("game.applytiles", (tiles: PositionedTile[]) => {
-    const gk = gameKey;
-    const uid = userId;
-
-    if (gk && uid) {
-      upsert(
-        games,
-        gk,
-        () => initialGame(gk),
-        (g) => {
-          if (g.userInControl === uid) {
-            const placement = Set(tiles);
-            const res = new TileGrid(g.tiles).place(placement);
-            if (res.type === "Success") {
-              const hand = g.hands.get(uid);
-              if (hand) {
-                const [nextHand, newTileBag] = newHand(g.tileBag, hand, tiles);
-                g.tileBag = newTileBag;
-                g.hands.set(uid, nextHand);
-                s.emit("user.hand", uid, nextHand.toArray());
-              }
-
-              g.tiles = res.tileGrid.tiles;
-              g.tilesLastPlaced = placement;
-              const user = g.users.get(uid);
-              if (user) {
-                g.users.set(uid, {
-                  ...user,
-                  score: user.score + res.score,
-                });
-                io.to(gk).emit("user.list", [...g.users.entries()]);
-              }
-              io.to(gk).emit(
-                "game.tiles",
-                g.tiles,
-                g.tilesLastPlaced.toArray()
-              );
-
-              if (g.userInControl === undefined) {
-                g.isOver = true;
-                io.to(gk).emit(
-                  "game.over",
-                  List(g.users.entries()).maxBy(([_, u]) => u.score)?.[0]
-                );
-              }
-              nextPlayer(gk);
-            }
-          }
-        }
-      );
-    }
-  });
-
-  s.on("disconnect", () => {
-    if (userId && gameKey) {
-      const game = games.get(gameKey);
-      if (game) {
-        const user = game.users.get(userId);
-
-        if (user) {
-          console.log(`${JSON.stringify(user)} disconnected from ${gameKey}`);
-          game.users.set(userId, {
-            ...user,
-            onlineStatus: OnlineStatus.offline,
-          });
-          io.to(gameKey).emit("user.list", [...game.users.entries()]);
-        }
-      }
-    }
-  });
-});
-
-server.listen(port);
-console.log(`listening on port ${port}`);
+redisPersistence()
+  .then(main)
+  .catch((r) => console.error(`rejected ${r}`));

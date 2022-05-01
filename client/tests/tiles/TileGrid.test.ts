@@ -1,5 +1,4 @@
 import {
-  ORIGIN,
   PlacementResult,
   Position,
   PositionedTile,
@@ -8,6 +7,8 @@ import {
 import { TileGrid } from "../../../shared/TileGrid";
 import { is, Set, List, fromJS } from "immutable";
 import { TileColour, TileShape, Tile } from "../../../shared/Domain";
+
+const ORIGIN: Position = { x: 0, y: 0 };
 
 function expectSuccess<T>(res: PlacementResult, f: (a: Success) => T): T {
   switch (res.type) {

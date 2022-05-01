@@ -25,7 +25,7 @@ export class Network implements IGameStateUpdater {
       this.socket.emit("user.identity", this.user, gameKey);
 
       this.socket.on("user.list", (users: [[string, UserWithStatus]]) => {
-        console.log("user list update");
+        console.log(`user list update ${JSON.stringify(users)}`);
         this.setUserList = Map(users);
       });
 
