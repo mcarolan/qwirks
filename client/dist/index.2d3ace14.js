@@ -620,9 +620,9 @@ module.exports = require('./cjs/react-refresh-runtime.development.js');
     exports.setSignature = setSignature;
 })();
 
-},{}],"6Oejs":[function(require,module,exports) {
+},{}],"ftbBg":[function(require,module,exports) {
 "use strict";
-var HMR_HOST = null;
+var HMR_HOST = "0.0.0.0";
 var HMR_PORT = null;
 var HMR_SECURE = false;
 var HMR_ENV_HASH = "d6ea1d42532a7575";
@@ -26674,8 +26674,8 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
     this.chunk = chunk;
@@ -29517,8 +29517,8 @@ Stream.prototype.pipe = function(dest, options) {
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;
@@ -30920,8 +30920,8 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
     this.chunk = chunk;
@@ -63527,8 +63527,8 @@ function compare(a, b) {
 
 },{"parse-asn1":"4Szbv","./mgf":"e2JgG","./xor":"iaxu0","bn.js":"3pDum","browserify-rsa":"e594P","create-hash":"2WyL8","./withPublic":"fFkPV","safe-buffer":"eW7r9"}],"k3tsT":[function(require,module,exports) {
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 function oldBrowser() {
     throw new Error('secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11');
 }
@@ -63831,13 +63831,23 @@ class MainComponent extends _reactDefault.default.Component {
             };
         });
     }
+    isTouchEnabled() {
+        return "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    }
     async componentDidMount() {
         const deps = await _gameDependencies.loadGameDependencies(this.props.user, this.props.gameKey);
         deps.canvas.width = deps.mainArea.clientWidth;
         deps.canvas.height = deps.mainArea.clientHeight;
-        document.addEventListener("mousedown", _mouse.Mouse.updateMouseDown(deps.mouse));
-        document.addEventListener("mouseup", _mouse.Mouse.updateMouseUp(deps.mouse));
-        document.addEventListener("mousemove", _mouse.Mouse.updateMousePosition(deps.mouse));
+        if (this.isTouchEnabled()) {
+            document.addEventListener("touchmove", _mouse.Mouse.updateTouchMove(deps.mouse));
+            document.addEventListener("touchcancel", _mouse.Mouse.updateTouchMove(deps.mouse));
+            document.addEventListener("touchend", _mouse.Mouse.updateTouchMove(deps.mouse));
+            document.addEventListener("touchstart", _mouse.Mouse.updateTouchMove(deps.mouse));
+        } else {
+            document.addEventListener("mousedown", _mouse.Mouse.updateMouseDown(deps.mouse));
+            document.addEventListener("mouseup", _mouse.Mouse.updateMouseUp(deps.mouse));
+            document.addEventListener("mousemove", _mouse.Mouse.updateMousePosition(deps.mouse));
+        }
         document.addEventListener("wheel", _mouse.Mouse.updateMouseWheel(deps.mouse));
         requestAnimationFrame((_)=>_frame.frame(_gameState.initialGameState(this.props.gameKey, this.props.user, _domain.rectFromElement(deps.mainArea)), deps, this)
         );
@@ -63865,7 +63875,7 @@ class MainComponent extends _reactDefault.default.Component {
                             turnStartTime: this.state.game.turnStartTime
                         }, void 0, false, {
                             fileName: "src/component/MainComponent.tsx",
-                            lineNumber: 123,
+                            lineNumber: 141,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -63877,7 +63887,7 @@ class MainComponent extends _reactDefault.default.Component {
                                     zoomOut: ()=>this.state.ui.zoomOutPressed += 1
                                 }, void 0, false, {
                                     fileName: "src/component/MainComponent.tsx",
-                                    lineNumber: 144,
+                                    lineNumber: 162,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -63893,7 +63903,7 @@ class MainComponent extends _reactDefault.default.Component {
                                                     children: "No round timer"
                                                 }, void 0, false, {
                                                     fileName: "src/component/MainComponent.tsx",
-                                                    lineNumber: 153,
+                                                    lineNumber: 171,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("option", {
@@ -63901,7 +63911,7 @@ class MainComponent extends _reactDefault.default.Component {
                                                     children: "10 seconds"
                                                 }, void 0, false, {
                                                     fileName: "src/component/MainComponent.tsx",
-                                                    lineNumber: 154,
+                                                    lineNumber: 172,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("option", {
@@ -63909,7 +63919,7 @@ class MainComponent extends _reactDefault.default.Component {
                                                     children: "20 seconds"
                                                 }, void 0, false, {
                                                     fileName: "src/component/MainComponent.tsx",
-                                                    lineNumber: 155,
+                                                    lineNumber: 173,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("option", {
@@ -63917,7 +63927,7 @@ class MainComponent extends _reactDefault.default.Component {
                                                     children: "30 seconds"
                                                 }, void 0, false, {
                                                     fileName: "src/component/MainComponent.tsx",
-                                                    lineNumber: 156,
+                                                    lineNumber: 174,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("option", {
@@ -63925,7 +63935,7 @@ class MainComponent extends _reactDefault.default.Component {
                                                     children: "1 minute"
                                                 }, void 0, false, {
                                                     fileName: "src/component/MainComponent.tsx",
-                                                    lineNumber: 157,
+                                                    lineNumber: 175,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("option", {
@@ -63933,13 +63943,13 @@ class MainComponent extends _reactDefault.default.Component {
                                                     children: "2 minutes"
                                                 }, void 0, false, {
                                                     fileName: "src/component/MainComponent.tsx",
-                                                    lineNumber: 158,
+                                                    lineNumber: 176,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "src/component/MainComponent.tsx",
-                                            lineNumber: 149,
+                                            lineNumber: 167,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_button.Button, {
@@ -63949,13 +63959,13 @@ class MainComponent extends _reactDefault.default.Component {
                                             enabled: isEnabled(_button1.ButtonTag.Start)
                                         }, void 0, false, {
                                             fileName: "src/component/MainComponent.tsx",
-                                            lineNumber: 160,
+                                            lineNumber: 178,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "src/component/MainComponent.tsx",
-                                    lineNumber: 148,
+                                    lineNumber: 166,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -63972,12 +63982,12 @@ class MainComponent extends _reactDefault.default.Component {
                                                 enabled: isEnabled(_button1.ButtonTag.Accept)
                                             }, void 0, false, {
                                                 fileName: "src/component/MainComponent.tsx",
-                                                lineNumber: 169,
+                                                lineNumber: 187,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/component/MainComponent.tsx",
-                                            lineNumber: 168,
+                                            lineNumber: 186,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -63991,12 +64001,12 @@ class MainComponent extends _reactDefault.default.Component {
                                                 enabled: isEnabled(_button1.ButtonTag.Swap)
                                             }, void 0, false, {
                                                 fileName: "src/component/MainComponent.tsx",
-                                                lineNumber: 178,
+                                                lineNumber: 196,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/component/MainComponent.tsx",
-                                            lineNumber: 177,
+                                            lineNumber: 195,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -64010,12 +64020,12 @@ class MainComponent extends _reactDefault.default.Component {
                                                 enabled: isEnabled(_button1.ButtonTag.Cancel)
                                             }, void 0, false, {
                                                 fileName: "src/component/MainComponent.tsx",
-                                                lineNumber: 187,
+                                                lineNumber: 205,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/component/MainComponent.tsx",
-                                            lineNumber: 186,
+                                            lineNumber: 204,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -64028,30 +64038,30 @@ class MainComponent extends _reactDefault.default.Component {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "src/component/MainComponent.tsx",
-                                                lineNumber: 196,
+                                                lineNumber: 214,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/component/MainComponent.tsx",
-                                            lineNumber: 195,
+                                            lineNumber: 213,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "src/component/MainComponent.tsx",
-                                    lineNumber: 167,
+                                    lineNumber: 185,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "src/component/MainComponent.tsx",
-                            lineNumber: 143,
+                            lineNumber: 161,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "src/component/MainComponent.tsx",
-                    lineNumber: 122,
+                    lineNumber: 140,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -64062,7 +64072,7 @@ class MainComponent extends _reactDefault.default.Component {
                             onChangeUsername: this.onChangeUsername
                         }, void 0, false, {
                             fileName: "src/component/MainComponent.tsx",
-                            lineNumber: 204,
+                            lineNumber: 222,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -64072,18 +64082,18 @@ class MainComponent extends _reactDefault.default.Component {
                                 userInControl: this.state.game.userInControl
                             }, void 0, false, {
                                 fileName: "src/component/MainComponent.tsx",
-                                lineNumber: 209,
+                                lineNumber: 227,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "src/component/MainComponent.tsx",
-                            lineNumber: 208,
+                            lineNumber: 226,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "src/component/MainComponent.tsx",
-                    lineNumber: 203,
+                    lineNumber: 221,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -64098,30 +64108,30 @@ class MainComponent extends _reactDefault.default.Component {
                             onPressed: (i)=>this.onHandTileClicked(i)
                         }, void 0, false, {
                             fileName: "src/component/MainComponent.tsx",
-                            lineNumber: 217,
+                            lineNumber: 235,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "src/component/MainComponent.tsx",
-                        lineNumber: 216,
+                        lineNumber: 234,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "src/component/MainComponent.tsx",
-                    lineNumber: 215,
+                    lineNumber: 233,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_connectionStatus.ConnectionStatus, {
                     isConnected: this.state.game.isConnected
                 }, void 0, false, {
                     fileName: "src/component/MainComponent.tsx",
-                    lineNumber: 228,
+                    lineNumber: 246,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "src/component/MainComponent.tsx",
-            lineNumber: 121,
+            lineNumber: 139,
             columnNumber: 7
         }, this));
     }
@@ -68868,7 +68878,7 @@ async function loadGameDependencies(user, gameKey) {
     const canvas = document.querySelector("#game");
     const mainArea = document.querySelector("#mainArea");
     const tileGraphics = await _tileGraphics.loadTileGraphics();
-    const socket = _socketIoClient.io("http://localhost:3000");
+    const socket = _socketIoClient.io("http://192.168.0.21:3000");
     const mouse = new _mouse.Mouse();
     const firstTileImage = await _domain.loadImage("./images/first-tile.png");
     const tileGrid = new _tileGridGraphics.TileGridGraphics(tileGraphics, firstTileImage);
@@ -76794,6 +76804,51 @@ class Mouse {
             this.events.push(e);
         }
     }
+    static updateTouchMove(mouse) {
+        return (e)=>{
+            const downBefore = mouse.primaryMouseButtonDown;
+            mouse.primaryMouseButtonDown = e.touches.length === 1;
+            const x = mouse.primaryMouseButtonDown ? e.touches.item(0)?.pageX : (e.type === "touchend" || e.type === "touchcancel") && e.changedTouches.length === 1 ? e.changedTouches.item(0)?.pageX : undefined;
+            const y = mouse.primaryMouseButtonDown ? e.touches.item(0)?.pageY : (e.type === "touchend" || e.type === "touchcancel") && e.changedTouches.length === 1 ? e.changedTouches.item(0)?.pageY : undefined;
+            if (x && y) mouse.mousePosition = {
+                x,
+                y
+            };
+            if (mouse.primaryMouseButtonDown && mouse.mouseDragStart && !mouse.isDragging && x && y) {
+                const dx = Math.abs(mouse.mouseDragStart.x - x);
+                const dy = Math.abs(mouse.mouseDragStart.y - y);
+                if (dx > 5 || dy > 5) mouse.isDragging = true;
+            } else if (mouse.isDragging && mouse.mouseDragStart && downBefore && !mouse.primaryMouseButtonDown && x && y) {
+                mouse.isDragging = false;
+                const e = {
+                    type: "MouseDrag",
+                    from: mouse.mouseDragStart,
+                    to: {
+                        x,
+                        y
+                    }
+                };
+                mouse.events.push(e);
+                mouse.mouseDragStart = undefined;
+            } else if (!downBefore && mouse.primaryMouseButtonDown && x && y && mouse.mouseDragStart === undefined) {
+                console.log(`setting mouse drag start ${x} ${y}`);
+                mouse.mouseDragStart = {
+                    x,
+                    y
+                };
+            } else if (downBefore && !mouse.primaryMouseButtonDown && x && y) {
+                const e = {
+                    type: "MouseClick",
+                    position: {
+                        x,
+                        y
+                    }
+                };
+                mouse.mouseDragStart = undefined;
+                mouse.events.push(e);
+            }
+        };
+    }
     static updateMouseWheel(mouse) {
         return (e)=>{
             e.preventDefault();
@@ -76835,6 +76890,7 @@ class Mouse {
         gameState.mouseDragInProgress = drag;
         gameState.scale = _gameState.capScale(gameState.scale + this.wheelDelta * 0.001);
         this.wheelDelta = 0;
+        console.log(JSON.stringify(this.events));
         this.events = [];
     }
     constructor(){
@@ -91867,6 +91923,6 @@ $RefreshReg$(_c, "ZoomControls");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}]},["kn9T2","6Oejs","4aBH6"], "4aBH6", "parcelRequire00f1")
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}]},["kn9T2","ftbBg","4aBH6"], "4aBH6", "parcelRequire00f1")
 
 //# sourceMappingURL=index.2d3ace14.js.map

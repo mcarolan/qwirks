@@ -76,6 +76,81 @@ export class Mouse implements IGameStateUpdater {
     }
   }
 
+  static updateTouchMove(mouse: Mouse): (e: TouchEvent) => void {
+    return (e: TouchEvent) => {
+      const downBefore = mouse.primaryMouseButtonDown;
+      mouse.primaryMouseButtonDown = e.touches.length === 1;
+
+      const x: number | undefined = mouse.primaryMouseButtonDown
+        ? e.touches.item(0)?.pageX
+        : (e.type === "touchend" || e.type === "touchcancel") &&
+          e.changedTouches.length === 1
+        ? e.changedTouches.item(0)?.pageX
+        : undefined;
+
+      const y: number | undefined = mouse.primaryMouseButtonDown
+        ? e.touches.item(0)?.pageY
+        : (e.type === "touchend" || e.type === "touchcancel") &&
+          e.changedTouches.length === 1
+        ? e.changedTouches.item(0)?.pageY
+        : undefined;
+
+      if (x && y) {
+        mouse.mousePosition = { x, y };
+      }
+
+      if (
+        mouse.primaryMouseButtonDown &&
+        mouse.mouseDragStart &&
+        !mouse.isDragging &&
+        x &&
+        y
+      ) {
+        const dx = Math.abs(mouse.mouseDragStart.x - x);
+        const dy = Math.abs(mouse.mouseDragStart.y - y);
+
+        if (dx > 5 || dy > 5) {
+          mouse.isDragging = true;
+        }
+      } else if (
+        mouse.isDragging &&
+        mouse.mouseDragStart &&
+        downBefore &&
+        !mouse.primaryMouseButtonDown &&
+        x &&
+        y
+      ) {
+        mouse.isDragging = false;
+        const e: MouseDrag = {
+          type: "MouseDrag",
+          from: mouse.mouseDragStart,
+          to: { x, y },
+        };
+        mouse.events.push(e);
+        mouse.mouseDragStart = undefined;
+      } else if (
+        !downBefore &&
+        mouse.primaryMouseButtonDown &&
+        x &&
+        y &&
+        mouse.mouseDragStart === undefined
+      ) {
+        console.log(`setting mouse drag start ${x} ${y}`);
+        mouse.mouseDragStart = {
+          x,
+          y,
+        };
+      } else if (downBefore && !mouse.primaryMouseButtonDown && x && y) {
+        const e: MouseClick = {
+          type: "MouseClick",
+          position: { x, y },
+        };
+        mouse.mouseDragStart = undefined;
+        mouse.events.push(e);
+      }
+    };
+  }
+
   static updateMouseWheel(mouse: Mouse): (e: WheelEvent) => void {
     return (e: WheelEvent) => {
       e.preventDefault();
@@ -125,6 +200,7 @@ export class Mouse implements IGameStateUpdater {
 
     gameState.scale = capScale(gameState.scale + this.wheelDelta * 0.001);
     this.wheelDelta = 0;
+    console.log(JSON.stringify(this.events));
 
     this.events = [];
   }
