@@ -1,9 +1,9 @@
 import { RedisClientType, WatchError } from "@node-redis/client";
 import { List, Set, Map } from "immutable";
 import { createClient } from "redis";
-import { PositionedTile, Tile } from "../../shared/Domain";
+import { Position, PositionedTile, Tile, TileColour, TileShape } from "../../shared/Domain";
 import { UserWithStatus } from "../../shared/User";
-import { Game } from "./game";
+import { Game, initialGame } from "./game";
 import { TileBag } from "./TileBag";
 
 const redis_host = process.env.REDIS_HOST ?? "localhost";
@@ -11,6 +11,41 @@ const redis_host = process.env.REDIS_HOST ?? "localhost";
 export interface Persistence {
   persist(gameKey: string, game: Game): Promise<boolean>;
   get(gameKey: string): Promise<Game | null>;
+}
+
+class DummyPersistence implements Persistence {
+
+  private tiles: Array<PositionedTile> = [
+    {
+      position: { x: 0, y: 0 },
+      shape: TileShape.One,
+      colour: TileColour.Blue
+    },
+    {
+      position: { x: 0, y: 1 },
+      shape: TileShape.One,
+      colour: TileColour.Red
+    },
+    {
+      position: { x: 0, y: 2 },
+      shape: TileShape.One,
+      colour: TileColour.Green
+    },
+  ];
+
+  private gameWithTiles: Game = { ...initialGame, tiles: this.tiles }
+
+  private games: Map<string, Game> = Map()
+
+  persist(gameKey: string, game: Game): Promise<boolean> {
+    this.games = this.games.set(gameKey, game);
+    return Promise.resolve(true);
+  }
+
+  get(gameKey: string): Promise<Game | null> {
+    return Promise.resolve(this.games.get(gameKey, this.gameWithTiles));
+  }
+  
 }
 
 class RedisPersistence implements Persistence {
@@ -208,9 +243,15 @@ class RedisPersistence implements Persistence {
 }
 
 export async function redisPersistence(): Promise<Persistence> {
+  console.log("starting with redis persistence");
   const client: RedisClientType = createClient({
     url: `redis://${redis_host}:6379`,
   });
   await client.connect();
   return new RedisPersistence(client);
+}
+
+export async function dummyPersistence(): Promise<Persistence> {
+  console.log("starting with dummy persistence");
+  return Promise.resolve(new DummyPersistence);
 }

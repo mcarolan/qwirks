@@ -1,7 +1,7 @@
 import { List, Set as ImmSet, Map } from "immutable";
 import { User, UserWithStatus } from "~/../../shared/User";
 import { Rect } from "../graphics/domain";
-import { MouseClickOrDrag, MouseDrag } from "../game/Mouse";
+import { MouseDrag, MouseEv } from "../game/Mouse";
 import { Tile, PositionedTile, Position } from "../../../shared/Domain";
 import { ButtonTag } from "~/component/Button";
 
@@ -24,7 +24,7 @@ export interface GameState {
   tilesToApply: PositionedTile[] | undefined;
   tilesToSwap: Tile[] | undefined;
   mousePosition: Position;
-  mouseEvents: Array<MouseClickOrDrag>;
+  mouseEvents: Array<MouseEv>;
   tilePositionsPressed: Array<Position>;
   pressedButtonTags: ImmSet<ButtonTag>;
   enabledButtonTags: ImmSet<ButtonTag>;
@@ -106,6 +106,6 @@ export function initialGameState(
     turnTimerSelected: undefined,
     turnTimer: undefined,
     turnStartTime: undefined,
-    newUserInControl: undefined,
+    newUserInControl: undefined
   };
 }

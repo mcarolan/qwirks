@@ -22,7 +22,7 @@ import {
   afterUsernameSet,
   OutgoingMessage,
 } from "./outgoingmessage";
-import { Persistence, redisPersistence } from "./persistence";
+import { dummyPersistence, Persistence, redisPersistence } from "./persistence";
 
 function main(persistence: Persistence) {
   const app = express();
@@ -174,6 +174,10 @@ function main(persistence: Persistence) {
   console.log(`listening on port ${port}`);
 }
 
-redisPersistence()
+const args = Set(process.argv.slice(2));
+const perisistence: Promise<Persistence> =
+  args.contains("--dummy-persistence") ? dummyPersistence() : redisPersistence();
+
+perisistence
   .then(main)
   .catch((r) => console.error(`rejected ${r}`));

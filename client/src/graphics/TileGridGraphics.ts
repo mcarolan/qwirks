@@ -1,5 +1,5 @@
 import { fromJS } from "immutable";
-import { minus, plus, Position, Tile } from "../../../shared/Domain";
+import { divideScalar, minus, mul, plus, Position, Tile } from "../../../shared/Domain";
 import { IGameStateUpdater } from "../game/IGameStateUpdater";
 import { MouseDrag } from "../game/Mouse";
 import { GameState, singleActiveTile } from "../state/GameState";
@@ -9,6 +9,7 @@ import { TileGraphics } from "./TileGraphics";
 export class TileGridGraphics implements IGameStateUpdater {
   private offset: Position;
   private effectiveOffset: Position;
+  private lastMid: Position | undefined;
 
   constructor(
     private tileGraphics: TileGraphics,
@@ -23,6 +24,9 @@ export class TileGridGraphics implements IGameStateUpdater {
     gameState.mouseEvents.forEach((e) => {
       if (e.type == "MouseDrag") {
         this.offset = minus(this.offset, delta(e));
+      }
+      if (e.type == "MouseZoom") {
+        this.offset = divideScalar(e.point, gameState.scale);
       }
     });
 
@@ -120,7 +124,8 @@ export class TileGridGraphics implements IGameStateUpdater {
       this.tileGraphics.drawInactiveTile(
         context,
         screenCoords,
-        singleActive[1]
+        singleActive[1],
+        1
       );
       context.restore();
     } else {
@@ -135,14 +140,19 @@ export class TileGridGraphics implements IGameStateUpdater {
     for (const pt of state.tilesToDisplay) {
       const coords = this.tileGraphics.screenCoords(pt.position, mid);
       if (state.currentPlacement.placedTiles.contains(pt)) {
-        this.tileGraphics.drawHoverTile(context, coords, pt);
+        this.tileGraphics.drawHoverTile(context, coords, pt, 1);
       } else if (
         state.tilesLastPlaced.map((x) => fromJS(x)).contains(fromJS(pt))
       ) {
-        this.tileGraphics.drawLastPlacementTile(context, coords, pt);
+        this.tileGraphics.drawLastPlacementTile(context, coords, pt, 1);
       } else {
-        this.tileGraphics.drawInactiveTile(context, coords, pt);
+        this.tileGraphics.drawInactiveTile(context, coords, pt, 1);
       }
+    }
+
+    if (this.lastMid) {
+      context.fillStyle = 'red';
+      context.fillRect(this.lastMid.x, this.lastMid.y, 10, 10);
     }
     context.restore();
   }

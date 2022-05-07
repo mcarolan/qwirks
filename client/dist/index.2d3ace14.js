@@ -24925,8 +24925,8 @@ exports.pipeline = require('./lib/internal/streams/pipeline.js');
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;
@@ -26674,8 +26674,8 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
     this.chunk = chunk;
@@ -30920,8 +30920,8 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
     this.chunk = chunk;
@@ -40583,8 +40583,8 @@ exports.pipeline = require('./lib/internal/streams/pipeline.js');
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;
@@ -68878,7 +68878,7 @@ async function loadGameDependencies(user, gameKey) {
     const canvas = document.querySelector("#game");
     const mainArea = document.querySelector("#mainArea");
     const tileGraphics = await _tileGraphics.loadTileGraphics();
-    const socket = _socketIoClient.io("http://192.168.0.21:3000");
+    const socket = _socketIoClient.io("http://192.168.0.16:3000");
     const mouse = new _mouse.Mouse();
     const firstTileImage = await _domain.loadImage("./images/first-tile.png");
     const tileGrid = new _tileGridGraphics.TileGridGraphics(tileGraphics, firstTileImage);
@@ -76810,49 +76810,96 @@ class Mouse {
             mouse.primaryMouseButtonDown = e.touches.length === 1;
             const x = mouse.primaryMouseButtonDown ? e.touches.item(0)?.pageX : (e.type === "touchend" || e.type === "touchcancel") && e.changedTouches.length === 1 ? e.changedTouches.item(0)?.pageX : undefined;
             const y = mouse.primaryMouseButtonDown ? e.touches.item(0)?.pageY : (e.type === "touchend" || e.type === "touchcancel") && e.changedTouches.length === 1 ? e.changedTouches.item(0)?.pageY : undefined;
+            const prevTwoFingerTouch = mouse.twoFingerTouch;
+            mouse.twoFingerTouch = e.touches.length === 2;
+            const prevTouchPinchDiff = mouse.touchPinchDiff;
+            if (mouse.twoFingerTouch) {
+                const x1 = e.touches.item(0)?.pageX ?? 0;
+                const y1 = e.touches.item(0)?.pageY ?? 0;
+                const x2 = e.touches.item(1)?.pageX ?? 0;
+                const y2 = e.touches.item(1)?.pageY ?? 0;
+                mouse.touchPinchDiff = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+                const mid = {
+                    x: (x1 + x2) / 2,
+                    y: (y1 + y2) / 2
+                };
+                const zoomEv = {
+                    type: "MouseZoom",
+                    point: mid
+                };
+                mouse.events.push(zoomEv);
+            } else mouse.touchPinchDiff = -1;
             if (x && y) mouse.mousePosition = {
                 x,
                 y
             };
-            if (mouse.primaryMouseButtonDown && mouse.mouseDragStart && !mouse.isDragging && x && y) {
-                const dx = Math.abs(mouse.mouseDragStart.x - x);
-                const dy = Math.abs(mouse.mouseDragStart.y - y);
-                if (dx > 5 || dy > 5) mouse.isDragging = true;
-            } else if (mouse.isDragging && mouse.mouseDragStart && downBefore && !mouse.primaryMouseButtonDown && x && y) {
-                mouse.isDragging = false;
-                const e = {
-                    type: "MouseDrag",
-                    from: mouse.mouseDragStart,
-                    to: {
-                        x,
-                        y
-                    }
-                };
-                mouse.events.push(e);
-                mouse.mouseDragStart = undefined;
-            } else if (!downBefore && mouse.primaryMouseButtonDown && x && y && mouse.mouseDragStart === undefined) {
-                console.log(`setting mouse drag start ${x} ${y}`);
-                mouse.mouseDragStart = {
-                    x,
-                    y
-                };
-            } else if (downBefore && !mouse.primaryMouseButtonDown && x && y) {
-                const e = {
-                    type: "MouseClick",
-                    position: {
-                        x,
-                        y
-                    }
-                };
-                mouse.mouseDragStart = undefined;
-                mouse.events.push(e);
-            }
+            if (prevTwoFingerTouch && !mouse.twoFingerTouch) return;
+            else if (mouse.twoFingerTouch && mouse.touchPinchDiff > prevTouchPinchDiff) mouse.wheelDelta /= 1.1;
+            else if (mouse.twoFingerTouch && mouse.touchPinchDiff < prevTouchPinchDiff) mouse.wheelDelta *= 1.1;
+        /*else if (
+        mouse.primaryMouseButtonDown &&
+        mouse.mouseDragStart &&
+        !mouse.isDragging &&
+        x &&
+        y
+      ) {
+        const dx = Math.abs(mouse.mouseDragStart.x - x);
+        const dy = Math.abs(mouse.mouseDragStart.y - y);
+
+        if (dx > 5 || dy > 5) {
+          mouse.isDragging = true;
+        }
+      } else if (
+        mouse.isDragging &&
+        mouse.mouseDragStart &&
+        downBefore &&
+        !mouse.primaryMouseButtonDown &&
+        x &&
+        y
+      ) {
+        mouse.isDragging = false;
+        const e: MouseDrag = {
+          type: "MouseDrag",
+          from: mouse.mouseDragStart,
+          to: { x, y },
         };
+        mouse.events.push(e);
+        mouse.mouseDragStart = undefined;
+      } else if (
+        !downBefore &&
+        mouse.primaryMouseButtonDown &&
+        x &&
+        y &&
+        mouse.mouseDragStart === undefined
+      ) {
+        console.log(`setting mouse drag start ${x} ${y}`);
+        mouse.mouseDragStart = {
+          x,
+          y,
+        };
+      } else if (downBefore && !mouse.primaryMouseButtonDown && x && y) {
+        const e: MouseClick = {
+          type: "MouseClick",
+          position: { x, y },
+        };
+        mouse.mouseDragStart = undefined;
+        mouse.events.push(e);
+      }*/ };
     }
     static updateMouseWheel(mouse) {
         return (e)=>{
             e.preventDefault();
-            mouse.wheelDelta += e.deltaY;
+            console.log(e.deltaY);
+            if (e.deltaY > 0) mouse.wheelDelta *= 1.1;
+            else mouse.wheelDelta /= 1.1;
+            const ev = {
+                type: "MouseZoom",
+                point: {
+                    x: e.pageX,
+                    y: e.pageY
+                }
+            };
+            mouse.events.push(ev);
         };
     }
     static updateMouseUp(mouse) {
@@ -76888,9 +76935,7 @@ class Mouse {
         };
         gameState.mouseEvents = this.events;
         gameState.mouseDragInProgress = drag;
-        gameState.scale = _gameState.capScale(gameState.scale + this.wheelDelta * 0.001);
-        this.wheelDelta = 0;
-        console.log(JSON.stringify(this.events));
+        gameState.scale = _gameState.capScale(this.wheelDelta);
         this.events = [];
     }
     constructor(){
@@ -76899,9 +76944,11 @@ class Mouse {
             y: 0
         };
         this.primaryMouseButtonDown = false;
+        this.twoFingerTouch = false;
+        this.touchPinchDiff = -1;
         this.isDragging = false;
         this.events = Array();
-        this.wheelDelta = 0;
+        this.wheelDelta = 1;
     }
 }
 
@@ -91389,22 +91436,22 @@ class TileGraphics {
     get tileHeight() {
         return this.emptyTileImage.height;
     }
-    drawHoverTile(context, position, tile) {
-        this.drawTile(context, position, tile, this.hoverTileImage);
+    drawHoverTile(context, position, tile, scale) {
+        this.drawTile(context, position, tile, this.hoverTileImage, scale);
     }
-    drawInactiveTile(context, position, tile) {
-        this.drawTile(context, position, tile, this.blankTileImage);
+    drawInactiveTile(context, position, tile, scale) {
+        this.drawTile(context, position, tile, this.blankTileImage, scale);
     }
-    drawActiveTile(context, position, tile) {
-        this.drawTile(context, position, tile, this.activeTileImage);
+    drawActiveTile(context, position, tile, scale) {
+        this.drawTile(context, position, tile, this.activeTileImage, scale);
     }
-    drawLastPlacementTile(context, position, tile) {
-        this.drawTile(context, position, tile, this.lastPlacementTileImage);
+    drawLastPlacementTile(context, position, tile, scale) {
+        this.drawTile(context, position, tile, this.lastPlacementTileImage, scale);
     }
-    drawTile(context, position, tile, tileBackground) {
-        context.drawImage(tileBackground, position.x, position.y, this.blankTileImage.width, this.blankTileImage.height);
+    drawTile(context, position, tile, tileBackground, scale) {
+        context.drawImage(tileBackground, position.x, position.y, this.blankTileImage.width * scale, this.blankTileImage.height * scale);
         const inner = this.imageCache.get(tile.colour)?.get(tile.shape);
-        if (inner) context.drawImage(inner, position.x + this.symWidth / 2, position.y + this.symHeight / 2, this.symWidth, this.symHeight);
+        if (inner) context.drawImage(inner, position.x + this.symWidth * scale / 2, position.y + this.symHeight * scale / 2, this.symWidth * scale, this.symHeight * scale);
     }
     screenCoords(pos, mid) {
         const tileX = pos.x * this.tileWidth + pos.x * TileGraphics.PADDING;
@@ -91452,6 +91499,7 @@ class TileGridGraphics {
         ;
         gameState.mouseEvents.forEach((e)=>{
             if (e.type == "MouseDrag") this.offset = _domain.minus(this.offset, delta(e));
+            if (e.type == "MouseZoom") this.offset = _domain.divideScalar(e.point, gameState.scale);
         });
         this.effectiveOffset = this.offset;
         if (gameState.mouseDragInProgress) this.effectiveOffset = _domain.minus(this.offset, delta(gameState.mouseDragInProgress));
@@ -91496,15 +91544,19 @@ class TileGridGraphics {
         if (singleActive) {
             context.save();
             context.globalAlpha = 0.5;
-            this.tileGraphics.drawInactiveTile(context, screenCoords, singleActive[1]);
+            this.tileGraphics.drawInactiveTile(context, screenCoords, singleActive[1], 1);
             context.restore();
         } else context.fillRect(screenCoords.x, screenCoords.y, this.tileGraphics.tileWidth, this.tileGraphics.tileHeight);
         for (const pt of state.tilesToDisplay){
             const coords = this.tileGraphics.screenCoords(pt.position, mid);
-            if (state.currentPlacement.placedTiles.contains(pt)) this.tileGraphics.drawHoverTile(context, coords, pt);
+            if (state.currentPlacement.placedTiles.contains(pt)) this.tileGraphics.drawHoverTile(context, coords, pt, 1);
             else if (state.tilesLastPlaced.map((x)=>_immutable.fromJS(x)
-            ).contains(_immutable.fromJS(pt))) this.tileGraphics.drawLastPlacementTile(context, coords, pt);
-            else this.tileGraphics.drawInactiveTile(context, coords, pt);
+            ).contains(_immutable.fromJS(pt))) this.tileGraphics.drawLastPlacementTile(context, coords, pt, 1);
+            else this.tileGraphics.drawInactiveTile(context, coords, pt, 1);
+        }
+        if (this.lastMid) {
+            context.fillStyle = 'red';
+            context.fillRect(this.lastMid.x, this.lastMid.y, 10, 10);
         }
         context.restore();
     }

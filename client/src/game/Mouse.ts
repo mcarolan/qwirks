@@ -13,18 +13,32 @@ export interface MouseDrag {
   to: Position;
 }
 
-export type MouseClickOrDrag = MouseClick | MouseDrag;
+export interface MouseZoom {
+  type: "MouseZoom";
+  point: Position;
+}
+
+export type MouseEv = MouseClick | MouseDrag | MouseZoom;
+
+export interface MouseGameState {
+  mousePosition: Position;
+  mouseEvents: MouseEv[];
+  mouseDragInProgress: MouseDrag | undefined;
+  scale: number;
+}
 
 export class Mouse implements IGameStateUpdater {
   private mousePosition: Position = { x: 0, y: 0 };
   private primaryMouseButtonDown = false;
+  private twoFingerTouch = false;
+  private touchPinchDiff: number = -1;
 
   private isDragging: boolean = false;
   private mouseDragStart: Position | undefined;
 
-  private events = Array<MouseClickOrDrag>();
+  private events = Array<MouseEv>();
 
-  private wheelDelta: number = 0;
+  private wheelDelta: number = 1;
 
   private setPrimaryMouseButtonDown(e: MouseEvent): void {
     const flags = e.buttons !== undefined ? e.buttons : e.which;
@@ -95,11 +109,46 @@ export class Mouse implements IGameStateUpdater {
         ? e.changedTouches.item(0)?.pageY
         : undefined;
 
+      const prevTwoFingerTouch = mouse.twoFingerTouch;
+      mouse.twoFingerTouch = e.touches.length === 2;
+
+      const prevTouchPinchDiff = mouse.touchPinchDiff;
+
+      if (mouse.twoFingerTouch) {
+        const x1 = e.touches.item(0)?.pageX ?? 0;
+        const y1 = e.touches.item(0)?.pageY ?? 0;
+        const x2 = e.touches.item(1)?.pageX ?? 0;
+        const y2 = e.touches.item(1)?.pageY ?? 0;
+
+        mouse.touchPinchDiff = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+        const mid = {
+          x: (x1 + x2) / 2,
+          y: (y1 + y2) / 2
+        }
+        const zoomEv: MouseZoom = {
+          type: "MouseZoom",
+          point: mid
+        }
+        mouse.events.push(zoomEv);
+      }
+      else {
+        mouse.touchPinchDiff = -1;
+      }
+
       if (x && y) {
         mouse.mousePosition = { x, y };
       }
 
-      if (
+      if (prevTwoFingerTouch && !mouse.twoFingerTouch) {
+        return;
+      }
+      else if (mouse.twoFingerTouch && mouse.touchPinchDiff > prevTouchPinchDiff) {
+        mouse.wheelDelta /= 1.1;
+      }
+      else if (mouse.twoFingerTouch && mouse.touchPinchDiff < prevTouchPinchDiff) {
+        mouse.wheelDelta *= 1.1;
+      }
+      /*else if (
         mouse.primaryMouseButtonDown &&
         mouse.mouseDragStart &&
         !mouse.isDragging &&
@@ -147,14 +196,25 @@ export class Mouse implements IGameStateUpdater {
         };
         mouse.mouseDragStart = undefined;
         mouse.events.push(e);
-      }
+      }*/
     };
   }
 
   static updateMouseWheel(mouse: Mouse): (e: WheelEvent) => void {
     return (e: WheelEvent) => {
       e.preventDefault();
-      mouse.wheelDelta += e.deltaY;
+      console.log(e.deltaY);
+      if (e.deltaY > 0) {
+        mouse.wheelDelta *= 1.1;
+      }
+      else {
+        mouse.wheelDelta /= 1.1;
+      }
+      const ev: MouseZoom = {
+        type: "MouseZoom",
+        point: { x: e.pageX, y: e.pageY }
+      }
+      mouse.events.push(ev);
     };
   }
 
@@ -179,7 +239,7 @@ export class Mouse implements IGameStateUpdater {
     };
   }
 
-  update(gameState: GameState): void {
+  update(gameState: MouseGameState): void {
     var drag: MouseDrag | undefined;
 
     if (this.isDragging && this.mouseDragStart) {
@@ -198,9 +258,7 @@ export class Mouse implements IGameStateUpdater {
     gameState.mouseEvents = this.events;
     gameState.mouseDragInProgress = drag;
 
-    gameState.scale = capScale(gameState.scale + this.wheelDelta * 0.001);
-    this.wheelDelta = 0;
-    console.log(JSON.stringify(this.events));
+    gameState.scale = capScale(this.wheelDelta);
 
     this.events = [];
   }

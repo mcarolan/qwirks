@@ -82,47 +82,52 @@ export class TileGraphics {
   drawHoverTile(
     context: CanvasRenderingContext2D,
     position: Position,
-    tile: Tile
+    tile: Tile,
+    scale: number
   ): void {
-    this.drawTile(context, position, tile, this.hoverTileImage);
+    this.drawTile(context, position, tile, this.hoverTileImage, scale);
   }
 
   drawInactiveTile(
     context: CanvasRenderingContext2D,
     position: Position,
-    tile: Tile
+    tile: Tile,
+    scale: number
   ): void {
-    this.drawTile(context, position, tile, this.blankTileImage);
+    this.drawTile(context, position, tile, this.blankTileImage, scale);
   }
 
   drawActiveTile(
     context: CanvasRenderingContext2D,
     position: Position,
-    tile: Tile
+    tile: Tile,
+    scale: number
   ): void {
-    this.drawTile(context, position, tile, this.activeTileImage);
+    this.drawTile(context, position, tile, this.activeTileImage, scale);
   }
 
   drawLastPlacementTile(
     context: CanvasRenderingContext2D,
     position: Position,
-    tile: Tile
+    tile: Tile,
+    scale: number
   ): void {
-    this.drawTile(context, position, tile, this.lastPlacementTileImage);
+    this.drawTile(context, position, tile, this.lastPlacementTileImage, scale);
   }
 
   private drawTile(
     context: CanvasRenderingContext2D,
     position: Position,
     tile: Tile,
-    tileBackground: HTMLImageElement
+    tileBackground: HTMLImageElement, 
+    scale: number
   ): void {
     context.drawImage(
       tileBackground,
       position.x,
       position.y,
-      this.blankTileImage.width,
-      this.blankTileImage.height
+      this.blankTileImage.width * scale,
+      this.blankTileImage.height * scale
     );
     const inner = this.imageCache
       .get(tile.colour)
@@ -131,10 +136,10 @@ export class TileGraphics {
     if (inner) {
       context.drawImage(
         inner,
-        position.x + this.symWidth / 2,
-        position.y + this.symHeight / 2,
-        this.symWidth,
-        this.symHeight
+        position.x + ((this.symWidth * scale) / 2),
+        position.y + ((this.symHeight * scale) / 2),
+        this.symWidth * scale,
+        this.symHeight * scale
       );
     }
   }

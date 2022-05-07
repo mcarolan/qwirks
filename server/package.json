@@ -5,6 +5,7 @@
   "scripts": {
     "test": "jest",
     "start": "tsc && node out/server/src/main.js",
+    "dummy": "tsc && node out/server/src/main.js --dummy-persistence",
     "build": "tsc",
     "postinstall": "npm run build"
   },
