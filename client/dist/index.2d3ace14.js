@@ -22971,8 +22971,8 @@ exports.constants = {
 
 },{"randombytes":"8hjhE","create-hash":"2WyL8","create-hmac":"k1utz","browserify-sign/algos":"busIB","pbkdf2":"g38Hg","browserify-cipher":"d4idn","diffie-hellman":"hwD3y","browserify-sign":"jbRNy","create-ecdh":"9Rcg1","public-encrypt":"h9Rdh","randomfill":"k3tsT"}],"8hjhE":[function(require,module,exports) {
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 // limit of Crypto.getRandomValues()
 // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
 var MAX_BYTES = 65536;
@@ -24925,8 +24925,8 @@ exports.pipeline = require('./lib/internal/streams/pipeline.js');
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;
@@ -26674,8 +26674,8 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
     this.chunk = chunk;
@@ -63527,8 +63527,8 @@ function compare(a, b) {
 
 },{"parse-asn1":"4Szbv","./mgf":"e2JgG","./xor":"iaxu0","bn.js":"3pDum","browserify-rsa":"e594P","create-hash":"2WyL8","./withPublic":"fFkPV","safe-buffer":"eW7r9"}],"k3tsT":[function(require,module,exports) {
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 function oldBrowser() {
     throw new Error('secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11');
 }
@@ -68816,7 +68816,7 @@ async function loadGameDependencies(user, gameKey, document) {
     };
 }
 
-},{"socket.io-client":"8HBJR","../fireworks/Fireworks":"evkZJ","../fireworks/FireworkUpdater":"5Bc4C","./GameLogic":"48mBC","./Network":"4f7Bn","./Sounds":"eB3xr","../graphics/TileGraphics":"jbJGn","../graphics/TileGridGraphics":"lTls6","../graphics/domain":"5in7n","./Mouse":"57eqU","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../../../shared/Domain":"2iCCP"}],"8HBJR":[function(require,module,exports) {
+},{"socket.io-client":"8HBJR","../fireworks/Fireworks":"evkZJ","../fireworks/FireworkUpdater":"5Bc4C","./GameLogic":"48mBC","./Network":"4f7Bn","./Sounds":"eB3xr","../graphics/TileGraphics":"jbJGn","../graphics/TileGridGraphics":"lTls6","../graphics/domain":"5in7n","./Mouse":"57eqU","../../../shared/Domain":"2iCCP","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"8HBJR":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 /**
@@ -71917,6 +71917,8 @@ parcelHelpers.export(exports, "mul", ()=>mul
 );
 parcelHelpers.export(exports, "divideScalar", ()=>divideScalar
 );
+parcelHelpers.export(exports, "normalise", ()=>normalise
+);
 parcelHelpers.export(exports, "distanceBetween", ()=>distanceBetween
 );
 parcelHelpers.export(exports, "prettyPrint", ()=>prettyPrint
@@ -72007,6 +72009,13 @@ function divideScalar(p, n) {
     return {
         x: p.x / n,
         y: p.y / n
+    };
+}
+function normalise(p) {
+    const length = Math.sqrt(Math.pow(p.x, 2) + Math.pow(p.y, 2));
+    return {
+        x: p.x / length,
+        y: p.y / length
     };
 }
 function distanceBetween(a, b) {
@@ -91362,7 +91371,7 @@ class MouseUpdater {
     constructor(initialOffset){
         this.initialOffset = initialOffset;
         this.DRAG_TOLERANCE = 3;
-        this.NO_POTENTIAL_TOUCH_CLICK = [
+        this.NULL_TIME_POSITION = [
             -1,
             {
                 x: 0,
@@ -91371,6 +91380,8 @@ class MouseUpdater {
         ];
         this.TOUCH_CLICK_LAG = 150;
         this.TOUCH_ZOOM_DELTA = 1.07;
+        this.DRIFT_AMOUNT = 100;
+        this.DRIFT_DECELERATION = 0.9;
         this.state = {
             mousePosition: {
                 x: 0,
@@ -91388,9 +91399,15 @@ class MouseUpdater {
             scale: 1,
             touchPinchDiff: -1,
             clicks: [],
-            isDragging: false,
-            lastPotentialTouchClick: this.NO_POTENTIAL_TOUCH_CLICK,
-            touchClickEnabled: true
+            dragStart: this.NULL_TIME_POSITION,
+            lastPotentialTouchClick: this.NULL_TIME_POSITION,
+            touchClickEnabled: true,
+            driftDirection: {
+                x: 0,
+                y: 0
+            },
+            driftAcceleration: -1,
+            lastFrame: -1
         };
     }
     wheelEvent(e) {
@@ -91422,11 +91439,28 @@ class MouseUpdater {
             this.state.startPan = {
                 ...this.state.mousePosition
             };
-            this.state.isDragging = true;
+            if (this.state.dragStart[0] === -1) {
+                this.state.dragStart = [
+                    performance.now(),
+                    {
+                        ...this.state.mousePosition
+                    }
+                ];
+                this.state.driftAcceleration = 0;
+            }
         }
         if (downBefore && !this.state.primaryDown) {
-            if (this.state.isDragging) this.state.isDragging = false;
-            else this.state.clicks.push({
+            if (this.state.dragStart[0] > 0) {
+                const dragTime = performance.now() - this.state.dragStart[0];
+                const dragDistance = _domain.distanceBetween(this.state.dragStart[1], this.state.mousePosition);
+                this.state.driftDirection = _domain.normalise({
+                    x: this.state.mousePosition.x - this.state.dragStart[1].x,
+                    y: this.state.mousePosition.y - this.state.dragStart[1].y
+                });
+                this.state.driftAcceleration = dragDistance / dragTime;
+                this.state.dragStart = this.NULL_TIME_POSITION;
+                console.log(`${dragDistance} in ${dragTime} gives acceleration of ${this.state.driftAcceleration}. driftDirection: ${JSON.stringify(this.state.driftDirection)}`);
+            } else this.state.clicks.push({
                 ...this.state.mousePosition
             });
         }
@@ -91459,12 +91493,21 @@ class MouseUpdater {
                 this.state.startPan = {
                     ...this.state.mousePosition
                 };
-                this.state.lastPotentialTouchClick = this.NO_POTENTIAL_TOUCH_CLICK;
+                this.state.lastPotentialTouchClick = this.NULL_TIME_POSITION;
                 this.state.touchClickEnabled = false;
+                if (this.state.dragStart[0] === -1) {
+                    this.state.dragStart = [
+                        performance.now(),
+                        {
+                            ...this.state.mousePosition
+                        }
+                    ];
+                    this.state.driftAcceleration = 0;
+                }
             }
         }
         if (multiFingersDown) {
-            this.state.lastPotentialTouchClick = this.NO_POTENTIAL_TOUCH_CLICK;
+            this.state.lastPotentialTouchClick = this.NULL_TIME_POSITION;
             this.state.touchClickEnabled = false;
             const x1 = e.touches.item(0)?.pageX ?? 0;
             const y1 = e.touches.item(0)?.pageY ?? 0;
@@ -91487,19 +91530,47 @@ class MouseUpdater {
                 };
             }
         }
-        if (e.touches.length === 0) this.state.touchClickEnabled = true;
+        if (e.touches.length === 0) {
+            this.state.touchClickEnabled = true;
+            if (this.state.dragStart[0] > 0) {
+                const dragTime = performance.now() - this.state.dragStart[0];
+                const dragDistance = _domain.distanceBetween(this.state.dragStart[1], this.state.mousePosition);
+                this.state.driftDirection = _domain.normalise({
+                    x: this.state.mousePosition.x - this.state.dragStart[1].x,
+                    y: this.state.mousePosition.y - this.state.dragStart[1].y
+                });
+                this.state.driftAcceleration = dragDistance / dragTime;
+                this.state.dragStart = this.NULL_TIME_POSITION;
+                console.log(`${dragDistance} in ${dragTime} gives acceleration of ${this.state.driftAcceleration}. driftDirection: ${JSON.stringify(this.state.driftDirection)}`);
+            }
+        }
     }
     update(time) {
-        if (this.state.touchClickEnabled && this.state.lastPotentialTouchClick != this.NO_POTENTIAL_TOUCH_CLICK && time - this.state.lastPotentialTouchClick[0] > this.TOUCH_CLICK_LAG) {
+        if (this.state.lastFrame === -1) this.state.lastFrame = time;
+        const timeSinceLastFrame = time - this.state.lastFrame;
+        this.state.lastFrame = time;
+        if (this.state.touchClickEnabled && this.state.lastPotentialTouchClick != this.NULL_TIME_POSITION && time - this.state.lastPotentialTouchClick[0] > this.TOUCH_CLICK_LAG) {
             this.state.clicks.push({
                 ...this.state.lastPotentialTouchClick[1]
             });
-            this.state.lastPotentialTouchClick = this.NO_POTENTIAL_TOUCH_CLICK;
+            this.state.lastPotentialTouchClick = this.NULL_TIME_POSITION;
         }
+        if (this.state.driftAcceleration > 0) {
+            const delta = {
+                x: this.state.driftDirection.x * this.DRIFT_AMOUNT * (timeSinceLastFrame / 1000) * this.state.driftAcceleration,
+                y: this.state.driftDirection.y * this.DRIFT_AMOUNT * (timeSinceLastFrame / 1000) * this.state.driftAcceleration
+            };
+            this.state.offset = {
+                x: this.state.offset.x - delta.x / this.state.scale,
+                y: this.state.offset.y - delta.y / this.state.scale
+            };
+            this.state.driftAcceleration *= this.DRIFT_DECELERATION;
+        }
+        if (this.state.driftAcceleration < 0.001) this.state.driftAcceleration = 0;
     }
 }
 
-},{"../../../shared/Domain":"2iCCP","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../state/GameState":"fRKfr"}],"9JNK3":[function(require,module,exports) {
+},{"../state/GameState":"fRKfr","../../../shared/Domain":"2iCCP","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"9JNK3":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$6598 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;

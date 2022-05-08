@@ -110,6 +110,11 @@ export function divideScalar(p: Position, n: number): Position {
   };
 }
 
+export function normalise(p: Position): Position {
+  const length = Math.sqrt(Math.pow(p.x, 2) + Math.pow(p.y, 2));
+  return { x: p.x / length, y: p.y / length };
+}
+
 export function distanceBetween(a: Position, b: Position): number {
   const xDistance = a.x - b.x;
   const yDistance = a.y - b.y;

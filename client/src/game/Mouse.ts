@@ -1,5 +1,5 @@
 import { capScale } from "../state/GameState";
-import { distanceBetween, Position } from "../../../shared/Domain";
+import { distanceBetween, normalise, Position } from "../../../shared/Domain";
 
 export interface MouseState {
   mousePosition: Position;
@@ -10,9 +10,12 @@ export interface MouseState {
   scale: number;
   touchPinchDiff: number;
   clicks: Position[];
-  isDragging: boolean;
+  dragStart: [DOMHighResTimeStamp, Position];
   lastPotentialTouchClick: [DOMHighResTimeStamp, Position];
   touchClickEnabled: boolean;
+  driftDirection: Position;
+  driftAcceleration: number;
+  lastFrame: DOMHighResTimeStamp;
 }
 
 export function registerMouseUpdater(document: Document, initialOffset: Position): MouseUpdater {
@@ -49,9 +52,11 @@ export function screenToWorld(screen: Position, state: MouseState): Position {
 
 export class MouseUpdater {
   private DRAG_TOLERANCE: number = 3;
-  private NO_POTENTIAL_TOUCH_CLICK: [DOMHighResTimeStamp, Position] = [-1, { x: 0, y: 0}];
+  private NULL_TIME_POSITION: [DOMHighResTimeStamp, Position] = [-1, { x: 0, y: 0}];
   private TOUCH_CLICK_LAG = 150;
   private TOUCH_ZOOM_DELTA = 1.07;
+  private DRIFT_AMOUNT = 100;
+  private DRIFT_DECELERATION = 0.9;
 
   constructor(private initialOffset: Position) {}
 
@@ -64,9 +69,12 @@ export class MouseUpdater {
       scale: 1,
       touchPinchDiff: -1,
       clicks: [],
-      isDragging: false,
-      lastPotentialTouchClick: this.NO_POTENTIAL_TOUCH_CLICK,
-      touchClickEnabled: true
+      dragStart: this.NULL_TIME_POSITION,
+      lastPotentialTouchClick: this.NULL_TIME_POSITION,
+      touchClickEnabled: true,
+      driftDirection: { x: 0, y: 0 },
+      driftAcceleration: -1,
+      lastFrame: -1
   };
 
   wheelEvent(e: WheelEvent): void {
@@ -95,12 +103,20 @@ export class MouseUpdater {
       if (downBefore && this.state.primaryDown && distanceBetween(this.state.startPan, this.state.mousePosition) > this.DRAG_TOLERANCE) {
           this.state.offset = { x: this.state.offset.x - ((this.state.mousePosition.x - this.state.startPan.x) / this.state.scale), y: this.state.offset.y - ((this.state.mousePosition.y - this.state.startPan.y) / this.state.scale) };
           this.state.startPan = { ...this.state.mousePosition };
-          this.state.isDragging = true;
+          if (this.state.dragStart[0] === -1) {
+            this.state.dragStart = [performance.now(), { ...this.state.mousePosition }]
+            this.state.driftAcceleration = 0;
+          }
       }
 
       if (downBefore && !this.state.primaryDown) {
-          if (this.state.isDragging) {
-              this.state.isDragging = false;
+          if (this.state.dragStart[0] > 0) {
+              const dragTime = performance.now() - this.state.dragStart[0];
+              const dragDistance = distanceBetween(this.state.dragStart[1], this.state.mousePosition);
+              this.state.driftDirection = normalise({ x: this.state.mousePosition.x - this.state.dragStart[1].x, y:  this.state.mousePosition.y - this.state.dragStart[1].y });
+              this.state.driftAcceleration = dragDistance / dragTime;
+              this.state.dragStart = this.NULL_TIME_POSITION;
+              console.log(`${dragDistance} in ${dragTime} gives acceleration of ${this.state.driftAcceleration}. driftDirection: ${JSON.stringify(this.state.driftDirection)}`);
           }
           else {
               this.state.clicks.push({ ...this.state.mousePosition });
@@ -127,13 +143,18 @@ export class MouseUpdater {
           else if (distanceBetween(this.state.startPan, this.state.mousePosition) > this.DRAG_TOLERANCE) {
               this.state.offset = { x: this.state.offset.x - ((this.state.mousePosition.x - this.state.startPan.x) / this.state.scale), y: this.state.offset.y - ((this.state.mousePosition.y - this.state.startPan.y) / this.state.scale) };
               this.state.startPan = { ...this.state.mousePosition };
-              this.state.lastPotentialTouchClick = this.NO_POTENTIAL_TOUCH_CLICK;
+              this.state.lastPotentialTouchClick = this.NULL_TIME_POSITION;
               this.state.touchClickEnabled = false;
+
+            if (this.state.dragStart[0] === -1) {
+                this.state.dragStart = [performance.now(), { ...this.state.mousePosition }]
+                this.state.driftAcceleration = 0;
+            }
           }
       }
       
       if (multiFingersDown) {
-          this.state.lastPotentialTouchClick = this.NO_POTENTIAL_TOUCH_CLICK;
+          this.state.lastPotentialTouchClick = this.NULL_TIME_POSITION;
           this.state.touchClickEnabled = false;
           const x1 = e.touches.item(0)?.pageX ?? 0;
           const y1 = e.touches.item(0)?.pageY ?? 0;
@@ -162,13 +183,37 @@ export class MouseUpdater {
 
       if (e.touches.length === 0) {
           this.state.touchClickEnabled = true;
+
+          if (this.state.dragStart[0] > 0) {
+            const dragTime = performance.now() - this.state.dragStart[0];
+            const dragDistance = distanceBetween(this.state.dragStart[1], this.state.mousePosition);
+            this.state.driftDirection = normalise({ x: this.state.mousePosition.x - this.state.dragStart[1].x, y:  this.state.mousePosition.y - this.state.dragStart[1].y });
+            this.state.driftAcceleration = dragDistance / dragTime;
+            this.state.dragStart = this.NULL_TIME_POSITION;
+            console.log(`${dragDistance} in ${dragTime} gives acceleration of ${this.state.driftAcceleration}. driftDirection: ${JSON.stringify(this.state.driftDirection)}`);
+        }
       }
   }
 
   update(time: DOMHighResTimeStamp): void {
-      if (this.state.touchClickEnabled && this.state.lastPotentialTouchClick != this.NO_POTENTIAL_TOUCH_CLICK && (time - this.state.lastPotentialTouchClick[0]) > this.TOUCH_CLICK_LAG) {
+      if (this.state.lastFrame === -1) {
+          this.state.lastFrame = time;
+      }
+      const timeSinceLastFrame = time - this.state.lastFrame;
+      this.state.lastFrame = time;
+      if (this.state.touchClickEnabled && this.state.lastPotentialTouchClick != this.NULL_TIME_POSITION && (time - this.state.lastPotentialTouchClick[0]) > this.TOUCH_CLICK_LAG) {
           this.state.clicks.push({ ...this.state.lastPotentialTouchClick[1] });
-          this.state.lastPotentialTouchClick = this.NO_POTENTIAL_TOUCH_CLICK;
+          this.state.lastPotentialTouchClick = this.NULL_TIME_POSITION;
+      }
+
+      if (this.state.driftAcceleration > 0) {
+        const delta: Position = { x: this.state.driftDirection.x * this.DRIFT_AMOUNT * (timeSinceLastFrame / 1000) * this.state.driftAcceleration, y: this.state.driftDirection.y * this.DRIFT_AMOUNT * (timeSinceLastFrame / 1000) * this.state.driftAcceleration };
+        this.state.offset = { x: this.state.offset.x - (delta.x / this.state.scale), y: this.state.offset.y - (delta.y / this.state.scale) };
+        this.state.driftAcceleration *= this.DRIFT_DECELERATION;
+      }
+      
+      if (this.state.driftAcceleration < 0.001) {
+          this.state.driftAcceleration = 0;
       }
   }
 }
