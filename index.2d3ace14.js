@@ -22971,8 +22971,8 @@ exports.constants = {
 
 },{"randombytes":"8hjhE","create-hash":"2WyL8","create-hmac":"k1utz","browserify-sign/algos":"busIB","pbkdf2":"g38Hg","browserify-cipher":"d4idn","diffie-hellman":"hwD3y","browserify-sign":"jbRNy","create-ecdh":"9Rcg1","public-encrypt":"h9Rdh","randomfill":"k3tsT"}],"8hjhE":[function(require,module,exports) {
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 // limit of Crypto.getRandomValues()
 // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
 var MAX_BYTES = 65536;
@@ -29517,8 +29517,8 @@ Stream.prototype.pipe = function(dest, options) {
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;
@@ -32395,8 +32395,8 @@ exports.pbkdf2 = require('./lib/async');
 exports.pbkdf2Sync = require('./lib/sync');
 
 },{"./lib/async":"aqdig","./lib/sync":"lh9gw"}],"aqdig":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 var Buffer = require('safe-buffer').Buffer;
 var checkParameters = require('./precondition');
 var defaultEncoding = require('./default-encoding');
@@ -40583,8 +40583,8 @@ exports.pipeline = require('./lib/internal/streams/pipeline.js');
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;
@@ -63775,7 +63775,6 @@ var _gameStatus = require("../component/GameStatus");
 var _mainComponentState = require("../state/MainComponentState");
 var _domain = require("../graphics/domain");
 var _gameState = require("../state/GameState");
-var _mouse = require("../game/Mouse");
 var _userHand = require("./UserHand");
 var _userList = require("./UserList");
 var _usernamePanel = require("./UsernamePanel");
@@ -63831,26 +63830,11 @@ class MainComponent extends _reactDefault.default.Component {
             };
         });
     }
-    isTouchEnabled() {
-        return "ontouchstart" in window || navigator.maxTouchPoints > 0;
-    }
     async componentDidMount() {
-        const deps = await _gameDependencies.loadGameDependencies(this.props.user, this.props.gameKey);
+        const deps = await _gameDependencies.loadGameDependencies(this.props.user, this.props.gameKey, document);
         deps.canvas.width = deps.mainArea.clientWidth;
         deps.canvas.height = deps.mainArea.clientHeight;
-        if (this.isTouchEnabled()) {
-            document.addEventListener("touchmove", _mouse.Mouse.updateTouchMove(deps.mouse));
-            document.addEventListener("touchcancel", _mouse.Mouse.updateTouchMove(deps.mouse));
-            document.addEventListener("touchend", _mouse.Mouse.updateTouchMove(deps.mouse));
-            document.addEventListener("touchstart", _mouse.Mouse.updateTouchMove(deps.mouse));
-        } else {
-            document.addEventListener("mousedown", _mouse.Mouse.updateMouseDown(deps.mouse));
-            document.addEventListener("mouseup", _mouse.Mouse.updateMouseUp(deps.mouse));
-            document.addEventListener("mousemove", _mouse.Mouse.updateMousePosition(deps.mouse));
-        }
-        document.addEventListener("wheel", _mouse.Mouse.updateMouseWheel(deps.mouse));
-        requestAnimationFrame((_)=>_frame.frame(_gameState.initialGameState(this.props.gameKey, this.props.user, _domain.rectFromElement(deps.mainArea)), deps, this)
-        );
+        requestAnimationFrame(_frame.frame(_gameState.initialGameState(this.props.gameKey, this.props.user, _domain.rectFromElement(deps.mainArea)), deps, this));
     }
     render() {
         const isEnabled = (tag)=>this.state.game.enabledButtonTags.contains(tag)
@@ -63875,7 +63859,7 @@ class MainComponent extends _reactDefault.default.Component {
                             turnStartTime: this.state.game.turnStartTime
                         }, void 0, false, {
                             fileName: "src/component/MainComponent.tsx",
-                            lineNumber: 141,
+                            lineNumber: 115,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -63887,7 +63871,7 @@ class MainComponent extends _reactDefault.default.Component {
                                     zoomOut: ()=>this.state.ui.zoomOutPressed += 1
                                 }, void 0, false, {
                                     fileName: "src/component/MainComponent.tsx",
-                                    lineNumber: 162,
+                                    lineNumber: 136,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -63903,7 +63887,7 @@ class MainComponent extends _reactDefault.default.Component {
                                                     children: "No round timer"
                                                 }, void 0, false, {
                                                     fileName: "src/component/MainComponent.tsx",
-                                                    lineNumber: 171,
+                                                    lineNumber: 145,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("option", {
@@ -63911,7 +63895,7 @@ class MainComponent extends _reactDefault.default.Component {
                                                     children: "10 seconds"
                                                 }, void 0, false, {
                                                     fileName: "src/component/MainComponent.tsx",
-                                                    lineNumber: 172,
+                                                    lineNumber: 146,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("option", {
@@ -63919,7 +63903,7 @@ class MainComponent extends _reactDefault.default.Component {
                                                     children: "20 seconds"
                                                 }, void 0, false, {
                                                     fileName: "src/component/MainComponent.tsx",
-                                                    lineNumber: 173,
+                                                    lineNumber: 147,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("option", {
@@ -63927,7 +63911,7 @@ class MainComponent extends _reactDefault.default.Component {
                                                     children: "30 seconds"
                                                 }, void 0, false, {
                                                     fileName: "src/component/MainComponent.tsx",
-                                                    lineNumber: 174,
+                                                    lineNumber: 148,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("option", {
@@ -63935,7 +63919,7 @@ class MainComponent extends _reactDefault.default.Component {
                                                     children: "1 minute"
                                                 }, void 0, false, {
                                                     fileName: "src/component/MainComponent.tsx",
-                                                    lineNumber: 175,
+                                                    lineNumber: 149,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("option", {
@@ -63943,13 +63927,13 @@ class MainComponent extends _reactDefault.default.Component {
                                                     children: "2 minutes"
                                                 }, void 0, false, {
                                                     fileName: "src/component/MainComponent.tsx",
-                                                    lineNumber: 176,
+                                                    lineNumber: 150,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "src/component/MainComponent.tsx",
-                                            lineNumber: 167,
+                                            lineNumber: 141,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_button.Button, {
@@ -63959,13 +63943,13 @@ class MainComponent extends _reactDefault.default.Component {
                                             enabled: isEnabled(_button1.ButtonTag.Start)
                                         }, void 0, false, {
                                             fileName: "src/component/MainComponent.tsx",
-                                            lineNumber: 178,
+                                            lineNumber: 152,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "src/component/MainComponent.tsx",
-                                    lineNumber: 166,
+                                    lineNumber: 140,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -63982,12 +63966,12 @@ class MainComponent extends _reactDefault.default.Component {
                                                 enabled: isEnabled(_button1.ButtonTag.Accept)
                                             }, void 0, false, {
                                                 fileName: "src/component/MainComponent.tsx",
-                                                lineNumber: 187,
+                                                lineNumber: 161,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/component/MainComponent.tsx",
-                                            lineNumber: 186,
+                                            lineNumber: 160,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -64001,12 +63985,12 @@ class MainComponent extends _reactDefault.default.Component {
                                                 enabled: isEnabled(_button1.ButtonTag.Swap)
                                             }, void 0, false, {
                                                 fileName: "src/component/MainComponent.tsx",
-                                                lineNumber: 196,
+                                                lineNumber: 170,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/component/MainComponent.tsx",
-                                            lineNumber: 195,
+                                            lineNumber: 169,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -64020,12 +64004,12 @@ class MainComponent extends _reactDefault.default.Component {
                                                 enabled: isEnabled(_button1.ButtonTag.Cancel)
                                             }, void 0, false, {
                                                 fileName: "src/component/MainComponent.tsx",
-                                                lineNumber: 205,
+                                                lineNumber: 179,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/component/MainComponent.tsx",
-                                            lineNumber: 204,
+                                            lineNumber: 178,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -64038,30 +64022,30 @@ class MainComponent extends _reactDefault.default.Component {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "src/component/MainComponent.tsx",
-                                                lineNumber: 214,
+                                                lineNumber: 188,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/component/MainComponent.tsx",
-                                            lineNumber: 213,
+                                            lineNumber: 187,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "src/component/MainComponent.tsx",
-                                    lineNumber: 185,
+                                    lineNumber: 159,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "src/component/MainComponent.tsx",
-                            lineNumber: 161,
+                            lineNumber: 135,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "src/component/MainComponent.tsx",
-                    lineNumber: 140,
+                    lineNumber: 114,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -64072,7 +64056,7 @@ class MainComponent extends _reactDefault.default.Component {
                             onChangeUsername: this.onChangeUsername
                         }, void 0, false, {
                             fileName: "src/component/MainComponent.tsx",
-                            lineNumber: 222,
+                            lineNumber: 196,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -64082,18 +64066,18 @@ class MainComponent extends _reactDefault.default.Component {
                                 userInControl: this.state.game.userInControl
                             }, void 0, false, {
                                 fileName: "src/component/MainComponent.tsx",
-                                lineNumber: 227,
+                                lineNumber: 201,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "src/component/MainComponent.tsx",
-                            lineNumber: 226,
+                            lineNumber: 200,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "src/component/MainComponent.tsx",
-                    lineNumber: 221,
+                    lineNumber: 195,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -64108,30 +64092,30 @@ class MainComponent extends _reactDefault.default.Component {
                             onPressed: (i)=>this.onHandTileClicked(i)
                         }, void 0, false, {
                             fileName: "src/component/MainComponent.tsx",
-                            lineNumber: 235,
+                            lineNumber: 209,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "src/component/MainComponent.tsx",
-                        lineNumber: 234,
+                        lineNumber: 208,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "src/component/MainComponent.tsx",
-                    lineNumber: 233,
+                    lineNumber: 207,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_connectionStatus.ConnectionStatus, {
                     isConnected: this.state.game.isConnected
                 }, void 0, false, {
                     fileName: "src/component/MainComponent.tsx",
-                    lineNumber: 246,
+                    lineNumber: 220,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "src/component/MainComponent.tsx",
-            lineNumber: 139,
+            lineNumber: 113,
             columnNumber: 7
         }, this));
     }
@@ -64142,7 +64126,7 @@ class MainComponent extends _reactDefault.default.Component {
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","../component/Button":"hdTPe","./Button":"hdTPe","../component/ConnectionStatus":"6AZV2","../game/Frame":"jTPaV","../game/GameDependencies":"9PSfn","../component/GameStatus":"9JNK3","../state/MainComponentState":"6NFgD","../graphics/domain":"5in7n","../state/GameState":"fRKfr","../game/Mouse":"57eqU","./UserHand":"Y6k4R","./UserList":"hhkeo","./UsernamePanel":"1yLaa","./ZoomControls":"4E4gg","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"hdTPe":[function(require,module,exports) {
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","../component/Button":"hdTPe","./Button":"hdTPe","../component/ConnectionStatus":"6AZV2","../game/Frame":"jTPaV","../game/GameDependencies":"9PSfn","../component/GameStatus":"9JNK3","../state/MainComponentState":"6NFgD","../graphics/domain":"5in7n","../state/GameState":"fRKfr","./UserHand":"Y6k4R","./UserList":"hhkeo","./UsernamePanel":"1yLaa","./ZoomControls":"4E4gg","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"hdTPe":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$e0e8 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -64369,24 +64353,28 @@ parcelHelpers.export(exports, "frame", ()=>frame
 var _mainComponentState = require("../state/MainComponentState");
 var _domain = require("../graphics/domain");
 function frame(gameState, deps, mainState) {
-    gameState.mainAreaBounds = _domain.rectFromElement(deps.mainArea);
-    deps.context.save();
-    deps.canvas.width = gameState.mainAreaBounds.width;
-    deps.canvas.height = gameState.mainAreaBounds.height;
-    deps.context.clearRect(0, 0, deps.context.canvas.width, deps.context.canvas.height);
-    deps.network.update(gameState);
-    deps.mouse.update(gameState);
-    deps.tileGrid.update(gameState);
-    deps.gameLogic.update(gameState);
-    deps.fireworkUpdater.update(gameState);
-    deps.sounds.update(gameState);
-    deps.context.scale(gameState.scale, gameState.scale);
-    deps.tileGrid.draw(deps.context, gameState);
-    deps.fireworks.updateAndDraw(deps.context);
-    deps.context.restore();
-    _mainComponentState.syncReactAndGameState(mainState, gameState, ()=>requestAnimationFrame((_)=>frame(gameState, deps, mainState)
-        )
-    );
+    return (time)=>{
+        gameState.mainAreaBounds = _domain.rectFromElement(deps.mainArea);
+        deps.context.save();
+        deps.canvas.width = gameState.mainAreaBounds.width;
+        deps.canvas.height = gameState.mainAreaBounds.height;
+        deps.context.clearRect(0, 0, deps.context.canvas.width, deps.context.canvas.height);
+        deps.network.update(gameState);
+        deps.mouseUpdater.update(time);
+        const mouseState = {
+            ...deps.mouseUpdater.state
+        };
+        deps.mouseUpdater.state.clicks = [];
+        deps.tileGrid.update(gameState, mouseState);
+        deps.gameLogic.update(gameState);
+        deps.fireworkUpdater.update(gameState, mouseState);
+        deps.sounds.update(gameState);
+        deps.tileGrid.draw(deps.context, gameState, mouseState);
+        deps.fireworks.updateAndDraw(deps.context);
+        deps.context.restore();
+        _mainComponentState.syncReactAndGameState(mainState, gameState, ()=>requestAnimationFrame(frame(gameState, deps, mainState))
+        );
+    };
 }
 
 },{"../state/MainComponentState":"6NFgD","../graphics/domain":"5in7n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"6NFgD":[function(require,module,exports) {
@@ -64398,7 +64386,6 @@ parcelHelpers.export(exports, "syncReactAndGameState", ()=>syncReactAndGameState
 );
 var _immutable = require("immutable");
 var _browserAPI = require("../browser/BrowserAPI");
-var _gameState = require("./GameState");
 const initialMainComponentState = {
     game: {
         userList: _immutable.Map(),
@@ -64457,11 +64444,6 @@ function syncReactAndGameState(mainComponent, gameState, cb) {
         });
         resetUiState = true;
     }
-    const netZoomChange = mainComponent.state.ui.zoomInPressed + mainComponent.state.ui.zoomOutPressed * -1;
-    if (netZoomChange != 0) {
-        gameState.scale = _gameState.capScale(gameState.scale + netZoomChange * 0.1);
-        resetUiState = true;
-    }
     if (mainComponent.state.ui.setUsername) {
         gameState.setUsername = mainComponent.state.ui.setUsername;
         gameState.currentUser = {
@@ -64489,7 +64471,7 @@ function syncReactAndGameState(mainComponent, gameState, cb) {
     else setTimeout(cb, 0);
 }
 
-},{"immutable":"iIkjt","../browser/BrowserAPI":"lJseq","./GameState":"fRKfr","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"iIkjt":[function(require,module,exports) {
+},{"immutable":"iIkjt","../browser/BrowserAPI":"lJseq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"iIkjt":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Collection", ()=>Collection
@@ -68746,75 +68728,7 @@ var Immutable = {
 var Iterable = Collection;
 exports.default = Immutable;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fRKfr":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "capScale", ()=>capScale
-);
-parcelHelpers.export(exports, "singleActiveTile", ()=>singleActiveTile
-);
-parcelHelpers.export(exports, "initialGameState", ()=>initialGameState
-);
-var _immutable = require("immutable");
-function capScale(scale) {
-    return Math.min(Math.max(scale, 0.25), 2);
-}
-function singleActiveTile(gameState) {
-    if (gameState.panelActiveTileIndicies.size === 1) {
-        const index = gameState.panelActiveTileIndicies.toArray().at(0);
-        const tile = index != undefined ? gameState.hand.get(index) : undefined;
-        if (index != undefined && tile) return [
-            index,
-            tile
-        ];
-    }
-    return undefined;
-}
-function initialGameState(gameKey, user, mainAreaBounds) {
-    return {
-        scale: 1,
-        gameKey: gameKey,
-        isStarted: false,
-        isConnected: false,
-        hand: _immutable.List.of(),
-        tilesToDisplay: [],
-        tilesApplied: [],
-        tilesLastPlaced: _immutable.Set(),
-        tilesToApply: undefined,
-        tilesToSwap: undefined,
-        mousePosition: {
-            x: 0,
-            y: 0
-        },
-        mouseEvents: [],
-        tilePositionsPressed: [],
-        pressedButtonTags: _immutable.Set(),
-        enabledButtonTags: _immutable.Set(),
-        visibleButtonTags: _immutable.Set(),
-        panelActiveTileIndicies: _immutable.Set(),
-        scoreJustAchieved: 0,
-        fireworkTilePositions: _immutable.List.of(),
-        currentPlacement: {
-            placedTiles: _immutable.Set(),
-            tiles: [],
-            score: 0,
-            lines: _immutable.Set.of()
-        },
-        mainAreaBounds,
-        currentUser: user,
-        userList: _immutable.Map(),
-        userInControl: undefined,
-        mouseDragInProgress: undefined,
-        setUsername: undefined,
-        winner: undefined,
-        turnTimerSelected: undefined,
-        turnTimer: undefined,
-        turnStartTime: undefined,
-        newUserInControl: undefined
-    };
-}
-
-},{"immutable":"iIkjt","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"5in7n":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"5in7n":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "rectFromElement", ()=>rectFromElement
@@ -68868,29 +68782,30 @@ var _socketIoClient = require("socket.io-client");
 var _fireworks = require("../fireworks/Fireworks");
 var _fireworkUpdater = require("../fireworks/FireworkUpdater");
 var _gameLogic = require("./GameLogic");
-var _mouse = require("./Mouse");
 var _network = require("./Network");
 var _sounds = require("./Sounds");
 var _tileGraphics = require("../graphics/TileGraphics");
 var _tileGridGraphics = require("../graphics/TileGridGraphics");
 var _domain = require("../graphics/domain");
-async function loadGameDependencies(user, gameKey) {
+var _mouse = require("./Mouse");
+var _domain1 = require("../../../shared/Domain");
+async function loadGameDependencies(user, gameKey, document) {
     const canvas = document.querySelector("#game");
     const mainArea = document.querySelector("#mainArea");
     const tileGraphics = await _tileGraphics.loadTileGraphics();
     const socket = _socketIoClient.io("http://192.168.0.16:3000");
-    const mouse = new _mouse.Mouse();
+    const mouseUpdater = _mouse.registerMouseUpdater(document, _domain1.mul(_domain.middle(_domain.rectFromElement(mainArea)), -1));
     const firstTileImage = await _domain.loadImage("./images/first-tile.png");
     const tileGrid = new _tileGridGraphics.TileGridGraphics(tileGraphics, firstTileImage);
     const fireworks = new _fireworks.Fireworks();
     const sounds = new _sounds.Sounds();
-    const fireworkUpdater = new _fireworkUpdater.FireworkUpdater(tileGraphics, tileGrid, fireworks);
+    const fireworkUpdater = new _fireworkUpdater.FireworkUpdater(tileGraphics, fireworks);
     return {
         canvas,
         context: canvas.getContext("2d"),
         mainArea,
         tileGrid,
-        mouse,
+        mouseUpdater,
         fireworks,
         socket,
         user,
@@ -68901,7 +68816,7 @@ async function loadGameDependencies(user, gameKey) {
     };
 }
 
-},{"socket.io-client":"8HBJR","../fireworks/Fireworks":"evkZJ","../fireworks/FireworkUpdater":"5Bc4C","./GameLogic":"48mBC","./Mouse":"57eqU","./Network":"4f7Bn","./Sounds":"eB3xr","../graphics/TileGraphics":"jbJGn","../graphics/TileGridGraphics":"lTls6","../graphics/domain":"5in7n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"8HBJR":[function(require,module,exports) {
+},{"socket.io-client":"8HBJR","../fireworks/Fireworks":"evkZJ","../fireworks/FireworkUpdater":"5Bc4C","./GameLogic":"48mBC","./Network":"4f7Bn","./Sounds":"eB3xr","../graphics/TileGraphics":"jbJGn","../graphics/TileGridGraphics":"lTls6","../graphics/domain":"5in7n","./Mouse":"57eqU","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../../../shared/Domain":"2iCCP"}],"8HBJR":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 /**
@@ -72165,12 +72080,11 @@ parcelHelpers.export(exports, "FireworkUpdater", ()=>FireworkUpdater
 var _immutable = require("immutable");
 var _domain = require("../../../shared/Domain");
 class FireworkUpdater {
-    constructor(tileGraphics, tileGrid, fireworks){
+    constructor(tileGraphics, fireworks){
         this.tileGraphics = tileGraphics;
-        this.tileGrid = tileGrid;
         this.fireworks = fireworks;
     }
-    update(gameState) {
+    update(gameState, mouseState) {
         if (!gameState.fireworkTilePositions.isEmpty()) {
             console.log("fire in the hole");
             const tileOffset = {
@@ -72178,11 +72092,11 @@ class FireworkUpdater {
                 y: this.tileGraphics.tileHeight / 2
             };
             const fireFrom = {
-                x: gameState.mousePosition.x,
-                y: gameState.mousePosition.y
+                x: mouseState.mousePosition.x,
+                y: mouseState.mousePosition.y
             };
             gameState.fireworkTilePositions.forEach((tp)=>{
-                const p = _domain.plus(this.tileGrid.tilePositionToScreenCoords(tp, gameState), tileOffset);
+                const p = this.tileGraphics.screenCoords(_domain.plus(tp, tileOffset), mouseState.offset, mouseState.scale);
                 this.fireworks.create(fireFrom, p);
             });
             gameState.fireworkTilePositions = _immutable.List();
@@ -72318,7 +72232,68 @@ class GameLogic {
     }
 }
 
-},{"../state/GameState":"fRKfr","immutable":"iIkjt","../../../shared/Domain":"2iCCP","../../../shared/TileGrid":"3gXtu","../component/Button":"hdTPe","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3gXtu":[function(require,module,exports) {
+},{"../state/GameState":"fRKfr","immutable":"iIkjt","../../../shared/Domain":"2iCCP","../../../shared/TileGrid":"3gXtu","../component/Button":"hdTPe","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fRKfr":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "capScale", ()=>capScale
+);
+parcelHelpers.export(exports, "singleActiveTile", ()=>singleActiveTile
+);
+parcelHelpers.export(exports, "initialGameState", ()=>initialGameState
+);
+var _immutable = require("immutable");
+function capScale(scale) {
+    return Math.min(Math.max(scale, 0.25), 2);
+}
+function singleActiveTile(gameState) {
+    if (gameState.panelActiveTileIndicies.size === 1) {
+        const index = gameState.panelActiveTileIndicies.toArray().at(0);
+        const tile = index != undefined ? gameState.hand.get(index) : undefined;
+        if (index != undefined && tile) return [
+            index,
+            tile
+        ];
+    }
+    return undefined;
+}
+function initialGameState(gameKey, user, mainAreaBounds) {
+    return {
+        gameKey: gameKey,
+        isStarted: false,
+        isConnected: false,
+        hand: _immutable.List.of(),
+        tilesToDisplay: [],
+        tilesApplied: [],
+        tilesLastPlaced: _immutable.Set(),
+        tilesToApply: undefined,
+        tilesToSwap: undefined,
+        tilePositionsPressed: [],
+        pressedButtonTags: _immutable.Set(),
+        enabledButtonTags: _immutable.Set(),
+        visibleButtonTags: _immutable.Set(),
+        panelActiveTileIndicies: _immutable.Set(),
+        scoreJustAchieved: 0,
+        fireworkTilePositions: _immutable.List.of(),
+        currentPlacement: {
+            placedTiles: _immutable.Set(),
+            tiles: [],
+            score: 0,
+            lines: _immutable.Set.of()
+        },
+        mainAreaBounds,
+        currentUser: user,
+        userList: _immutable.Map(),
+        userInControl: undefined,
+        setUsername: undefined,
+        winner: undefined,
+        turnTimerSelected: undefined,
+        turnTimer: undefined,
+        turnStartTime: undefined,
+        newUserInControl: undefined
+    };
+}
+
+},{"immutable":"iIkjt","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3gXtu":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "allLines", ()=>allLines
@@ -76761,198 +76736,7 @@ var Immutable = {
 var Iterable = Collection;
 exports.default = Immutable;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"57eqU":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "Mouse", ()=>Mouse
-);
-var _gameState = require("../state/GameState");
-class Mouse {
-    setPrimaryMouseButtonDown(e) {
-        const flags = e.buttons !== undefined ? e.buttons : e.which;
-        const downBefore = this.primaryMouseButtonDown;
-        this.primaryMouseButtonDown = (flags & 1) === 1;
-        if (this.primaryMouseButtonDown && this.mouseDragStart && !this.isDragging) {
-            const dx = Math.abs(this.mouseDragStart.x - this.mousePosition.x);
-            const dy = Math.abs(this.mouseDragStart.y - this.mousePosition.y);
-            if (dx > 5 || dy > 5) this.isDragging = true;
-        } else if (this.isDragging && this.mouseDragStart && downBefore && !this.primaryMouseButtonDown) {
-            this.isDragging = false;
-            const e = {
-                type: "MouseDrag",
-                from: this.mouseDragStart,
-                to: {
-                    x: this.mousePosition.x,
-                    y: this.mousePosition.y
-                }
-            };
-            this.events.push(e);
-            this.mouseDragStart = undefined;
-        } else if (!downBefore && this.primaryMouseButtonDown && this.mousePosition && this.mouseDragStart === undefined) this.mouseDragStart = {
-            x: this.mousePosition.x,
-            y: this.mousePosition.y
-        };
-        else if (downBefore && !this.primaryMouseButtonDown) {
-            const e = {
-                type: "MouseClick",
-                position: {
-                    x: this.mousePosition.x,
-                    y: this.mousePosition.y
-                }
-            };
-            this.mouseDragStart = undefined;
-            this.events.push(e);
-        }
-    }
-    static updateTouchMove(mouse) {
-        return (e)=>{
-            const downBefore = mouse.primaryMouseButtonDown;
-            mouse.primaryMouseButtonDown = e.touches.length === 1;
-            const x = mouse.primaryMouseButtonDown ? e.touches.item(0)?.pageX : (e.type === "touchend" || e.type === "touchcancel") && e.changedTouches.length === 1 ? e.changedTouches.item(0)?.pageX : undefined;
-            const y = mouse.primaryMouseButtonDown ? e.touches.item(0)?.pageY : (e.type === "touchend" || e.type === "touchcancel") && e.changedTouches.length === 1 ? e.changedTouches.item(0)?.pageY : undefined;
-            const prevTwoFingerTouch = mouse.twoFingerTouch;
-            mouse.twoFingerTouch = e.touches.length === 2;
-            const prevTouchPinchDiff = mouse.touchPinchDiff;
-            if (mouse.twoFingerTouch) {
-                const x1 = e.touches.item(0)?.pageX ?? 0;
-                const y1 = e.touches.item(0)?.pageY ?? 0;
-                const x2 = e.touches.item(1)?.pageX ?? 0;
-                const y2 = e.touches.item(1)?.pageY ?? 0;
-                mouse.touchPinchDiff = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-                const mid = {
-                    x: (x1 + x2) / 2,
-                    y: (y1 + y2) / 2
-                };
-                const zoomEv = {
-                    type: "MouseZoom",
-                    point: mid
-                };
-                mouse.events.push(zoomEv);
-            } else mouse.touchPinchDiff = -1;
-            if (x && y) mouse.mousePosition = {
-                x,
-                y
-            };
-            if (prevTwoFingerTouch && !mouse.twoFingerTouch) return;
-            else if (mouse.twoFingerTouch && mouse.touchPinchDiff > prevTouchPinchDiff) mouse.wheelDelta /= 1.1;
-            else if (mouse.twoFingerTouch && mouse.touchPinchDiff < prevTouchPinchDiff) mouse.wheelDelta *= 1.1;
-        /*else if (
-        mouse.primaryMouseButtonDown &&
-        mouse.mouseDragStart &&
-        !mouse.isDragging &&
-        x &&
-        y
-      ) {
-        const dx = Math.abs(mouse.mouseDragStart.x - x);
-        const dy = Math.abs(mouse.mouseDragStart.y - y);
-
-        if (dx > 5 || dy > 5) {
-          mouse.isDragging = true;
-        }
-      } else if (
-        mouse.isDragging &&
-        mouse.mouseDragStart &&
-        downBefore &&
-        !mouse.primaryMouseButtonDown &&
-        x &&
-        y
-      ) {
-        mouse.isDragging = false;
-        const e: MouseDrag = {
-          type: "MouseDrag",
-          from: mouse.mouseDragStart,
-          to: { x, y },
-        };
-        mouse.events.push(e);
-        mouse.mouseDragStart = undefined;
-      } else if (
-        !downBefore &&
-        mouse.primaryMouseButtonDown &&
-        x &&
-        y &&
-        mouse.mouseDragStart === undefined
-      ) {
-        console.log(`setting mouse drag start ${x} ${y}`);
-        mouse.mouseDragStart = {
-          x,
-          y,
-        };
-      } else if (downBefore && !mouse.primaryMouseButtonDown && x && y) {
-        const e: MouseClick = {
-          type: "MouseClick",
-          position: { x, y },
-        };
-        mouse.mouseDragStart = undefined;
-        mouse.events.push(e);
-      }*/ };
-    }
-    static updateMouseWheel(mouse) {
-        return (e)=>{
-            e.preventDefault();
-            console.log(e.deltaY);
-            if (e.deltaY > 0) mouse.wheelDelta *= 1.1;
-            else mouse.wheelDelta /= 1.1;
-            const ev = {
-                type: "MouseZoom",
-                point: {
-                    x: e.pageX,
-                    y: e.pageY
-                }
-            };
-            mouse.events.push(ev);
-        };
-    }
-    static updateMouseUp(mouse) {
-        return (e)=>{
-            mouse.setPrimaryMouseButtonDown(e);
-        };
-    }
-    static updateMouseDown(mouse) {
-        return (e)=>{
-            mouse.setPrimaryMouseButtonDown(e);
-        };
-    }
-    static updateMousePosition(mouse) {
-        return (e)=>{
-            mouse.mousePosition.x = e.pageX;
-            mouse.mousePosition.y = e.pageY;
-            mouse.setPrimaryMouseButtonDown(e);
-        };
-    }
-    update(gameState) {
-        var drag;
-        if (this.isDragging && this.mouseDragStart) {
-            const e = {
-                type: "MouseDrag",
-                from: this.mouseDragStart,
-                to: gameState.mousePosition
-            };
-            drag = e;
-        }
-        gameState.mousePosition = {
-            x: this.mousePosition.x,
-            y: this.mousePosition.y
-        };
-        gameState.mouseEvents = this.events;
-        gameState.mouseDragInProgress = drag;
-        gameState.scale = _gameState.capScale(this.wheelDelta);
-        this.events = [];
-    }
-    constructor(){
-        this.mousePosition = {
-            x: 0,
-            y: 0
-        };
-        this.primaryMouseButtonDown = false;
-        this.twoFingerTouch = false;
-        this.touchPinchDiff = -1;
-        this.isDragging = false;
-        this.events = Array();
-        this.wheelDelta = 1;
-    }
-}
-
-},{"../state/GameState":"fRKfr","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"4f7Bn":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"4f7Bn":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Network", ()=>Network
@@ -91453,17 +91237,17 @@ class TileGraphics {
         const inner = this.imageCache.get(tile.colour)?.get(tile.shape);
         if (inner) context.drawImage(inner, position.x + this.symWidth * scale / 2, position.y + this.symHeight * scale / 2, this.symWidth * scale, this.symHeight * scale);
     }
-    screenCoords(pos, mid) {
+    screenCoords(pos, mid, scale) {
         const tileX = pos.x * this.tileWidth + pos.x * TileGraphics.PADDING;
         const tileY = pos.y * this.tileHeight + pos.y * TileGraphics.PADDING;
         return {
-            x: mid.x + tileX,
-            y: mid.y + tileY
+            x: (tileX - mid.x) * scale,
+            y: (tileY - mid.y) * scale
         };
     }
     positionFromScreen(screen, mid, scale) {
-        const tileX = (screen.x / scale - mid.x) / (this.tileWidth + TileGraphics.PADDING);
-        const tileY = (screen.y / scale - mid.y) / (this.tileHeight + TileGraphics.PADDING);
+        const tileX = (screen.x / scale + mid.x) / (this.tileWidth + TileGraphics.PADDING);
+        const tileY = (screen.y / scale + mid.y) / (this.tileHeight + TileGraphics.PADDING);
         return {
             x: Math.floor(tileX),
             y: Math.floor(tileY)
@@ -91478,91 +91262,244 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "TileGridGraphics", ()=>TileGridGraphics
 );
 var _immutable = require("immutable");
-var _domain = require("../../../shared/Domain");
 var _gameState = require("../state/GameState");
-var _domain1 = require("./domain");
+var _domain = require("./domain");
 class TileGridGraphics {
     constructor(tileGraphics, firstTileImage){
         this.tileGraphics = tileGraphics;
         this.firstTileImage = firstTileImage;
-        this.offset = {
-            x: 0,
-            y: 0
-        };
-        this.effectiveOffset = {
-            x: 0,
-            y: 0
-        };
     }
-    updateDragging(gameState) {
-        const delta = (e)=>_domain.minus(e.from, e.to)
-        ;
-        gameState.mouseEvents.forEach((e)=>{
-            if (e.type == "MouseDrag") this.offset = _domain.minus(this.offset, delta(e));
-            if (e.type == "MouseZoom") this.offset = _domain.divideScalar(e.point, gameState.scale);
-        });
-        this.effectiveOffset = this.offset;
-        if (gameState.mouseDragInProgress) this.effectiveOffset = _domain.minus(this.offset, delta(gameState.mouseDragInProgress));
-    }
-    mid(state) {
-        return _domain.plus(_domain1.middle(state.mainAreaBounds), this.effectiveOffset);
-    }
-    updatePressedPositions(gameState) {
-        if (gameState.tilePositionsPressed.length > 0) gameState.tilePositionsPressed = new Array();
-        gameState.mouseEvents.forEach((e)=>{
-            if (e.type == "MouseClick") {
-                if (_domain1.rectContains(gameState.mainAreaBounds, e.position)) {
-                    const xy = this.tileGraphics.positionFromScreen(e.position, this.mid(gameState), gameState.scale);
-                    gameState.tilePositionsPressed.push(xy);
-                }
+    update(gameState, mouseState) {
+        if (gameState.userInControl === gameState.currentUser.userId) mouseState.clicks.forEach((c)=>{
+            if (_domain.rectContains(gameState.mainAreaBounds, c)) {
+                const xy = this.tileGraphics.positionFromScreen(c, mouseState.offset, mouseState.scale);
+                gameState.tilePositionsPressed.push(xy);
             }
         });
     }
-    update(gameState) {
-        if (gameState.tilesToDisplay.length > 0) this.updateDragging(gameState);
-        if (gameState.userInControl === gameState.currentUser.userId) this.updatePressedPositions(gameState);
-    }
-    tilePositionToScreenCoords(tilePosition, gameState) {
-        return this.tileGraphics.screenCoords(tilePosition, this.mid(gameState));
-    }
-    draw(context, state) {
-        const mid = this.mid(state);
+    draw(context, state, mouseState) {
         if (state.tilesToDisplay.length === 0 && state.userInControl === state.currentUser.userId) {
             const firstTilePosition = this.tileGraphics.screenCoords({
                 x: 0,
                 y: 0
-            }, mid);
+            }, mouseState.offset, mouseState.scale);
             const firstTilePositionX = firstTilePosition.x;
             const firstTilePositionY = firstTilePosition.y - this.firstTileImage.height + this.tileGraphics.tileHeight;
             context.drawImage(this.firstTileImage, firstTilePositionX, firstTilePositionY);
         }
         context.save();
-        const hoveringTilePosition = this.tileGraphics.positionFromScreen(state.mousePosition, mid, state.scale);
+        const hoveringTilePosition = this.tileGraphics.positionFromScreen(mouseState.mousePosition, mouseState.offset, mouseState.scale);
         context.fillStyle = "#eeeeee";
-        const screenCoords = this.tileGraphics.screenCoords(hoveringTilePosition, mid);
+        const screenCoords = this.tileGraphics.screenCoords(hoveringTilePosition, mouseState.offset, mouseState.scale);
         var singleActive = _gameState.singleActiveTile(state);
         if (singleActive) {
             context.save();
             context.globalAlpha = 0.5;
-            this.tileGraphics.drawInactiveTile(context, screenCoords, singleActive[1], 1);
+            this.tileGraphics.drawInactiveTile(context, screenCoords, singleActive[1], mouseState.scale);
             context.restore();
-        } else context.fillRect(screenCoords.x, screenCoords.y, this.tileGraphics.tileWidth, this.tileGraphics.tileHeight);
+        } else context.fillRect(screenCoords.x, screenCoords.y, this.tileGraphics.tileWidth * mouseState.scale, this.tileGraphics.tileHeight * mouseState.scale);
         for (const pt of state.tilesToDisplay){
-            const coords = this.tileGraphics.screenCoords(pt.position, mid);
-            if (state.currentPlacement.placedTiles.contains(pt)) this.tileGraphics.drawHoverTile(context, coords, pt, 1);
+            const coords = this.tileGraphics.screenCoords(pt.position, mouseState.offset, mouseState.scale);
+            if (state.currentPlacement.placedTiles.contains(pt)) this.tileGraphics.drawHoverTile(context, coords, pt, mouseState.scale);
             else if (state.tilesLastPlaced.map((x)=>_immutable.fromJS(x)
-            ).contains(_immutable.fromJS(pt))) this.tileGraphics.drawLastPlacementTile(context, coords, pt, 1);
-            else this.tileGraphics.drawInactiveTile(context, coords, pt, 1);
-        }
-        if (this.lastMid) {
-            context.fillStyle = 'red';
-            context.fillRect(this.lastMid.x, this.lastMid.y, 10, 10);
+            ).contains(_immutable.fromJS(pt))) this.tileGraphics.drawLastPlacementTile(context, coords, pt, mouseState.scale);
+            else this.tileGraphics.drawInactiveTile(context, coords, pt, mouseState.scale);
         }
         context.restore();
     }
 }
 
-},{"immutable":"iIkjt","../../../shared/Domain":"2iCCP","../state/GameState":"fRKfr","./domain":"5in7n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"9JNK3":[function(require,module,exports) {
+},{"immutable":"iIkjt","../state/GameState":"fRKfr","./domain":"5in7n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"57eqU":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "registerMouseUpdater", ()=>registerMouseUpdater
+);
+parcelHelpers.export(exports, "worldToScreen", ()=>worldToScreen
+);
+parcelHelpers.export(exports, "screenToWorld", ()=>screenToWorld
+);
+parcelHelpers.export(exports, "MouseUpdater", ()=>MouseUpdater
+);
+var _gameState = require("../state/GameState");
+var _domain = require("../../../shared/Domain");
+function registerMouseUpdater(document, initialOffset) {
+    const touchEnabled = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    const mouseUpdater = new MouseUpdater(initialOffset);
+    if (touchEnabled) {
+        document.addEventListener("touchmove", (e)=>mouseUpdater.touchEvent(e)
+        );
+        document.addEventListener("touchcancel", (e)=>mouseUpdater.touchEvent(e)
+        );
+        document.addEventListener("touchend", (e)=>mouseUpdater.touchEvent(e)
+        );
+        document.addEventListener("touchstart", (e)=>mouseUpdater.touchEvent(e)
+        );
+    } else {
+        document.addEventListener("mousemove", (e)=>mouseUpdater.mouseEvent(e)
+        );
+        document.addEventListener("mousedown", (e)=>mouseUpdater.mouseEvent(e)
+        );
+        document.addEventListener("mouseup", (e)=>mouseUpdater.mouseEvent(e)
+        );
+        document.addEventListener("wheel", (e)=>mouseUpdater.wheelEvent(e)
+        );
+    }
+    return mouseUpdater;
+}
+function worldToScreen(world, state) {
+    return {
+        x: (world.x - state.offset.x) * state.scale,
+        y: (world.y - state.offset.y) * state.scale
+    };
+}
+function screenToWorld(screen, state) {
+    return {
+        x: screen.x / state.scale + state.offset.x,
+        y: screen.y / state.scale + state.offset.y
+    };
+}
+class MouseUpdater {
+    constructor(initialOffset){
+        this.initialOffset = initialOffset;
+        this.DRAG_TOLERANCE = 3;
+        this.NO_POTENTIAL_TOUCH_CLICK = [
+            -1,
+            {
+                x: 0,
+                y: 0
+            }
+        ];
+        this.TOUCH_CLICK_LAG = 150;
+        this.TOUCH_ZOOM_DELTA = 1.07;
+        this.state = {
+            mousePosition: {
+                x: 0,
+                y: 0
+            },
+            primaryDown: false,
+            multiDown: false,
+            offset: {
+                ...this.initialOffset
+            },
+            startPan: {
+                x: 0,
+                y: 0
+            },
+            scale: 1,
+            touchPinchDiff: -1,
+            clicks: [],
+            isDragging: false,
+            lastPotentialTouchClick: this.NO_POTENTIAL_TOUCH_CLICK,
+            touchClickEnabled: true
+        };
+    }
+    wheelEvent(e) {
+        const beforeZoom = screenToWorld(this.state.mousePosition, this.state);
+        if (e.deltaY > 0) this.state.scale = _gameState.capScale(this.state.scale * 1.01);
+        else this.state.scale = _gameState.capScale(this.state.scale * 0.99);
+        const afterZoom = screenToWorld(this.state.mousePosition, this.state);
+        this.state.offset = {
+            x: this.state.offset.x + (beforeZoom.x - afterZoom.x),
+            y: this.state.offset.y + (beforeZoom.y - afterZoom.y)
+        };
+    }
+    mouseEvent(e) {
+        this.state.mousePosition = {
+            x: e.pageX,
+            y: e.pageY
+        };
+        const flags = e.buttons !== undefined ? e.buttons : e.which;
+        const downBefore = this.state.primaryDown;
+        this.state.primaryDown = (flags & 1) === 1;
+        if (!downBefore && this.state.primaryDown) this.state.startPan = {
+            ...this.state.mousePosition
+        };
+        if (downBefore && this.state.primaryDown && _domain.distanceBetween(this.state.startPan, this.state.mousePosition) > this.DRAG_TOLERANCE) {
+            this.state.offset = {
+                x: this.state.offset.x - (this.state.mousePosition.x - this.state.startPan.x) / this.state.scale,
+                y: this.state.offset.y - (this.state.mousePosition.y - this.state.startPan.y) / this.state.scale
+            };
+            this.state.startPan = {
+                ...this.state.mousePosition
+            };
+            this.state.isDragging = true;
+        }
+        if (downBefore && !this.state.primaryDown) {
+            if (this.state.isDragging) this.state.isDragging = false;
+            else this.state.clicks.push({
+                ...this.state.mousePosition
+            });
+        }
+    }
+    touchEvent(e) {
+        const singleFingerDown = e.touches.length === 1;
+        const multiFingersDown = e.touches.length === 2;
+        const downBefore = this.state.primaryDown;
+        this.state.primaryDown = singleFingerDown;
+        if (singleFingerDown) {
+            this.state.mousePosition = {
+                x: e.touches.item(0)?.pageX ?? 0,
+                y: e.touches.item(0)?.pageY ?? 0
+            };
+            if (!downBefore) {
+                this.state.startPan = {
+                    ...this.state.mousePosition
+                };
+                if (this.state.touchClickEnabled) this.state.lastPotentialTouchClick = [
+                    performance.now(),
+                    {
+                        ...this.state.mousePosition
+                    }
+                ];
+            } else if (_domain.distanceBetween(this.state.startPan, this.state.mousePosition) > this.DRAG_TOLERANCE) {
+                this.state.offset = {
+                    x: this.state.offset.x - (this.state.mousePosition.x - this.state.startPan.x) / this.state.scale,
+                    y: this.state.offset.y - (this.state.mousePosition.y - this.state.startPan.y) / this.state.scale
+                };
+                this.state.startPan = {
+                    ...this.state.mousePosition
+                };
+                this.state.lastPotentialTouchClick = this.NO_POTENTIAL_TOUCH_CLICK;
+                this.state.touchClickEnabled = false;
+            }
+        }
+        if (multiFingersDown) {
+            this.state.lastPotentialTouchClick = this.NO_POTENTIAL_TOUCH_CLICK;
+            this.state.touchClickEnabled = false;
+            const x1 = e.touches.item(0)?.pageX ?? 0;
+            const y1 = e.touches.item(0)?.pageY ?? 0;
+            const x2 = e.touches.item(1)?.pageX ?? 0;
+            const y2 = e.touches.item(1)?.pageY ?? 0;
+            const prevTouchPinchDiff = this.state.touchPinchDiff;
+            this.state.touchPinchDiff = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+            this.state.mousePosition = {
+                x: (x1 + x2) / 2,
+                y: (y1 + y2) / 2
+            };
+            if (prevTouchPinchDiff > 0 && this.state.touchPinchDiff != prevTouchPinchDiff) {
+                const beforeZoom = screenToWorld(this.state.mousePosition, this.state);
+                if (this.state.touchPinchDiff > prevTouchPinchDiff) this.state.scale = _gameState.capScale(this.state.scale * this.TOUCH_ZOOM_DELTA);
+                else this.state.scale = _gameState.capScale(this.state.scale / this.TOUCH_ZOOM_DELTA);
+                const afterZoom = screenToWorld(this.state.mousePosition, this.state);
+                this.state.offset = {
+                    x: this.state.offset.x + (beforeZoom.x - afterZoom.x),
+                    y: this.state.offset.y + (beforeZoom.y - afterZoom.y)
+                };
+            }
+        }
+        if (e.touches.length === 0) this.state.touchClickEnabled = true;
+    }
+    update(time) {
+        if (this.state.touchClickEnabled && this.state.lastPotentialTouchClick != this.NO_POTENTIAL_TOUCH_CLICK && time - this.state.lastPotentialTouchClick[0] > this.TOUCH_CLICK_LAG) {
+            this.state.clicks.push({
+                ...this.state.lastPotentialTouchClick[1]
+            });
+            this.state.lastPotentialTouchClick = this.NO_POTENTIAL_TOUCH_CLICK;
+        }
+    }
+}
+
+},{"../../../shared/Domain":"2iCCP","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../state/GameState":"fRKfr"}],"9JNK3":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$6598 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
