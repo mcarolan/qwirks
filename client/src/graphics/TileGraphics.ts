@@ -144,17 +144,17 @@ export class TileGraphics {
     }
   }
 
-  screenCoords(pos: Position, mid: Position): Position {
+  screenCoords(pos: Position, mid: Position, scale: number): Position {
     const tileX = pos.x * this.tileWidth + pos.x * TileGraphics.PADDING;
     const tileY = pos.y * this.tileHeight + pos.y * TileGraphics.PADDING;
-    return { x: mid.x + tileX, y: mid.y + tileY };
+    return { x: (tileX - mid.x) * scale, y: (tileY - mid.y) * scale };
   }
 
   positionFromScreen(screen: Position, mid: Position, scale: number): Position {
     const tileX =
-      (screen.x / scale - mid.x) / (this.tileWidth + TileGraphics.PADDING);
+      (screen.x / scale + mid.x) / (this.tileWidth + TileGraphics.PADDING);
     const tileY =
-      (screen.y / scale - mid.y) / (this.tileHeight + TileGraphics.PADDING);
+      (screen.y / scale + mid.y) / (this.tileHeight + TileGraphics.PADDING);
     return { x: Math.floor(tileX), y: Math.floor(tileY) };
   }
 }

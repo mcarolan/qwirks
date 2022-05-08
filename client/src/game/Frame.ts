@@ -18,33 +18,38 @@ export function frame(
   gameState: GameState,
   deps: GameDependencies,
   mainState: MainStateFunctions
-): void {
-  gameState.mainAreaBounds = rectFromElement(deps.mainArea);
+): (time: DOMHighResTimeStamp) => void {
+  return (time) => {
+    gameState.mainAreaBounds = rectFromElement(deps.mainArea);
 
-  deps.context.save();
-  deps.canvas.width = gameState.mainAreaBounds.width;
-  deps.canvas.height = gameState.mainAreaBounds.height;
-  deps.context.clearRect(
-    0,
-    0,
-    deps.context.canvas.width,
-    deps.context.canvas.height
-  );
+    deps.context.save();
+    deps.canvas.width = gameState.mainAreaBounds.width;
+    deps.canvas.height = gameState.mainAreaBounds.height;
+    deps.context.clearRect(
+      0,
+      0,
+      deps.context.canvas.width,
+      deps.context.canvas.height
+    );
 
-  deps.network.update(gameState);
-  deps.mouse.update(gameState);
-  deps.tileGrid.update(gameState);
-  deps.gameLogic.update(gameState);
-  deps.fireworkUpdater.update(gameState);
-  deps.sounds.update(gameState);
+    deps.network.update(gameState);
+    deps.mouseUpdater.update(time);
 
-  deps.context.scale(gameState.scale, gameState.scale);
-  deps.tileGrid.draw(deps.context, gameState);
-  deps.fireworks.updateAndDraw(deps.context);
+    const mouseState = { ...deps.mouseUpdater.state };
+    deps.mouseUpdater.state.clicks = [];
 
-  deps.context.restore();
+    deps.tileGrid.update(gameState, mouseState);
+    deps.gameLogic.update(gameState);
+    deps.fireworkUpdater.update(gameState, mouseState);
+    deps.sounds.update(gameState);
 
-  syncReactAndGameState(mainState, gameState, () =>
-    requestAnimationFrame((_) => frame(gameState, deps, mainState))
-  );
+    deps.tileGrid.draw(deps.context, gameState, mouseState);
+    deps.fireworks.updateAndDraw(deps.context);
+
+    deps.context.restore();
+
+    syncReactAndGameState(mainState, gameState, () =>
+      requestAnimationFrame(frame(gameState, deps, mainState))
+    );
+  }
 }

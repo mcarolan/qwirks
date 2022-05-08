@@ -1477,12 +1477,12 @@ class TileGraphics {
         const inner = this.imageCache.get(tile.colour)?.get(tile.shape);
         if (inner) context.drawImage(inner, position.x + this.symWidth * scale / 2, position.y + this.symHeight * scale / 2, this.symWidth * scale, this.symHeight * scale);
     }
-    screenCoords(pos, mid) {
+    screenCoords(pos, mid, scale) {
         const tileX = pos.x * this.tileWidth + pos.x * TileGraphics.PADDING;
         const tileY = pos.y * this.tileHeight + pos.y * TileGraphics.PADDING;
         return {
-            x: mid.x + tileX,
-            y: mid.y + tileY
+            x: mid.x + tileX * scale,
+            y: mid.y + tileY * scale
         };
     }
     positionFromScreen(screen, mid, scale) {

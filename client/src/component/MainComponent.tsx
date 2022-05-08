@@ -12,7 +12,6 @@ import {
 } from "../state/MainComponentState";
 import { rectFromElement } from "../graphics/domain";
 import { initialGameState } from "../state/GameState";
-import { Mouse } from "../game/Mouse";
 import { UserHand } from "./UserHand";
 import { UserList } from "./UserList";
 import { UsernamePanel } from "./UsernamePanel";
@@ -72,42 +71,17 @@ export class MainComponent extends React.Component<
     });
   }
 
-  private isTouchEnabled(): boolean {
-    return "ontouchstart" in window || navigator.maxTouchPoints > 0;
-  }
-
   async componentDidMount() {
     const deps = await loadGameDependencies(
       this.props.user,
-      this.props.gameKey
+      this.props.gameKey,
+      document
     );
 
     deps.canvas.width = deps.mainArea.clientWidth;
     deps.canvas.height = deps.mainArea.clientHeight;
 
-    if (this.isTouchEnabled()) {
-      document.addEventListener("touchmove", Mouse.updateTouchMove(deps.mouse));
-      document.addEventListener(
-        "touchcancel",
-        Mouse.updateTouchMove(deps.mouse)
-      );
-      document.addEventListener("touchend", Mouse.updateTouchMove(deps.mouse));
-      document.addEventListener(
-        "touchstart",
-        Mouse.updateTouchMove(deps.mouse)
-      );
-    } else {
-      document.addEventListener("mousedown", Mouse.updateMouseDown(deps.mouse));
-      document.addEventListener("mouseup", Mouse.updateMouseUp(deps.mouse));
-      document.addEventListener(
-        "mousemove",
-        Mouse.updateMousePosition(deps.mouse)
-      );
-    }
-
-    document.addEventListener("wheel", Mouse.updateMouseWheel(deps.mouse));
-
-    requestAnimationFrame((_) =>
+    requestAnimationFrame(
       frame(
         initialGameState(
           this.props.gameKey,

@@ -1,265 +1,174 @@
-import { IGameStateUpdater } from "~/game/IGameStateUpdater";
-import { Position } from "../../../shared/Domain";
-import { capScale, GameState } from "../state/GameState";
+import { capScale } from "../state/GameState";
+import { distanceBetween, Position } from "../../../shared/Domain";
 
-export interface MouseClick {
-  type: "MouseClick";
-  position: Position;
-}
-
-export interface MouseDrag {
-  type: "MouseDrag";
-  from: Position;
-  to: Position;
-}
-
-export interface MouseZoom {
-  type: "MouseZoom";
-  point: Position;
-}
-
-export type MouseEv = MouseClick | MouseDrag | MouseZoom;
-
-export interface MouseGameState {
+export interface MouseState {
   mousePosition: Position;
-  mouseEvents: MouseEv[];
-  mouseDragInProgress: MouseDrag | undefined;
+  primaryDown: boolean;
+  multiDown: boolean;
+  offset: Position;
+  startPan: Position;
   scale: number;
+  touchPinchDiff: number;
+  clicks: Position[];
+  isDragging: boolean;
+  lastPotentialTouchClick: [DOMHighResTimeStamp, Position];
+  touchClickEnabled: boolean;
 }
 
-export class Mouse implements IGameStateUpdater {
-  private mousePosition: Position = { x: 0, y: 0 };
-  private primaryMouseButtonDown = false;
-  private twoFingerTouch = false;
-  private touchPinchDiff: number = -1;
-
-  private isDragging: boolean = false;
-  private mouseDragStart: Position | undefined;
-
-  private events = Array<MouseEv>();
-
-  private wheelDelta: number = 1;
-
-  private setPrimaryMouseButtonDown(e: MouseEvent): void {
-    const flags = e.buttons !== undefined ? e.buttons : e.which;
-    const downBefore = this.primaryMouseButtonDown;
-    this.primaryMouseButtonDown = (flags & 1) === 1;
-
-    if (
-      this.primaryMouseButtonDown &&
-      this.mouseDragStart &&
-      !this.isDragging
-    ) {
-      const dx = Math.abs(this.mouseDragStart.x - this.mousePosition.x);
-      const dy = Math.abs(this.mouseDragStart.y - this.mousePosition.y);
-
-      if (dx > 5 || dy > 5) {
-        this.isDragging = true;
-      }
-    } else if (
-      this.isDragging &&
-      this.mouseDragStart &&
-      downBefore &&
-      !this.primaryMouseButtonDown
-    ) {
-      this.isDragging = false;
-      const e: MouseDrag = {
-        type: "MouseDrag",
-        from: this.mouseDragStart,
-        to: { x: this.mousePosition.x, y: this.mousePosition.y },
-      };
-      this.events.push(e);
-      this.mouseDragStart = undefined;
-    } else if (
-      !downBefore &&
-      this.primaryMouseButtonDown &&
-      this.mousePosition &&
-      this.mouseDragStart === undefined
-    ) {
-      this.mouseDragStart = {
-        x: this.mousePosition.x,
-        y: this.mousePosition.y,
-      };
-    } else if (downBefore && !this.primaryMouseButtonDown) {
-      const e: MouseClick = {
-        type: "MouseClick",
-        position: { x: this.mousePosition.x, y: this.mousePosition.y },
-      };
-      this.mouseDragStart = undefined;
-      this.events.push(e);
-    }
+export function registerMouseUpdater(document: Document, initialOffset: Position): MouseUpdater {
+  const touchEnabled = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+  const mouseUpdater = new MouseUpdater(initialOffset);
+  if (touchEnabled) {
+    document.addEventListener("touchmove", (e) => mouseUpdater.touchEvent(e));
+    document.addEventListener("touchcancel", (e) => mouseUpdater.touchEvent(e));
+    document.addEventListener("touchend", (e) => mouseUpdater.touchEvent(e));
+    document.addEventListener("touchstart", (e) => mouseUpdater.touchEvent(e));
+  } else {
+    document.addEventListener("mousemove", (e) => mouseUpdater.mouseEvent(e));
+    document.addEventListener("mousedown", (e) => mouseUpdater.mouseEvent(e));
+    document.addEventListener("mouseup", (e) => mouseUpdater.mouseEvent(e));
+    document.addEventListener("wheel", (e) => mouseUpdater.wheelEvent(e));
   }
+  return mouseUpdater;
+}
 
-  static updateTouchMove(mouse: Mouse): (e: TouchEvent) => void {
-    return (e: TouchEvent) => {
-      const downBefore = mouse.primaryMouseButtonDown;
-      mouse.primaryMouseButtonDown = e.touches.length === 1;
 
-      const x: number | undefined = mouse.primaryMouseButtonDown
-        ? e.touches.item(0)?.pageX
-        : (e.type === "touchend" || e.type === "touchcancel") &&
-          e.changedTouches.length === 1
-        ? e.changedTouches.item(0)?.pageX
-        : undefined;
+export function worldToScreen(world: Position, state: MouseState): Position {
+  return {
+      x: (world.x - state.offset.x) * state.scale,
+      y: (world.y - state.offset.y) * state.scale
+  };
+};
 
-      const y: number | undefined = mouse.primaryMouseButtonDown
-        ? e.touches.item(0)?.pageY
-        : (e.type === "touchend" || e.type === "touchcancel") &&
-          e.changedTouches.length === 1
-        ? e.changedTouches.item(0)?.pageY
-        : undefined;
+export function screenToWorld(screen: Position, state: MouseState): Position {
+  return {
+      x: screen.x / state.scale + state.offset.x,
+      y: screen.y / state.scale + state.offset.y
+  };
+}
 
-      const prevTwoFingerTouch = mouse.twoFingerTouch;
-      mouse.twoFingerTouch = e.touches.length === 2;
+export class MouseUpdater {
+  private DRAG_TOLERANCE: number = 3;
+  private NO_POTENTIAL_TOUCH_CLICK: [DOMHighResTimeStamp, Position] = [-1, { x: 0, y: 0}];
+  private TOUCH_CLICK_LAG = 150;
+  private TOUCH_ZOOM_DELTA = 1.07;
 
-      const prevTouchPinchDiff = mouse.touchPinchDiff;
+  constructor(private initialOffset: Position) {}
 
-      if (mouse.twoFingerTouch) {
-        const x1 = e.touches.item(0)?.pageX ?? 0;
-        const y1 = e.touches.item(0)?.pageY ?? 0;
-        const x2 = e.touches.item(1)?.pageX ?? 0;
-        const y2 = e.touches.item(1)?.pageY ?? 0;
+  state: MouseState = {
+      mousePosition: { x: 0, y: 0 },
+      primaryDown: false,
+      multiDown: false,
+      offset: {...this.initialOffset},
+      startPan: { x: 0, y: 0 },
+      scale: 1,
+      touchPinchDiff: -1,
+      clicks: [],
+      isDragging: false,
+      lastPotentialTouchClick: this.NO_POTENTIAL_TOUCH_CLICK,
+      touchClickEnabled: true
+  };
 
-        mouse.touchPinchDiff = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-        const mid = {
-          x: (x1 + x2) / 2,
-          y: (y1 + y2) / 2
-        }
-        const zoomEv: MouseZoom = {
-          type: "MouseZoom",
-          point: mid
-        }
-        mouse.events.push(zoomEv);
-      }
-      else {
-        mouse.touchPinchDiff = -1;
-      }
-
-      if (x && y) {
-        mouse.mousePosition = { x, y };
-      }
-
-      if (prevTwoFingerTouch && !mouse.twoFingerTouch) {
-        return;
-      }
-      else if (mouse.twoFingerTouch && mouse.touchPinchDiff > prevTouchPinchDiff) {
-        mouse.wheelDelta /= 1.1;
-      }
-      else if (mouse.twoFingerTouch && mouse.touchPinchDiff < prevTouchPinchDiff) {
-        mouse.wheelDelta *= 1.1;
-      }
-      /*else if (
-        mouse.primaryMouseButtonDown &&
-        mouse.mouseDragStart &&
-        !mouse.isDragging &&
-        x &&
-        y
-      ) {
-        const dx = Math.abs(mouse.mouseDragStart.x - x);
-        const dy = Math.abs(mouse.mouseDragStart.y - y);
-
-        if (dx > 5 || dy > 5) {
-          mouse.isDragging = true;
-        }
-      } else if (
-        mouse.isDragging &&
-        mouse.mouseDragStart &&
-        downBefore &&
-        !mouse.primaryMouseButtonDown &&
-        x &&
-        y
-      ) {
-        mouse.isDragging = false;
-        const e: MouseDrag = {
-          type: "MouseDrag",
-          from: mouse.mouseDragStart,
-          to: { x, y },
-        };
-        mouse.events.push(e);
-        mouse.mouseDragStart = undefined;
-      } else if (
-        !downBefore &&
-        mouse.primaryMouseButtonDown &&
-        x &&
-        y &&
-        mouse.mouseDragStart === undefined
-      ) {
-        console.log(`setting mouse drag start ${x} ${y}`);
-        mouse.mouseDragStart = {
-          x,
-          y,
-        };
-      } else if (downBefore && !mouse.primaryMouseButtonDown && x && y) {
-        const e: MouseClick = {
-          type: "MouseClick",
-          position: { x, y },
-        };
-        mouse.mouseDragStart = undefined;
-        mouse.events.push(e);
-      }*/
-    };
-  }
-
-  static updateMouseWheel(mouse: Mouse): (e: WheelEvent) => void {
-    return (e: WheelEvent) => {
-      e.preventDefault();
-      console.log(e.deltaY);
+  wheelEvent(e: WheelEvent): void {
+      const beforeZoom = screenToWorld(this.state.mousePosition, this.state);
       if (e.deltaY > 0) {
-        mouse.wheelDelta *= 1.1;
+          this.state.scale = capScale(this.state.scale * 1.01);
       }
       else {
-        mouse.wheelDelta /= 1.1;
+          this.state.scale = capScale(this.state.scale * 0.99);
       }
-      const ev: MouseZoom = {
-        type: "MouseZoom",
-        point: { x: e.pageX, y: e.pageY }
+      const afterZoom = screenToWorld(this.state.mousePosition, this.state);
+      this.state.offset = { x: this.state.offset.x + (beforeZoom.x - afterZoom.x), y: this.state.offset.y + (beforeZoom.y - afterZoom.y) };
+  }
+
+  mouseEvent(e: MouseEvent): void {
+      this.state.mousePosition = { x: e.pageX, y: e.pageY };
+
+      const flags = e.buttons !== undefined ? e.buttons : e.which;
+      const downBefore = this.state.primaryDown;
+      this.state.primaryDown = (flags & 1) === 1;
+
+      if (!downBefore && this.state.primaryDown) {
+          this.state.startPan = { ...this.state.mousePosition };
       }
-      mouse.events.push(ev);
-    };
+
+      if (downBefore && this.state.primaryDown && distanceBetween(this.state.startPan, this.state.mousePosition) > this.DRAG_TOLERANCE) {
+          this.state.offset = { x: this.state.offset.x - ((this.state.mousePosition.x - this.state.startPan.x) / this.state.scale), y: this.state.offset.y - ((this.state.mousePosition.y - this.state.startPan.y) / this.state.scale) };
+          this.state.startPan = { ...this.state.mousePosition };
+          this.state.isDragging = true;
+      }
+
+      if (downBefore && !this.state.primaryDown) {
+          if (this.state.isDragging) {
+              this.state.isDragging = false;
+          }
+          else {
+              this.state.clicks.push({ ...this.state.mousePosition });
+          }
+      }
   }
 
-  static updateMouseUp(mouse: Mouse): (e: MouseEvent) => void {
-    return (e: MouseEvent) => {
-      mouse.setPrimaryMouseButtonDown(e);
-    };
+  touchEvent(e: TouchEvent): void {
+      const singleFingerDown = e.touches.length === 1;
+      const multiFingersDown = e.touches.length === 2;
+
+      const downBefore = this.state.primaryDown;
+      this.state.primaryDown = singleFingerDown;
+
+      if (singleFingerDown) {
+          this.state.mousePosition = { x: e.touches.item(0)?.pageX ?? 0, y: e.touches.item(0)?.pageY ?? 0 };
+
+          if (!downBefore) {
+              this.state.startPan = { ...this.state.mousePosition };
+              if (this.state.touchClickEnabled) {
+                  this.state.lastPotentialTouchClick = [performance.now(), { ...this.state.mousePosition}];
+              }
+          }
+          else if (distanceBetween(this.state.startPan, this.state.mousePosition) > this.DRAG_TOLERANCE) {
+              this.state.offset = { x: this.state.offset.x - ((this.state.mousePosition.x - this.state.startPan.x) / this.state.scale), y: this.state.offset.y - ((this.state.mousePosition.y - this.state.startPan.y) / this.state.scale) };
+              this.state.startPan = { ...this.state.mousePosition };
+              this.state.lastPotentialTouchClick = this.NO_POTENTIAL_TOUCH_CLICK;
+              this.state.touchClickEnabled = false;
+          }
+      }
+      
+      if (multiFingersDown) {
+          this.state.lastPotentialTouchClick = this.NO_POTENTIAL_TOUCH_CLICK;
+          this.state.touchClickEnabled = false;
+          const x1 = e.touches.item(0)?.pageX ?? 0;
+          const y1 = e.touches.item(0)?.pageY ?? 0;
+          const x2 = e.touches.item(1)?.pageX ?? 0;
+          const y2 = e.touches.item(1)?.pageY ?? 0;
+  
+          const prevTouchPinchDiff = this.state.touchPinchDiff;
+          this.state.touchPinchDiff = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+          this.state.mousePosition = {
+            x: (x1 + x2) / 2,
+            y: (y1 + y2) / 2
+          }
+
+          if (prevTouchPinchDiff > 0 && this.state.touchPinchDiff != prevTouchPinchDiff) {
+              const beforeZoom = screenToWorld(this.state.mousePosition, this.state);
+              if (this.state.touchPinchDiff > prevTouchPinchDiff) {
+                  this.state.scale = capScale(this.state.scale * this.TOUCH_ZOOM_DELTA);
+              }
+              else {
+                  this.state.scale = capScale(this.state.scale / this.TOUCH_ZOOM_DELTA);
+              }
+              const afterZoom = screenToWorld(this.state.mousePosition, this.state);
+              this.state.offset = { x: this.state.offset.x + (beforeZoom.x - afterZoom.x), y: this.state.offset.y + (beforeZoom.y - afterZoom.y) };
+          }
+      }
+
+      if (e.touches.length === 0) {
+          this.state.touchClickEnabled = true;
+      }
   }
 
-  static updateMouseDown(mouse: Mouse): (e: MouseEvent) => void {
-    return (e: MouseEvent) => {
-      mouse.setPrimaryMouseButtonDown(e);
-    };
-  }
-
-  static updateMousePosition(mouse: Mouse): (e: MouseEvent) => void {
-    return (e) => {
-      mouse.mousePosition.x = e.pageX;
-      mouse.mousePosition.y = e.pageY;
-
-      mouse.setPrimaryMouseButtonDown(e);
-    };
-  }
-
-  update(gameState: MouseGameState): void {
-    var drag: MouseDrag | undefined;
-
-    if (this.isDragging && this.mouseDragStart) {
-      const e: MouseDrag = {
-        type: "MouseDrag",
-        from: this.mouseDragStart,
-        to: gameState.mousePosition,
-      };
-      drag = e;
-    }
-
-    gameState.mousePosition = {
-      x: this.mousePosition.x,
-      y: this.mousePosition.y,
-    };
-    gameState.mouseEvents = this.events;
-    gameState.mouseDragInProgress = drag;
-
-    gameState.scale = capScale(this.wheelDelta);
-
-    this.events = [];
+  update(time: DOMHighResTimeStamp): void {
+      if (this.state.touchClickEnabled && this.state.lastPotentialTouchClick != this.NO_POTENTIAL_TOUCH_CLICK && (time - this.state.lastPotentialTouchClick[0]) > this.TOUCH_CLICK_LAG) {
+          this.state.clicks.push({ ...this.state.lastPotentialTouchClick[1] });
+          this.state.lastPotentialTouchClick = this.NO_POTENTIAL_TOUCH_CLICK;
+      }
   }
 }

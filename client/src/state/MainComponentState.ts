@@ -132,15 +132,6 @@ export function syncReactAndGameState(
     resetUiState = true;
   }
 
-  const netZoomChange =
-    mainComponent.state.ui.zoomInPressed +
-    mainComponent.state.ui.zoomOutPressed * -1;
-
-  if (netZoomChange != 0) {
-    gameState.scale = capScale(gameState.scale + netZoomChange * 0.1);
-    resetUiState = true;
-  }
-
   if (mainComponent.state.ui.setUsername) {
     gameState.setUsername = mainComponent.state.ui.setUsername;
     gameState.currentUser = {

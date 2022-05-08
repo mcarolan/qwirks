@@ -3,19 +3,20 @@ import { User } from "../../../shared/User";
 import { Fireworks } from "../fireworks/Fireworks";
 import { FireworkUpdater } from "../fireworks/FireworkUpdater";
 import { GameLogic } from "./GameLogic";
-import { Mouse } from "./Mouse";
 import { Network } from "./Network";
 import { Sounds } from "./Sounds";
 import { loadTileGraphics } from "../graphics/TileGraphics";
 import { TileGridGraphics } from "../graphics/TileGridGraphics";
-import { loadImage } from "../graphics/domain";
+import { loadImage, middle, rectFromElement } from "../graphics/domain";
+import { MouseUpdater, registerMouseUpdater } from "./Mouse";
+import { mul } from "../../../shared/Domain";
 
 export interface GameDependencies {
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
   mainArea: HTMLElement;
   tileGrid: TileGridGraphics;
-  mouse: Mouse;
+  mouseUpdater: MouseUpdater;
   fireworks: Fireworks;
   socket: Socket;
   user: User;
@@ -27,7 +28,8 @@ export interface GameDependencies {
 
 export async function loadGameDependencies(
   user: User,
-  gameKey: string
+  gameKey: string,
+  document: Document
 ): Promise<GameDependencies> {
   const canvas = document.querySelector("#game") as HTMLCanvasElement;
   const mainArea = document.querySelector("#mainArea") as HTMLElement;
@@ -36,7 +38,7 @@ export async function loadGameDependencies(
 
   const socket = io("http://192.168.0.16:3000");
 
-  const mouse = new Mouse();
+  const mouseUpdater = registerMouseUpdater(document, mul(middle(rectFromElement(mainArea)), -1));
 
   const firstTileImage = await loadImage("./images/first-tile.png");
 
@@ -48,7 +50,6 @@ export async function loadGameDependencies(
 
   const fireworkUpdater = new FireworkUpdater(
     tileGraphics,
-    tileGrid,
     fireworks
   );
 
@@ -57,7 +58,7 @@ export async function loadGameDependencies(
     context: canvas.getContext("2d") as CanvasRenderingContext2D,
     mainArea,
     tileGrid,
-    mouse,
+    mouseUpdater,
     fireworks,
     socket,
     user,
