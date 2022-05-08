@@ -91279,6 +91279,7 @@ class TileGridGraphics {
         this.firstTileImage = firstTileImage;
     }
     update(gameState, mouseState) {
+        if (gameState.tilePositionsPressed.length > 0) gameState.tilePositionsPressed = new Array();
         if (gameState.userInControl === gameState.currentUser.userId) mouseState.clicks.forEach((c)=>{
             if (_domain.rectContains(gameState.mainAreaBounds, c)) {
                 const xy = this.tileGraphics.positionFromScreen(c, mouseState.offset, mouseState.scale);
@@ -91458,6 +91459,7 @@ class MouseUpdater {
                     y: this.state.mousePosition.y - this.state.dragStart[1].y
                 });
                 this.state.driftAcceleration = dragDistance / dragTime;
+                this.state.driftAcceleration = this.state.driftAcceleration > 1.1 ? this.state.driftAcceleration : 0;
                 this.state.dragStart = this.NULL_TIME_POSITION;
                 console.log(`${dragDistance} in ${dragTime} gives acceleration of ${this.state.driftAcceleration}. driftDirection: ${JSON.stringify(this.state.driftDirection)}`);
             } else this.state.clicks.push({

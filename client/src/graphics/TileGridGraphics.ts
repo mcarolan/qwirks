@@ -1,6 +1,6 @@
 import { fromJS } from "immutable";
 import { MouseState } from "~/game/Mouse";
-import { Tile } from "../../../shared/Domain";
+import { Position, Tile } from "../../../shared/Domain";
 import { GameState, singleActiveTile } from "../state/GameState";
 import { rectContains } from "./domain";
 import { TileGraphics } from "./TileGraphics";
@@ -13,6 +13,9 @@ export class TileGridGraphics {
   ) {}
 
   update(gameState: GameState, mouseState: MouseState): void {
+    if (gameState.tilePositionsPressed.length > 0) {
+      gameState.tilePositionsPressed = new Array<Position>();
+    }
     if (gameState.userInControl === gameState.currentUser.userId) {
       mouseState.clicks.forEach((c) => {
         if (rectContains(gameState.mainAreaBounds, c)) {

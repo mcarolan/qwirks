@@ -115,6 +115,7 @@ export class MouseUpdater {
               const dragDistance = distanceBetween(this.state.dragStart[1], this.state.mousePosition);
               this.state.driftDirection = normalise({ x: this.state.mousePosition.x - this.state.dragStart[1].x, y:  this.state.mousePosition.y - this.state.dragStart[1].y });
               this.state.driftAcceleration = dragDistance / dragTime;
+              this.state.driftAcceleration = this.state.driftAcceleration > 1.1 ? this.state.driftAcceleration : 0;
               this.state.dragStart = this.NULL_TIME_POSITION;
               console.log(`${dragDistance} in ${dragTime} gives acceleration of ${this.state.driftAcceleration}. driftDirection: ${JSON.stringify(this.state.driftDirection)}`);
           }
