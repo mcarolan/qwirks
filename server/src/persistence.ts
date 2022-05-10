@@ -23,13 +23,28 @@ class DummyPersistence implements Persistence {
     },
     {
       position: { x: 0, y: 1 },
-      shape: TileShape.One,
+      shape: TileShape.Two,
       colour: TileColour.Red
     },
     {
       position: { x: 0, y: 2 },
-      shape: TileShape.One,
+      shape: TileShape.Three,
       colour: TileColour.Green
+    },
+    {
+      position: { x: 0, y: 3 },
+      shape: TileShape.Four,
+      colour: TileColour.Orange
+    },
+    {
+      position: { x: 0, y: 4 },
+      shape: TileShape.Five,
+      colour: TileColour.Yellow
+    },
+    {
+      position: { x: 0, y: 5 },
+      shape: TileShape.Six,
+      colour: TileColour.Purple
     },
   ];
 

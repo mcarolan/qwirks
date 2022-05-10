@@ -64,6 +64,7 @@ body {
 
   border-radius: 30px;
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  position: relative;
 }
 
 #mainContainer {
@@ -249,34 +250,30 @@ body {
 .tile {
   width: 64px;
   height: 64px;
-  position: relative;
-  top: 0;
-  left: 0;
   float: left;
-  padding-left: 10px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.tile canvas {
+  width: 100%;
+  height: 100%;
 }
 
 .tile-disabled {
   opacity: 0.4;
 }
 
-.tile .background {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.tile .emblem {
-  position: absolute;
-  width: 32px;
-  height: 32px;
-  top: 16px;
-  left: 16px;
-}
-
 .hand {
-  padding-top: 30px;
-  padding-left: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 473px;
+  height: 129px;
+}
+
+.handTiles {
+  display: inline-block;
 }
 
 button {

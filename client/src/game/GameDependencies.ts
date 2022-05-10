@@ -32,9 +32,10 @@ export async function loadGameDependencies(
   document: Document
 ): Promise<GameDependencies> {
   const canvas = document.querySelector("#game") as HTMLCanvasElement;
+  const context = canvas.getContext("2d") as CanvasRenderingContext2D;
   const mainArea = document.querySelector("#mainArea") as HTMLElement;
 
-  const tileGraphics = await loadTileGraphics();
+  const tileGraphics = await loadTileGraphics(context);
 
   const socket = io("http://192.168.0.16:3000");
 
@@ -55,7 +56,7 @@ export async function loadGameDependencies(
 
   return {
     canvas,
-    context: canvas.getContext("2d") as CanvasRenderingContext2D,
+    context,
     mainArea,
     tileGrid,
     mouseUpdater,

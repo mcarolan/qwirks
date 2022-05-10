@@ -21,8 +21,7 @@ export class TileGridGraphics {
         if (rectContains(gameState.mainAreaBounds, c)) {
           const xy = this.tileGraphics.positionFromScreen(
             c,
-            mouseState.offset,
-            mouseState.scale
+            mouseState
           )
           gameState.tilePositionsPressed.push(xy);
         }
@@ -37,14 +36,13 @@ export class TileGridGraphics {
     ) {
       const firstTilePosition = this.tileGraphics.screenCoords(
         { x: 0, y: 0 },
-        mouseState.offset,
-        mouseState.scale
+        mouseState
       );
       const firstTilePositionX = firstTilePosition.x;
       const firstTilePositionY =
         firstTilePosition.y -
         this.firstTileImage.height +
-        this.tileGraphics.tileHeight;
+        this.tileGraphics.tileSize;
       context.drawImage(
         this.firstTileImage,
         firstTilePositionX,
@@ -56,15 +54,13 @@ export class TileGridGraphics {
 
     const hoveringTilePosition = this.tileGraphics.positionFromScreen(
       mouseState.mousePosition,
-      mouseState.offset,
-      mouseState.scale
+      mouseState
     );
 
     context.fillStyle = "#eeeeee";
     const screenCoords = this.tileGraphics.screenCoords(
       hoveringTilePosition,
-      mouseState.offset,
-      mouseState.scale
+      mouseState
     );
 
     var singleActive: [number, Tile] | undefined = singleActiveTile(state);
@@ -83,13 +79,13 @@ export class TileGridGraphics {
       context.fillRect(
         screenCoords.x,
         screenCoords.y,
-        this.tileGraphics.tileWidth * mouseState.scale,
-        this.tileGraphics.tileHeight * mouseState.scale
+        this.tileGraphics.tileSize * mouseState.scale,
+        this.tileGraphics.tileSize * mouseState.scale
       );
     }
 
     for (const pt of state.tilesToDisplay) {
-      const coords = this.tileGraphics.screenCoords(pt.position, mouseState.offset, mouseState.scale);
+      const coords = this.tileGraphics.screenCoords(pt.position, mouseState);
       if (state.currentPlacement.placedTiles.contains(pt)) {
         this.tileGraphics.drawHoverTile(context, coords, pt, mouseState.scale);
       } else if (

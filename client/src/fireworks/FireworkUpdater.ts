@@ -3,7 +3,7 @@ import { plus } from "../../../shared/Domain";
 import { GameState } from "~/state/GameState";
 import { TileGraphics } from "~/graphics/TileGraphics";
 import { Fireworks } from "./Fireworks";
-import { MouseState } from "~/game/Mouse";
+import { MouseState } from "../game/Mouse";
 
 export class FireworkUpdater {
   constructor(
@@ -24,7 +24,7 @@ export class FireworkUpdater {
       };
 
       gameState.fireworkTilePositions.forEach((tp) => {
-        const p = this.tileGraphics.screenCoords(plus(tp, tileOffset), mouseState.offset, mouseState.scale);
+        const p = plus(this.tileGraphics.screenCoords(tp, mouseState), tileOffset);
         this.fireworks.create(fireFrom, p);
       });
       gameState.fireworkTilePositions = List();
