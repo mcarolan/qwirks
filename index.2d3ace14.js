@@ -29517,8 +29517,8 @@ Stream.prototype.pipe = function(dest, options) {
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;
@@ -41986,8 +41986,8 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
     this.chunk = chunk;
@@ -63527,8 +63527,8 @@ function compare(a, b) {
 
 },{"parse-asn1":"4Szbv","./mgf":"e2JgG","./xor":"iaxu0","bn.js":"3pDum","browserify-rsa":"e594P","create-hash":"2WyL8","./withPublic":"fFkPV","safe-buffer":"eW7r9"}],"k3tsT":[function(require,module,exports) {
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 function oldBrowser() {
     throw new Error('secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11');
 }
@@ -68791,8 +68791,9 @@ var _mouse = require("./Mouse");
 var _domain1 = require("../../../shared/Domain");
 async function loadGameDependencies(user, gameKey, document) {
     const canvas = document.querySelector("#game");
+    const context = canvas.getContext("2d");
     const mainArea = document.querySelector("#mainArea");
-    const tileGraphics = await _tileGraphics.loadTileGraphics();
+    const tileGraphics = await _tileGraphics.loadTileGraphics(context);
     const socket = _socketIoClient.io("http://192.168.0.16:3000");
     const mouseUpdater = _mouse.registerMouseUpdater(document, _domain1.mul(_domain.middle(_domain.rectFromElement(mainArea)), -1));
     const firstTileImage = await _domain.loadImage("./images/first-tile.png");
@@ -68802,7 +68803,7 @@ async function loadGameDependencies(user, gameKey, document) {
     const fireworkUpdater = new _fireworkUpdater.FireworkUpdater(tileGraphics, fireworks);
     return {
         canvas,
-        context: canvas.getContext("2d"),
+        context,
         mainArea,
         tileGrid,
         mouseUpdater,
@@ -72105,7 +72106,7 @@ class FireworkUpdater {
                 y: mouseState.mousePosition.y
             };
             gameState.fireworkTilePositions.forEach((tp)=>{
-                const p = this.tileGraphics.screenCoords(_domain.plus(tp, tileOffset), mouseState.offset, mouseState.scale);
+                const p = _domain.plus(this.tileGraphics.screenCoords(tp, mouseState), tileOffset);
                 this.fireworks.create(fireFrom, p);
             });
             gameState.fireworkTilePositions = _immutable.List();
@@ -91184,142 +91185,158 @@ parcelHelpers.export(exports, "loadTileGraphics", ()=>loadTileGraphics
 );
 parcelHelpers.export(exports, "TileGraphics", ()=>TileGraphics
 );
+var _mouse = require("../game/Mouse");
 var _domain = require("../../../shared/Domain");
 var _domain1 = require("./domain");
-async function loadImageCache() {
-    const colours = new Map();
-    for (const colour of _domain.allTileColours()){
-        const shapes = new Map();
-        for (const shape of _domain.allTileShapes()){
-            const src = `./images/${shape.toString()}-${colour.toString()}.png`;
-            shapes.set(shape, await _domain1.loadImage(src));
-        }
-        colours.set(colour, shapes);
+var _immutable = require("immutable");
+async function loadTileGraphics(context) {
+    if (!TileGraphicElements.tileBackgroundGradient) {
+        TileGraphicElements.tileBackgroundGradient = context.createRadialGradient(300, 100, 0, 300, 100, 316.23);
+        TileGraphicElements.tileBackgroundGradient.addColorStop(0.82, 'rgba(0, 0, 0, 1)');
+        TileGraphicElements.tileBackgroundGradient.addColorStop(1, 'rgba(102, 102, 102, 1)');
+        TileGraphicElements.tileBackgroundPath = new Path2D("M 8 0 L 56 0 C 64 0 64 0 64 8 L 64 56 C 64 64 64 64 56 64 L 8 64 C 0 64 0 64 0 56 L 0 8 C 0 0 0 0 8 0");
+        TileGraphicElements.tileBorderHover = context.createLinearGradient(0, 100, 600, 100);
+        TileGraphicElements.tileBorderHover.addColorStop(0.77, 'rgba(211, 84, 0, 1)');
+        TileGraphicElements.tileBorderHover.addColorStop(1, 'rgba(0, 0, 0, 1)');
+        TileGraphicElements.tileBorderInactive = context.createLinearGradient(0, 100, 600, 100);
+        TileGraphicElements.tileBorderInactive.addColorStop(0.77, 'rgba(42, 42, 42, 1)');
+        TileGraphicElements.tileBorderInactive.addColorStop(1, 'rgba(0, 0, 0, 1)');
+        TileGraphicElements.tileBorderActive = context.createLinearGradient(0, 100, 600, 100);
+        TileGraphicElements.tileBorderActive.addColorStop(0.77, 'rgba(0, 159, 212, 1)');
+        TileGraphicElements.tileBorderActive.addColorStop(1, 'rgba(0, 0, 0, 1)');
+        TileGraphicElements.tileBorderLastPlay = context.createLinearGradient(0, 100, 600, 100);
+        TileGraphicElements.tileBorderLastPlay.addColorStop(0.77, 'rgba(0, 170, 0, 1)');
+        TileGraphicElements.tileBorderLastPlay.addColorStop(1, 'rgba(0, 0, 0, 1)');
+        TileGraphicElements.lastPlacementTileImage = await _domain1.loadImage("./images/lastplacement-tile.png");
     }
-    return colours;
+    return new TileGraphics();
 }
-async function loadTileGraphics() {
-    const imageCache = await loadImageCache();
-    const emptyTileImage = await _domain1.loadImage("./images/empty-tile.png");
-    const blankTileImage = await _domain1.loadImage("./images/blank-tile.png");
-    const hoverTileImage = await _domain1.loadImage("./images/hover-tile.png");
-    const activeTileImage = await _domain1.loadImage("./images/active-tile.png");
-    const lastPlacementTileImage = await _domain1.loadImage("./images/lastplacement-tile.png");
-    const symWidth = emptyTileImage.width / 2;
-    const symHeight = emptyTileImage.height / 2;
-    return new TileGraphics(imageCache, emptyTileImage, blankTileImage, hoverTileImage, activeTileImage, lastPlacementTileImage, symWidth, symHeight);
+class TileGraphicElements {
 }
+TileGraphicElements.shapes = _immutable.Map([
+    [
+        _domain.TileShape.One,
+        new Path2D("M 9.877 30.782 L 10.343 21.657 L 1.218 22.123 L 8 16 L 1.218 9.877 L 10.343 10.343 L 9.877 1.218 L 16 8 L 22.123 1.218 L 21.657 10.343 L 30.782 9.877 L 24 16 L 30.782 22.123 L 21.657 21.657 L 22.123 30.782 L 16 24 Z")
+    ],
+    [
+        _domain.TileShape.Two,
+        new Path2D("M 0 0 L 32 0 L 32 32 L 0 32 L 0 0")
+    ],
+    [
+        _domain.TileShape.Three,
+        new Path2D("M 16 0 L 32 12 L 28 32 L 4 32 L 0 12 L 16 0")
+    ],
+    [
+        _domain.TileShape.Four,
+        new Path2D("M 16 0 A 1 1 0 0 0 16 32 A 1 1 0 0 0 16 0")
+    ],
+    [
+        _domain.TileShape.Five,
+        new Path2D("M 16 0 L 19 3 L 19 13 L 29 13 L 32 16 L 29 19 L 19 19 L 19 29 L 16 32 L 13 29 L 13 19 L 3 19 L 0 16 L 3 13 L 13 13 L 13 3 L 16 0")
+    ],
+    [
+        _domain.TileShape.Six,
+        new Path2D("M 16 0 L 32 16 L 17 32 L 0 16 L 16 0")
+    ]
+]);
+TileGraphicElements.colours = _immutable.Map([
+    [
+        _domain.TileColour.Blue,
+        "#009fd4"
+    ],
+    [
+        _domain.TileColour.Green,
+        "#00aa55"
+    ],
+    [
+        _domain.TileColour.Orange,
+        "#d47500"
+    ],
+    [
+        _domain.TileColour.Purple,
+        "#b381b3"
+    ],
+    [
+        _domain.TileColour.Red,
+        "#f64747"
+    ],
+    [
+        _domain.TileColour.Yellow,
+        "#fdb81e"
+    ]
+]);
 class TileGraphics {
-    constructor(imageCache, emptyTileImage, blankTileImage, hoverTileImage, activeTileImage, lastPlacementTileImage, symWidth, symHeight){
-        this.imageCache = imageCache;
-        this.emptyTileImage = emptyTileImage;
-        this.blankTileImage = blankTileImage;
-        this.hoverTileImage = hoverTileImage;
-        this.activeTileImage = activeTileImage;
-        this.lastPlacementTileImage = lastPlacementTileImage;
-        this.symWidth = symWidth;
-        this.symHeight = symHeight;
-    }
-    drawEmptyTile(context, position) {
-        context.drawImage(this.emptyTileImage, position.x, position.y, this.emptyTileImage.width, this.emptyTileImage.height);
-    }
-    get tileWidth() {
-        return this.emptyTileImage.width;
-    }
-    get tileHeight() {
-        return this.emptyTileImage.height;
-    }
     drawHoverTile(context, position, tile, scale) {
-        this.drawTile(context, position, tile, this.hoverTileImage, scale);
+        this.drawTile(context, position, tile, TileGraphicElements.tileBorderHover, this.tileStrokeSolid, scale);
     }
     drawInactiveTile(context, position, tile, scale) {
-        this.drawTile(context, position, tile, this.blankTileImage, scale);
+        this.drawTile(context, position, tile, TileGraphicElements.tileBorderInactive, this.tileStrokeSolid, scale);
     }
     drawActiveTile(context, position, tile, scale) {
-        this.drawTile(context, position, tile, this.activeTileImage, scale);
+        this.drawTile(context, position, tile, TileGraphicElements.tileBorderActive, this.tileStrokeSolid, scale);
     }
     drawLastPlacementTile(context, position, tile, scale) {
-        this.drawTile(context, position, tile, this.lastPlacementTileImage, scale);
+        this.drawTile(context, position, tile, TileGraphicElements.tileBorderLastPlay, this.tileStrokeDashed, scale);
     }
-    drawTile(context, position, tile, tileBackground, scale) {
-        context.drawImage(tileBackground, position.x, position.y, this.blankTileImage.width * scale, this.blankTileImage.height * scale);
-        const inner = this.imageCache.get(tile.colour)?.get(tile.shape);
-        if (inner) context.drawImage(inner, position.x + this.symWidth * scale / 2, position.y + this.symHeight * scale / 2, this.symWidth * scale, this.symHeight * scale);
+    drawBackground(context, stroke, strokeDash, position, scale) {
+        context.save();
+        context.fillStyle = TileGraphicElements.tileBackgroundGradient;
+        context.translate(position.x, position.y);
+        context.scale(scale, scale);
+        context.fill(TileGraphicElements.tileBackgroundPath);
+        context.strokeStyle = stroke;
+        context.setLineDash(strokeDash);
+        context.lineWidth = 5;
+        context.stroke(TileGraphicElements.tileBackgroundPath);
+        context.restore();
     }
-    screenCoords(pos, mid, scale) {
-        const tileX = pos.x * this.tileWidth + pos.x * TileGraphics.PADDING;
-        const tileY = pos.y * this.tileHeight + pos.y * TileGraphics.PADDING;
+    drawInner(context, tile, position, scale) {
+        const colour = TileGraphicElements.colours.get(tile.colour);
+        const shape = TileGraphicElements.shapes.get(tile.shape);
+        if (colour && shape) {
+            context.save();
+            context.fillStyle = TileGraphicElements.colours.get(tile.colour) ?? "black";
+            context.translate(position.x, position.y);
+            context.scale(scale, scale);
+            context.fill(shape);
+            context.restore();
+        }
+    }
+    drawTile(context, position, tile, stroke, strokeDash, scale) {
+        this.drawBackground(context, stroke, strokeDash, position, scale);
+        const innerPosition = {
+            x: position.x + this.tileSize * scale / 2 / 2,
+            y: position.y + this.tileSize * scale / 2 / 2
+        };
+        this.drawInner(context, tile, innerPosition, scale);
+    }
+    screenCoords(pos, mouseState) {
+        const tileX = pos.x * this.tileSize + pos.x * TileGraphics.PADDING;
+        const tileY = pos.y * this.tileSize + pos.y * TileGraphics.PADDING;
+        return _mouse.worldToScreen({
+            x: tileX,
+            y: tileY
+        }, mouseState);
+    }
+    positionFromScreen(screen, mouseState) {
+        const world = _mouse.screenToWorld(screen, mouseState);
         return {
-            x: (tileX - mid.x) * scale,
-            y: (tileY - mid.y) * scale
+            x: Math.floor(world.x / (this.tileSize + TileGraphics.PADDING)),
+            y: Math.floor(world.y / (this.tileSize + TileGraphics.PADDING))
         };
     }
-    positionFromScreen(screen, mid, scale) {
-        const tileX = (screen.x / scale + mid.x) / (this.tileWidth + TileGraphics.PADDING);
-        const tileY = (screen.y / scale + mid.y) / (this.tileHeight + TileGraphics.PADDING);
-        return {
-            x: Math.floor(tileX),
-            y: Math.floor(tileY)
-        };
+    constructor(){
+        this.tileSize = 64;
+        this.tileStrokeSolid = [];
+        this.tileStrokeDashed = [
+            8,
+            4
+        ];
     }
 }
 TileGraphics.PADDING = 10;
 
-},{"../../../shared/Domain":"2iCCP","./domain":"5in7n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"lTls6":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "TileGridGraphics", ()=>TileGridGraphics
-);
-var _immutable = require("immutable");
-var _gameState = require("../state/GameState");
-var _domain = require("./domain");
-class TileGridGraphics {
-    constructor(tileGraphics, firstTileImage){
-        this.tileGraphics = tileGraphics;
-        this.firstTileImage = firstTileImage;
-    }
-    update(gameState, mouseState) {
-        if (gameState.tilePositionsPressed.length > 0) gameState.tilePositionsPressed = new Array();
-        if (gameState.userInControl === gameState.currentUser.userId) mouseState.clicks.forEach((c)=>{
-            if (_domain.rectContains(gameState.mainAreaBounds, c)) {
-                const xy = this.tileGraphics.positionFromScreen(c, mouseState.offset, mouseState.scale);
-                gameState.tilePositionsPressed.push(xy);
-            }
-        });
-    }
-    draw(context, state, mouseState) {
-        if (state.tilesToDisplay.length === 0 && state.userInControl === state.currentUser.userId) {
-            const firstTilePosition = this.tileGraphics.screenCoords({
-                x: 0,
-                y: 0
-            }, mouseState.offset, mouseState.scale);
-            const firstTilePositionX = firstTilePosition.x;
-            const firstTilePositionY = firstTilePosition.y - this.firstTileImage.height + this.tileGraphics.tileHeight;
-            context.drawImage(this.firstTileImage, firstTilePositionX, firstTilePositionY);
-        }
-        context.save();
-        const hoveringTilePosition = this.tileGraphics.positionFromScreen(mouseState.mousePosition, mouseState.offset, mouseState.scale);
-        context.fillStyle = "#eeeeee";
-        const screenCoords = this.tileGraphics.screenCoords(hoveringTilePosition, mouseState.offset, mouseState.scale);
-        var singleActive = _gameState.singleActiveTile(state);
-        if (singleActive) {
-            context.save();
-            context.globalAlpha = 0.5;
-            this.tileGraphics.drawInactiveTile(context, screenCoords, singleActive[1], mouseState.scale);
-            context.restore();
-        } else context.fillRect(screenCoords.x, screenCoords.y, this.tileGraphics.tileWidth * mouseState.scale, this.tileGraphics.tileHeight * mouseState.scale);
-        for (const pt of state.tilesToDisplay){
-            const coords = this.tileGraphics.screenCoords(pt.position, mouseState.offset, mouseState.scale);
-            if (state.currentPlacement.placedTiles.contains(pt)) this.tileGraphics.drawHoverTile(context, coords, pt, mouseState.scale);
-            else if (state.tilesLastPlaced.map((x)=>_immutable.fromJS(x)
-            ).contains(_immutable.fromJS(pt))) this.tileGraphics.drawLastPlacementTile(context, coords, pt, mouseState.scale);
-            else this.tileGraphics.drawInactiveTile(context, coords, pt, mouseState.scale);
-        }
-        context.restore();
-    }
-}
-
-},{"immutable":"iIkjt","../state/GameState":"fRKfr","./domain":"5in7n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"57eqU":[function(require,module,exports) {
+},{"../game/Mouse":"57eqU","../../../shared/Domain":"2iCCP","./domain":"5in7n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","immutable":"iIkjt"}],"57eqU":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "registerMouseUpdater", ()=>registerMouseUpdater
@@ -91572,7 +91589,61 @@ class MouseUpdater {
     }
 }
 
-},{"../state/GameState":"fRKfr","../../../shared/Domain":"2iCCP","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"9JNK3":[function(require,module,exports) {
+},{"../state/GameState":"fRKfr","../../../shared/Domain":"2iCCP","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"lTls6":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "TileGridGraphics", ()=>TileGridGraphics
+);
+var _immutable = require("immutable");
+var _gameState = require("../state/GameState");
+var _domain = require("./domain");
+class TileGridGraphics {
+    constructor(tileGraphics, firstTileImage){
+        this.tileGraphics = tileGraphics;
+        this.firstTileImage = firstTileImage;
+    }
+    update(gameState, mouseState) {
+        if (gameState.tilePositionsPressed.length > 0) gameState.tilePositionsPressed = new Array();
+        if (gameState.userInControl === gameState.currentUser.userId) mouseState.clicks.forEach((c)=>{
+            if (_domain.rectContains(gameState.mainAreaBounds, c)) {
+                const xy = this.tileGraphics.positionFromScreen(c, mouseState);
+                gameState.tilePositionsPressed.push(xy);
+            }
+        });
+    }
+    draw(context, state, mouseState) {
+        if (state.tilesToDisplay.length === 0 && state.userInControl === state.currentUser.userId) {
+            const firstTilePosition = this.tileGraphics.screenCoords({
+                x: 0,
+                y: 0
+            }, mouseState);
+            const firstTilePositionX = firstTilePosition.x;
+            const firstTilePositionY = firstTilePosition.y - this.firstTileImage.height + this.tileGraphics.tileSize;
+            context.drawImage(this.firstTileImage, firstTilePositionX, firstTilePositionY);
+        }
+        context.save();
+        const hoveringTilePosition = this.tileGraphics.positionFromScreen(mouseState.mousePosition, mouseState);
+        context.fillStyle = "#eeeeee";
+        const screenCoords = this.tileGraphics.screenCoords(hoveringTilePosition, mouseState);
+        var singleActive = _gameState.singleActiveTile(state);
+        if (singleActive) {
+            context.save();
+            context.globalAlpha = 0.5;
+            this.tileGraphics.drawInactiveTile(context, screenCoords, singleActive[1], mouseState.scale);
+            context.restore();
+        } else context.fillRect(screenCoords.x, screenCoords.y, this.tileGraphics.tileSize * mouseState.scale, this.tileGraphics.tileSize * mouseState.scale);
+        for (const pt of state.tilesToDisplay){
+            const coords = this.tileGraphics.screenCoords(pt.position, mouseState);
+            if (state.currentPlacement.placedTiles.contains(pt)) this.tileGraphics.drawHoverTile(context, coords, pt, mouseState.scale);
+            else if (state.tilesLastPlaced.map((x)=>_immutable.fromJS(x)
+            ).contains(_immutable.fromJS(pt))) this.tileGraphics.drawLastPlacementTile(context, coords, pt, mouseState.scale);
+            else this.tileGraphics.drawInactiveTile(context, coords, pt, mouseState.scale);
+        }
+        context.restore();
+    }
+}
+
+},{"immutable":"iIkjt","../state/GameState":"fRKfr","./domain":"5in7n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"9JNK3":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$6598 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -91642,25 +91713,33 @@ parcelHelpers.export(exports, "UserHand", ()=>UserHand
 var _jsxDevRuntime = require("react/jsx-dev-runtime");
 var _react = require("react");
 var _reactDefault = parcelHelpers.interopDefault(_react);
+var _tileGraphics = require("../graphics/TileGraphics");
 var _s = $RefreshSig$();
 function UserHand(props) {
     return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
         className: "hand",
-        children: props.hand.toArray().map((t, i)=>/*#__PURE__*/ _jsxDevRuntime.jsxDEV(HandTile, {
-                isEnabled: props.isEnabled,
-                tile: t,
-                onPressed: ()=>props.onPressed(i)
-                ,
-                isActive: props.activeIndicies.contains(i)
-            }, i, false, {
-                fileName: "src/component/UserHand.tsx",
-                lineNumber: 16,
-                columnNumber: 9
-            }, this)
-        )
+        children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+            className: "handTiles",
+            children: props.hand.toArray().map((t, i)=>/*#__PURE__*/ _jsxDevRuntime.jsxDEV(HandTile, {
+                    isEnabled: props.isEnabled,
+                    tile: t,
+                    onPressed: ()=>props.onPressed(i)
+                    ,
+                    isActive: props.activeIndicies.contains(i)
+                }, i, false, {
+                    fileName: "src/component/UserHand.tsx",
+                    lineNumber: 18,
+                    columnNumber: 13
+                }, this)
+            )
+        }, void 0, false, {
+            fileName: "src/component/UserHand.tsx",
+            lineNumber: 16,
+            columnNumber: 7
+        }, this)
     }, void 0, false, {
         fileName: "src/component/UserHand.tsx",
-        lineNumber: 14,
+        lineNumber: 15,
         columnNumber: 5
     }, this));
 }
@@ -91668,9 +91747,31 @@ _c = UserHand;
 function HandTile(props) {
     _s();
     const [isHovering, setHovering] = _react.useState(false);
-    const imageUrl = `./images/${props.tile.shape.toString()}-${props.tile.colour.toString()}.png`;
-    const tileBackground = props.isActive ? "./images/active-tile.png" : isHovering ? "./images/hover-tile.png" : "./images/blank-tile.png";
     const tileClassName = `tile${props.isEnabled ? "" : " tile-disabled"}`;
+    const canvas = /*#__PURE__*/ _reactDefault.default.createRef();
+    _reactDefault.default.useEffect(()=>{
+        const can = canvas.current;
+        const context = canvas.current?.getContext('2d');
+        const width = canvas.current?.clientWidth;
+        if (can && context && width) (async ()=>{
+            can.width = can.offsetWidth;
+            can.height = can.offsetHeight;
+            const tileGraphics = await _tileGraphics.loadTileGraphics(context);
+            const scale = width / tileGraphics.tileSize;
+            if (props.isActive) tileGraphics.drawActiveTile(context, {
+                x: 0,
+                y: 0
+            }, props.tile, scale);
+            else if (isHovering) tileGraphics.drawHoverTile(context, {
+                x: 0,
+                y: 0
+            }, props.tile, scale);
+            else tileGraphics.drawInactiveTile(context, {
+                x: 0,
+                y: 0
+            }, props.tile, scale);
+        })();
+    });
     return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
         className: tileClassName,
         onMouseEnter: ()=>{
@@ -91682,31 +91783,20 @@ function HandTile(props) {
         onClick: ()=>{
             if (props.isEnabled) props.onPressed();
         },
-        children: [
-            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("img", {
-                src: tileBackground,
-                className: "background"
-            }, void 0, false, {
-                fileName: "src/component/UserHand.tsx",
-                lineNumber: 65,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("img", {
-                src: imageUrl,
-                className: "emblem"
-            }, void 0, false, {
-                fileName: "src/component/UserHand.tsx",
-                lineNumber: 66,
-                columnNumber: 7
-            }, this)
-        ]
-    }, void 0, true, {
+        children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("canvas", {
+            ref: canvas
+        }, void 0, false, {
+            fileName: "src/component/UserHand.tsx",
+            lineNumber: 92,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
         fileName: "src/component/UserHand.tsx",
-        lineNumber: 47,
+        lineNumber: 74,
         columnNumber: 5
     }, this));
 }
-_s(HandTile, "omIPmSlyMGSbwGDKviA+PMZ26ak=");
+_s(HandTile, "cN6M1aBCRX1TGDrF2C3DHZgvhjA=");
 _c1 = HandTile;
 var _c, _c1;
 $RefreshReg$(_c, "UserHand");
@@ -91717,7 +91807,7 @@ $RefreshReg$(_c1, "HandTile");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"hhkeo":[function(require,module,exports) {
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","../graphics/TileGraphics":"jbJGn"}],"hhkeo":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$fad8 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
