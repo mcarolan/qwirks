@@ -22971,8 +22971,8 @@ exports.constants = {
 
 },{"randombytes":"8hjhE","create-hash":"2WyL8","create-hmac":"k1utz","browserify-sign/algos":"busIB","pbkdf2":"g38Hg","browserify-cipher":"d4idn","diffie-hellman":"hwD3y","browserify-sign":"jbRNy","create-ecdh":"9Rcg1","public-encrypt":"h9Rdh","randomfill":"k3tsT"}],"8hjhE":[function(require,module,exports) {
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 // limit of Crypto.getRandomValues()
 // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
 var MAX_BYTES = 65536;
@@ -24925,8 +24925,8 @@ exports.pipeline = require('./lib/internal/streams/pipeline.js');
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;
@@ -26674,8 +26674,8 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
     this.chunk = chunk;
@@ -29517,8 +29517,8 @@ Stream.prototype.pipe = function(dest, options) {
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;
@@ -30920,8 +30920,8 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
     this.chunk = chunk;
@@ -40583,8 +40583,8 @@ exports.pipeline = require('./lib/internal/streams/pipeline.js');
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;
@@ -63777,15 +63777,15 @@ var _domain = require("../graphics/domain");
 var _gameState = require("../state/GameState");
 var _userHand = require("./UserHand");
 var _userList = require("./UserList");
-var _usernamePanel = require("./UsernamePanel");
-var _zoomControls = require("./ZoomControls");
+var _lobby = require("./Lobby");
 class MainComponent extends _reactDefault.default.Component {
     constructor(props){
         super(props);
         this.state = _mainComponentState.initialMainComponentState;
     }
     onClickButton(buttonTag) {
-        return ()=>this.setState((s)=>{
+        return ()=>{
+            this.setState((s)=>{
                 return {
                     ...s,
                     ui: {
@@ -63793,8 +63793,8 @@ class MainComponent extends _reactDefault.default.Component {
                         buttonsClicked: s.ui.buttonsClicked.add(buttonTag)
                     }
                 };
-            })
-        ;
+            });
+        };
     }
     onHandTileClicked(i) {
         this.setState((s)=>{
@@ -63841,281 +63841,190 @@ class MainComponent extends _reactDefault.default.Component {
         ;
         const isVisible = (tag)=>this.state.game.visibleButtonTags.contains(tag)
         ;
+        const isStarted = this.state.game.isStarted;
         const bottomClasses = this.state.game.isStarted ? "bottom-expand" : "bottom-contracted";
         const wrapperClasses = this.state.game.isStarted ? "wrapper-expand" : "wrapper-contracted";
         return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
             id: "wrapper",
             className: wrapperClasses,
-            children: [
-                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                    id: "mainArea",
-                    children: [
-                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_gameStatus.GameStatus, {
-                            userIsInControl: this.state.game.userInControl === this.state.game.currentUser?.userId,
-                            waitingForUsername: this.state.game.userInControl ? this.state.game.userList.get(this.state.game.userInControl)?.username : undefined,
-                            winningUsername: this.state.game.winner ? this.state.game.userList.get(this.state.game.winner)?.username : undefined,
-                            isStarted: this.state.game.isStarted,
-                            turnTimer: this.state.game.turnTimer,
-                            turnStartTime: this.state.game.turnStartTime
-                        }, void 0, false, {
-                            fileName: "src/component/MainComponent.tsx",
-                            lineNumber: 115,
-                            columnNumber: 11
-                        }, this),
-                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                            id: "buttonsContainer",
-                            children: [
-                                /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_zoomControls.ZoomControls, {
-                                    zoomIn: ()=>this.state.ui.zoomInPressed += 1
+            children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                id: "mainArea",
+                children: [
+                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_gameStatus.GameStatus, {
+                        userIsInControl: this.state.game.userInControl === this.state.game.currentUser?.userId,
+                        waitingForUsername: this.state.game.userInControl ? this.state.game.userList.get(this.state.game.userInControl)?.username : undefined,
+                        winningUsername: this.state.game.winner ? this.state.game.userList.get(this.state.game.winner)?.username : undefined,
+                        isStarted: this.state.game.isStarted,
+                        turnTimer: this.state.game.turnTimer,
+                        turnStartTime: this.state.game.turnStartTime
+                    }, void 0, false, {
+                        fileName: "src/component/MainComponent.tsx",
+                        lineNumber: 117,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                        id: "buttonsContainer",
+                        children: [
+                            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                                className: "main-area",
+                                children: !isStarted ? /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_lobby.Lobby, {
+                                    currentUser: this.state.game.currentUser,
+                                    onChangeUsername: (newName)=>this.onChangeUsername(newName)
                                     ,
-                                    zoomOut: ()=>this.state.ui.zoomOutPressed += 1
+                                    users: this.state.game.userList,
+                                    startButtonEnabled: !this.state.game.isStarted && this.state.game.userList.size > 1,
+                                    onStartClick: this.onClickButton(_button1.ButtonTag.Start)
                                 }, void 0, false, {
                                     fileName: "src/component/MainComponent.tsx",
-                                    lineNumber: 136,
-                                    columnNumber: 13
-                                }, this),
-                                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                                    className: "main-buttons",
-                                    children: [
-                                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV("select", {
-                                            className: isVisible(_button1.ButtonTag.Start) ? "" : "displayNone",
-                                            onChange: (e)=>this.onSelectedTurnTimerChanged(e)
-                                            ,
+                                    lineNumber: 140,
+                                    columnNumber: 17
+                                }, this) : /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_jsxDevRuntime.Fragment, {
+                                }, void 0, false)
+                            }, void 0, false, {
+                                fileName: "src/component/MainComponent.tsx",
+                                lineNumber: 138,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                                className: "right-side-buttons",
+                                children: [
+                                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                                        children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_button.Button, {
+                                            visible: isVisible(_button1.ButtonTag.Accept),
+                                            onClick: this.onClickButton(_button1.ButtonTag.Accept),
+                                            text: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("img", {
+                                                src: "./images/accept.png"
+                                            }, void 0, false, void 0, void 0),
+                                            className: "squareButton",
+                                            enabled: isEnabled(_button1.ButtonTag.Accept)
+                                        }, void 0, false, {
+                                            fileName: "src/component/MainComponent.tsx",
+                                            lineNumber: 149,
+                                            columnNumber: 17
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "src/component/MainComponent.tsx",
+                                        lineNumber: 148,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                                        children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_button.Button, {
+                                            visible: isVisible(_button1.ButtonTag.Swap),
+                                            onClick: this.onClickButton(_button1.ButtonTag.Swap),
+                                            text: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("img", {
+                                                src: "./images/swap.png"
+                                            }, void 0, false, void 0, void 0),
+                                            className: "squareButton",
+                                            enabled: isEnabled(_button1.ButtonTag.Swap)
+                                        }, void 0, false, {
+                                            fileName: "src/component/MainComponent.tsx",
+                                            lineNumber: 158,
+                                            columnNumber: 17
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "src/component/MainComponent.tsx",
+                                        lineNumber: 157,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                                        children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_button.Button, {
+                                            visible: isVisible(_button1.ButtonTag.Cancel),
+                                            onClick: this.onClickButton(_button1.ButtonTag.Cancel),
+                                            text: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("img", {
+                                                src: "./images/cross.png"
+                                            }, void 0, false, void 0, void 0),
+                                            className: "squareButton",
+                                            enabled: isEnabled(_button1.ButtonTag.Cancel)
+                                        }, void 0, false, {
+                                            fileName: "src/component/MainComponent.tsx",
+                                            lineNumber: 167,
+                                            columnNumber: 17
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "src/component/MainComponent.tsx",
+                                        lineNumber: 166,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                                        className: "tilesRemainingWrapper",
+                                        children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                                            className: "tilesRemaining",
                                             children: [
-                                                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("option", {
-                                                    value: undefined,
-                                                    children: "No round timer"
-                                                }, void 0, false, {
-                                                    fileName: "src/component/MainComponent.tsx",
-                                                    lineNumber: 145,
-                                                    columnNumber: 17
-                                                }, this),
-                                                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("option", {
-                                                    value: 10000,
-                                                    children: "10 seconds"
-                                                }, void 0, false, {
-                                                    fileName: "src/component/MainComponent.tsx",
-                                                    lineNumber: 146,
-                                                    columnNumber: 17
-                                                }, this),
-                                                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("option", {
-                                                    value: 20000,
-                                                    children: "20 seconds"
-                                                }, void 0, false, {
-                                                    fileName: "src/component/MainComponent.tsx",
-                                                    lineNumber: 147,
-                                                    columnNumber: 17
-                                                }, this),
-                                                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("option", {
-                                                    value: 30000,
-                                                    children: "30 seconds"
-                                                }, void 0, false, {
-                                                    fileName: "src/component/MainComponent.tsx",
-                                                    lineNumber: 148,
-                                                    columnNumber: 17
-                                                }, this),
-                                                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("option", {
-                                                    value: 60000,
-                                                    children: "1 minute"
-                                                }, void 0, false, {
-                                                    fileName: "src/component/MainComponent.tsx",
-                                                    lineNumber: 149,
-                                                    columnNumber: 17
-                                                }, this),
-                                                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("option", {
-                                                    value: 120000,
-                                                    children: "2 minutes"
-                                                }, void 0, false, {
-                                                    fileName: "src/component/MainComponent.tsx",
-                                                    lineNumber: 150,
-                                                    columnNumber: 17
-                                                }, this)
+                                                108 - this.state.game.tilesPlaced,
+                                                " tiles to place"
                                             ]
                                         }, void 0, true, {
                                             fileName: "src/component/MainComponent.tsx",
-                                            lineNumber: 141,
-                                            columnNumber: 15
-                                        }, this),
-                                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_button.Button, {
-                                            visible: isVisible(_button1.ButtonTag.Start),
-                                            onClick: this.onClickButton(_button1.ButtonTag.Start),
-                                            text: "Start",
-                                            enabled: isEnabled(_button1.ButtonTag.Start)
-                                        }, void 0, false, {
-                                            fileName: "src/component/MainComponent.tsx",
-                                            lineNumber: 152,
-                                            columnNumber: 15
+                                            lineNumber: 176,
+                                            columnNumber: 17
                                         }, this)
-                                    ]
-                                }, void 0, true, {
-                                    fileName: "src/component/MainComponent.tsx",
-                                    lineNumber: 140,
-                                    columnNumber: 13
-                                }, this),
-                                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                                    className: "right-side-buttons",
-                                    children: [
-                                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                                            children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_button.Button, {
-                                                visible: isVisible(_button1.ButtonTag.Accept),
-                                                onClick: this.onClickButton(_button1.ButtonTag.Accept),
-                                                text: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("img", {
-                                                    src: "./images/accept.png"
-                                                }, void 0, false, void 0, void 0),
-                                                className: "squareButton",
-                                                enabled: isEnabled(_button1.ButtonTag.Accept)
-                                            }, void 0, false, {
-                                                fileName: "src/component/MainComponent.tsx",
-                                                lineNumber: 161,
-                                                columnNumber: 17
-                                            }, this)
-                                        }, void 0, false, {
-                                            fileName: "src/component/MainComponent.tsx",
-                                            lineNumber: 160,
-                                            columnNumber: 15
-                                        }, this),
-                                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                                            children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_button.Button, {
-                                                visible: isVisible(_button1.ButtonTag.Swap),
-                                                onClick: this.onClickButton(_button1.ButtonTag.Swap),
-                                                text: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("img", {
-                                                    src: "./images/swap.png"
-                                                }, void 0, false, void 0, void 0),
-                                                className: "squareButton",
-                                                enabled: isEnabled(_button1.ButtonTag.Swap)
-                                            }, void 0, false, {
-                                                fileName: "src/component/MainComponent.tsx",
-                                                lineNumber: 170,
-                                                columnNumber: 17
-                                            }, this)
-                                        }, void 0, false, {
-                                            fileName: "src/component/MainComponent.tsx",
-                                            lineNumber: 169,
-                                            columnNumber: 15
-                                        }, this),
-                                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                                            children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_button.Button, {
-                                                visible: isVisible(_button1.ButtonTag.Cancel),
-                                                onClick: this.onClickButton(_button1.ButtonTag.Cancel),
-                                                text: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("img", {
-                                                    src: "./images/cross.png"
-                                                }, void 0, false, void 0, void 0),
-                                                className: "squareButton",
-                                                enabled: isEnabled(_button1.ButtonTag.Cancel)
-                                            }, void 0, false, {
-                                                fileName: "src/component/MainComponent.tsx",
-                                                lineNumber: 179,
-                                                columnNumber: 17
-                                            }, this)
-                                        }, void 0, false, {
-                                            fileName: "src/component/MainComponent.tsx",
-                                            lineNumber: 178,
-                                            columnNumber: 15
-                                        }, this),
-                                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                                            className: "tilesRemainingWrapper",
-                                            children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                                                className: "tilesRemaining",
-                                                children: [
-                                                    108 - this.state.game.tilesPlaced,
-                                                    " tiles to place"
-                                                ]
-                                            }, void 0, true, {
-                                                fileName: "src/component/MainComponent.tsx",
-                                                lineNumber: 188,
-                                                columnNumber: 17
-                                            }, this)
-                                        }, void 0, false, {
-                                            fileName: "src/component/MainComponent.tsx",
-                                            lineNumber: 187,
-                                            columnNumber: 15
-                                        }, this)
-                                    ]
-                                }, void 0, true, {
-                                    fileName: "src/component/MainComponent.tsx",
-                                    lineNumber: 159,
-                                    columnNumber: 13
-                                }, this)
-                            ]
-                        }, void 0, true, {
-                            fileName: "src/component/MainComponent.tsx",
-                            lineNumber: 135,
-                            columnNumber: 11
-                        }, this)
-                    ]
-                }, void 0, true, {
-                    fileName: "src/component/MainComponent.tsx",
-                    lineNumber: 114,
-                    columnNumber: 9
-                }, this),
-                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                    id: "sidebarRight",
-                    children: [
-                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_usernamePanel.UsernamePanel, {
-                            currentUser: this.state.game.currentUser,
-                            onChangeUsername: this.onChangeUsername
-                        }, void 0, false, {
-                            fileName: "src/component/MainComponent.tsx",
-                            lineNumber: 196,
-                            columnNumber: 11
-                        }, this),
-                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                            id: "userList",
-                            children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_userList.UserList, {
-                                userList: this.state.game.userList,
-                                userInControl: this.state.game.userInControl
+                                    }, void 0, false, {
+                                        fileName: "src/component/MainComponent.tsx",
+                                        lineNumber: 175,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "src/component/MainComponent.tsx",
+                                lineNumber: 147,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "src/component/MainComponent.tsx",
+                        lineNumber: 137,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_userList.UserList, {
+                        userList: this.state.game.userList,
+                        userInControl: this.state.game.userInControl,
+                        isStarted: this.state.game.isStarted
+                    }, void 0, false, {
+                        fileName: "src/component/MainComponent.tsx",
+                        lineNumber: 182,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                        id: "bottom",
+                        className: bottomClasses,
+                        children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                            id: "bottomPanel",
+                            children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_userHand.UserHand, {
+                                isEnabled: this.state.game.userInControl === this.state.game.currentUser?.userId,
+                                hand: this.state.game.hand,
+                                activeIndicies: this.state.game.activeTileIndicies,
+                                onPressed: (i)=>this.onHandTileClicked(i)
                             }, void 0, false, {
                                 fileName: "src/component/MainComponent.tsx",
-                                lineNumber: 201,
+                                lineNumber: 189,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "src/component/MainComponent.tsx",
-                            lineNumber: 200,
+                            lineNumber: 188,
                             columnNumber: 11
-                        }, this)
-                    ]
-                }, void 0, true, {
-                    fileName: "src/component/MainComponent.tsx",
-                    lineNumber: 195,
-                    columnNumber: 9
-                }, this),
-                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                    id: "bottom",
-                    className: bottomClasses,
-                    children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                        id: "bottomPanel",
-                        children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_userHand.UserHand, {
-                            isEnabled: this.state.game.userInControl === this.state.game.currentUser?.userId,
-                            hand: this.state.game.hand,
-                            activeIndicies: this.state.game.activeTileIndicies,
-                            onPressed: (i)=>this.onHandTileClicked(i)
-                        }, void 0, false, {
-                            fileName: "src/component/MainComponent.tsx",
-                            lineNumber: 209,
-                            columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "src/component/MainComponent.tsx",
-                        lineNumber: 208,
-                        columnNumber: 11
+                        lineNumber: 187,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_connectionStatus.ConnectionStatus, {
+                        isConnected: this.state.game.isConnected
+                    }, void 0, false, {
+                        fileName: "src/component/MainComponent.tsx",
+                        lineNumber: 200,
+                        columnNumber: 9
                     }, this)
-                }, void 0, false, {
-                    fileName: "src/component/MainComponent.tsx",
-                    lineNumber: 207,
-                    columnNumber: 9
-                }, this),
-                /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_connectionStatus.ConnectionStatus, {
-                    isConnected: this.state.game.isConnected
-                }, void 0, false, {
-                    fileName: "src/component/MainComponent.tsx",
-                    lineNumber: 220,
-                    columnNumber: 9
-                }, this)
-            ]
-        }, void 0, true, {
+                ]
+            }, void 0, true, {
+                fileName: "src/component/MainComponent.tsx",
+                lineNumber: 116,
+                columnNumber: 9
+            }, this)
+        }, void 0, false, {
             fileName: "src/component/MainComponent.tsx",
-            lineNumber: 113,
+            lineNumber: 115,
             columnNumber: 7
         }, this));
     }
@@ -64126,7 +64035,7 @@ class MainComponent extends _reactDefault.default.Component {
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","../component/Button":"hdTPe","./Button":"hdTPe","../component/ConnectionStatus":"6AZV2","../game/Frame":"jTPaV","../game/GameDependencies":"9PSfn","../component/GameStatus":"9JNK3","../state/MainComponentState":"6NFgD","../graphics/domain":"5in7n","../state/GameState":"fRKfr","./UserHand":"Y6k4R","./UserList":"hhkeo","./UsernamePanel":"1yLaa","./ZoomControls":"4E4gg","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"hdTPe":[function(require,module,exports) {
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","../component/Button":"hdTPe","./Button":"hdTPe","../component/ConnectionStatus":"6AZV2","../game/Frame":"jTPaV","../game/GameDependencies":"9PSfn","../component/GameStatus":"9JNK3","../state/MainComponentState":"6NFgD","../graphics/domain":"5in7n","../state/GameState":"fRKfr","./UserHand":"Y6k4R","./UserList":"hhkeo","./Lobby":"sjZ3Z","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"hdTPe":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$e0e8 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -64352,24 +64261,33 @@ parcelHelpers.export(exports, "frame", ()=>frame
 );
 var _mainComponentState = require("../state/MainComponentState");
 var _domain = require("../graphics/domain");
+var _mouse = require("./Mouse");
+var _domain1 = require("../../../shared/Domain");
 function frame(gameState, deps, mainState) {
     return (time)=>{
+        deps.network.update(gameState);
         gameState.mainAreaBounds = _domain.rectFromElement(deps.mainArea);
+        if (gameState.isStarted && !deps.mouseUpdater) {
+            deps.mouseUpdater = new _mouse.MouseUpdater(_domain1.mul(_domain.middle(gameState.mainAreaBounds), -1));
+            _mouse.registerMouseUpdater(deps.mouseUpdater);
+        }
         deps.context.save();
         deps.canvas.width = gameState.mainAreaBounds.width;
         deps.canvas.height = gameState.mainAreaBounds.height;
         deps.context.clearRect(0, 0, deps.context.canvas.width, deps.context.canvas.height);
-        deps.network.update(gameState);
-        deps.mouseUpdater.update(time);
-        const mouseState = {
-            ...deps.mouseUpdater.state
-        };
-        deps.mouseUpdater.state.clicks = [];
-        deps.tileGrid.update(gameState, mouseState);
+        const mouseUpdater = deps.mouseUpdater;
+        if (mouseUpdater) {
+            mouseUpdater.update(time);
+            const mouseState = {
+                ...mouseUpdater.state
+            };
+            deps.tileGrid.update(gameState, mouseState);
+            deps.fireworkUpdater.update(gameState, mouseState);
+            deps.tileGrid.draw(deps.context, gameState, mouseState);
+            mouseUpdater.state.clicks = [];
+        }
         deps.gameLogic.update(gameState);
-        deps.fireworkUpdater.update(gameState, mouseState);
         deps.sounds.update(gameState);
-        deps.tileGrid.draw(deps.context, gameState, mouseState);
         deps.fireworks.updateAndDraw(deps.context);
         deps.context.restore();
         _mainComponentState.syncReactAndGameState(mainState, gameState, ()=>requestAnimationFrame(frame(gameState, deps, mainState))
@@ -64377,7 +64295,7 @@ function frame(gameState, deps, mainState) {
     };
 }
 
-},{"../state/MainComponentState":"6NFgD","../graphics/domain":"5in7n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"6NFgD":[function(require,module,exports) {
+},{"../state/MainComponentState":"6NFgD","../graphics/domain":"5in7n","./Mouse":"57eqU","../../../shared/Domain":"2iCCP","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"6NFgD":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "initialMainComponentState", ()=>initialMainComponentState
@@ -68773,6 +68691,468 @@ function loadImage(src) {
     return p;
 }
 
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"57eqU":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "registerMouseUpdater", ()=>registerMouseUpdater
+);
+parcelHelpers.export(exports, "worldToScreen", ()=>worldToScreen
+);
+parcelHelpers.export(exports, "screenToWorld", ()=>screenToWorld
+);
+parcelHelpers.export(exports, "MouseUpdater", ()=>MouseUpdater
+);
+var _gameState = require("../state/GameState");
+var _domain = require("../../../shared/Domain");
+function registerMouseUpdater(mouseUpdater) {
+    const touchEnabled = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    if (touchEnabled) {
+        document.addEventListener("touchmove", (e)=>mouseUpdater.touchEvent(e)
+        );
+        document.addEventListener("touchcancel", (e)=>mouseUpdater.touchEvent(e)
+        );
+        document.addEventListener("touchend", (e)=>mouseUpdater.touchEvent(e)
+        );
+        document.addEventListener("touchstart", (e)=>mouseUpdater.touchEvent(e)
+        );
+    } else {
+        document.addEventListener("mousemove", (e)=>mouseUpdater.mouseEvent(e)
+        );
+        document.addEventListener("mousedown", (e)=>mouseUpdater.mouseEvent(e)
+        );
+        document.addEventListener("mouseup", (e)=>mouseUpdater.mouseEvent(e)
+        );
+        document.addEventListener("wheel", (e)=>mouseUpdater.wheelEvent(e)
+        );
+    }
+}
+function worldToScreen(world, state) {
+    return {
+        x: (world.x - state.offset.x) * state.scale,
+        y: (world.y - state.offset.y) * state.scale
+    };
+}
+function screenToWorld(screen, state) {
+    return {
+        x: screen.x / state.scale + state.offset.x,
+        y: screen.y / state.scale + state.offset.y
+    };
+}
+class MouseUpdater {
+    constructor(initialOffset){
+        this.initialOffset = initialOffset;
+        this.DRAG_TOLERANCE = 3;
+        this.NULL_TIME_POSITION = [
+            -1,
+            {
+                x: 0,
+                y: 0
+            }
+        ];
+        this.TOUCH_CLICK_LAG = 150;
+        this.TOUCH_ZOOM_DELTA = 1.07;
+        this.DRIFT_AMOUNT = 100;
+        this.DRIFT_DECELERATION = 0.9;
+        this.state = {
+            mousePosition: {
+                x: 0,
+                y: 0
+            },
+            primaryDown: false,
+            multiDown: false,
+            offset: {
+                ...this.initialOffset
+            },
+            startPan: {
+                x: 0,
+                y: 0
+            },
+            scale: 1,
+            touchPinchDiff: -1,
+            clicks: [],
+            dragStart: this.NULL_TIME_POSITION,
+            lastPotentialTouchClick: this.NULL_TIME_POSITION,
+            touchClickEnabled: true,
+            driftDirection: {
+                x: 0,
+                y: 0
+            },
+            driftAcceleration: -1,
+            lastFrame: -1
+        };
+    }
+    wheelEvent(e) {
+        const beforeZoom = screenToWorld(this.state.mousePosition, this.state);
+        if (e.deltaY > 0) this.state.scale = _gameState.capScale(this.state.scale * 1.01);
+        else this.state.scale = _gameState.capScale(this.state.scale * 0.99);
+        const afterZoom = screenToWorld(this.state.mousePosition, this.state);
+        this.state.offset = {
+            x: this.state.offset.x + (beforeZoom.x - afterZoom.x),
+            y: this.state.offset.y + (beforeZoom.y - afterZoom.y)
+        };
+    }
+    mouseEvent(e) {
+        this.state.mousePosition = {
+            x: e.pageX,
+            y: e.pageY
+        };
+        const flags = e.buttons !== undefined ? e.buttons : e.which;
+        const downBefore = this.state.primaryDown;
+        this.state.primaryDown = (flags & 1) === 1;
+        if (!downBefore && this.state.primaryDown) this.state.startPan = {
+            ...this.state.mousePosition
+        };
+        if (downBefore && this.state.primaryDown && _domain.distanceBetween(this.state.startPan, this.state.mousePosition) > this.DRAG_TOLERANCE) {
+            this.state.offset = {
+                x: this.state.offset.x - (this.state.mousePosition.x - this.state.startPan.x) / this.state.scale,
+                y: this.state.offset.y - (this.state.mousePosition.y - this.state.startPan.y) / this.state.scale
+            };
+            this.state.startPan = {
+                ...this.state.mousePosition
+            };
+            if (this.state.dragStart[0] === -1) {
+                this.state.dragStart = [
+                    performance.now(),
+                    {
+                        ...this.state.mousePosition
+                    }
+                ];
+                this.state.driftAcceleration = 0;
+            }
+        }
+        if (downBefore && !this.state.primaryDown) {
+            if (this.state.dragStart[0] > 0) {
+                const dragTime = performance.now() - this.state.dragStart[0];
+                const dragDistance = _domain.distanceBetween(this.state.dragStart[1], this.state.mousePosition);
+                this.state.driftDirection = _domain.normalise({
+                    x: this.state.mousePosition.x - this.state.dragStart[1].x,
+                    y: this.state.mousePosition.y - this.state.dragStart[1].y
+                });
+                this.state.driftAcceleration = dragDistance / dragTime;
+                this.state.driftAcceleration = this.state.driftAcceleration > 1.1 ? this.state.driftAcceleration : 0;
+                this.state.dragStart = this.NULL_TIME_POSITION;
+                console.log(`${dragDistance} in ${dragTime} gives acceleration of ${this.state.driftAcceleration}. driftDirection: ${JSON.stringify(this.state.driftDirection)}`);
+            } else this.state.clicks.push({
+                ...this.state.mousePosition
+            });
+        }
+    }
+    touchEvent(e) {
+        const singleFingerDown = e.touches.length === 1;
+        const multiFingersDown = e.touches.length === 2;
+        const downBefore = this.state.primaryDown;
+        this.state.primaryDown = singleFingerDown;
+        if (singleFingerDown) {
+            this.state.mousePosition = {
+                x: e.touches.item(0)?.pageX ?? 0,
+                y: e.touches.item(0)?.pageY ?? 0
+            };
+            if (!downBefore) {
+                this.state.startPan = {
+                    ...this.state.mousePosition
+                };
+                if (this.state.touchClickEnabled) this.state.lastPotentialTouchClick = [
+                    performance.now(),
+                    {
+                        ...this.state.mousePosition
+                    }
+                ];
+            } else if (_domain.distanceBetween(this.state.startPan, this.state.mousePosition) > this.DRAG_TOLERANCE) {
+                this.state.offset = {
+                    x: this.state.offset.x - (this.state.mousePosition.x - this.state.startPan.x) / this.state.scale,
+                    y: this.state.offset.y - (this.state.mousePosition.y - this.state.startPan.y) / this.state.scale
+                };
+                this.state.startPan = {
+                    ...this.state.mousePosition
+                };
+                this.state.lastPotentialTouchClick = this.NULL_TIME_POSITION;
+                this.state.touchClickEnabled = false;
+                if (this.state.dragStart[0] === -1) {
+                    this.state.dragStart = [
+                        performance.now(),
+                        {
+                            ...this.state.mousePosition
+                        }
+                    ];
+                    this.state.driftAcceleration = 0;
+                }
+            }
+        }
+        if (multiFingersDown) {
+            this.state.lastPotentialTouchClick = this.NULL_TIME_POSITION;
+            this.state.touchClickEnabled = false;
+            const x1 = e.touches.item(0)?.pageX ?? 0;
+            const y1 = e.touches.item(0)?.pageY ?? 0;
+            const x2 = e.touches.item(1)?.pageX ?? 0;
+            const y2 = e.touches.item(1)?.pageY ?? 0;
+            const prevTouchPinchDiff = this.state.touchPinchDiff;
+            this.state.touchPinchDiff = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+            this.state.mousePosition = {
+                x: (x1 + x2) / 2,
+                y: (y1 + y2) / 2
+            };
+            if (prevTouchPinchDiff > 0 && this.state.touchPinchDiff != prevTouchPinchDiff) {
+                const beforeZoom = screenToWorld(this.state.mousePosition, this.state);
+                if (this.state.touchPinchDiff > prevTouchPinchDiff) this.state.scale = _gameState.capScale(this.state.scale * this.TOUCH_ZOOM_DELTA);
+                else this.state.scale = _gameState.capScale(this.state.scale / this.TOUCH_ZOOM_DELTA);
+                const afterZoom = screenToWorld(this.state.mousePosition, this.state);
+                this.state.offset = {
+                    x: this.state.offset.x + (beforeZoom.x - afterZoom.x),
+                    y: this.state.offset.y + (beforeZoom.y - afterZoom.y)
+                };
+            }
+        }
+        if (e.touches.length === 0) {
+            this.state.touchClickEnabled = true;
+            if (this.state.dragStart[0] > 0) {
+                const dragTime = performance.now() - this.state.dragStart[0];
+                const dragDistance = _domain.distanceBetween(this.state.dragStart[1], this.state.mousePosition);
+                this.state.driftDirection = _domain.normalise({
+                    x: this.state.mousePosition.x - this.state.dragStart[1].x,
+                    y: this.state.mousePosition.y - this.state.dragStart[1].y
+                });
+                this.state.driftAcceleration = dragDistance / dragTime;
+                this.state.dragStart = this.NULL_TIME_POSITION;
+                console.log(`${dragDistance} in ${dragTime} gives acceleration of ${this.state.driftAcceleration}. driftDirection: ${JSON.stringify(this.state.driftDirection)}`);
+            }
+        }
+    }
+    update(time) {
+        if (this.state.lastFrame === -1) this.state.lastFrame = time;
+        const timeSinceLastFrame = time - this.state.lastFrame;
+        this.state.lastFrame = time;
+        if (this.state.touchClickEnabled && this.state.lastPotentialTouchClick != this.NULL_TIME_POSITION && time - this.state.lastPotentialTouchClick[0] > this.TOUCH_CLICK_LAG) {
+            this.state.clicks.push({
+                ...this.state.lastPotentialTouchClick[1]
+            });
+            this.state.lastPotentialTouchClick = this.NULL_TIME_POSITION;
+        }
+        if (this.state.driftAcceleration > 0) {
+            const delta = {
+                x: this.state.driftDirection.x * this.DRIFT_AMOUNT * (timeSinceLastFrame / 1000) * this.state.driftAcceleration,
+                y: this.state.driftDirection.y * this.DRIFT_AMOUNT * (timeSinceLastFrame / 1000) * this.state.driftAcceleration
+            };
+            this.state.offset = {
+                x: this.state.offset.x - delta.x / this.state.scale,
+                y: this.state.offset.y - delta.y / this.state.scale
+            };
+            this.state.driftAcceleration *= this.DRIFT_DECELERATION;
+        }
+        if (this.state.driftAcceleration < 0.001) this.state.driftAcceleration = 0;
+    }
+}
+
+},{"../state/GameState":"fRKfr","../../../shared/Domain":"2iCCP","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fRKfr":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "capScale", ()=>capScale
+);
+parcelHelpers.export(exports, "singleActiveTile", ()=>singleActiveTile
+);
+parcelHelpers.export(exports, "initialGameState", ()=>initialGameState
+);
+var _immutable = require("immutable");
+function capScale(scale) {
+    return Math.min(Math.max(scale, 0.25), 2);
+}
+function singleActiveTile(gameState) {
+    if (gameState.panelActiveTileIndicies.size === 1) {
+        const index = gameState.panelActiveTileIndicies.toArray().at(0);
+        const tile = index != undefined ? gameState.hand.get(index) : undefined;
+        if (index != undefined && tile) return [
+            index,
+            tile
+        ];
+    }
+    return undefined;
+}
+function initialGameState(gameKey, user, mainAreaBounds) {
+    return {
+        gameKey: gameKey,
+        isStarted: false,
+        isConnected: false,
+        hand: _immutable.List.of(),
+        tilesToDisplay: [],
+        tilesApplied: [],
+        tilesLastPlaced: _immutable.Set(),
+        tilesToApply: undefined,
+        tilesToSwap: undefined,
+        tilePositionsPressed: [],
+        pressedButtonTags: _immutable.Set(),
+        enabledButtonTags: _immutable.Set(),
+        visibleButtonTags: _immutable.Set(),
+        panelActiveTileIndicies: _immutable.Set(),
+        scoreJustAchieved: 0,
+        fireworkTilePositions: _immutable.List.of(),
+        currentPlacement: {
+            placedTiles: _immutable.Set(),
+            tiles: [],
+            score: 0,
+            lines: _immutable.Set.of()
+        },
+        mainAreaBounds,
+        currentUser: user,
+        userList: _immutable.Map(),
+        userInControl: undefined,
+        setUsername: undefined,
+        winner: undefined,
+        turnTimerSelected: undefined,
+        turnTimer: undefined,
+        turnStartTime: undefined,
+        newUserInControl: undefined
+    };
+}
+
+},{"immutable":"iIkjt","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"2iCCP":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "TileColour", ()=>TileColour
+);
+parcelHelpers.export(exports, "allTileColours", ()=>allTileColours
+);
+parcelHelpers.export(exports, "TileShape", ()=>TileShape
+);
+parcelHelpers.export(exports, "allTileShapes", ()=>allTileShapes
+);
+parcelHelpers.export(exports, "below", ()=>below
+);
+parcelHelpers.export(exports, "above", ()=>above
+);
+parcelHelpers.export(exports, "left", ()=>left
+);
+parcelHelpers.export(exports, "right", ()=>right
+);
+parcelHelpers.export(exports, "minus", ()=>minus
+);
+parcelHelpers.export(exports, "plus", ()=>plus
+);
+parcelHelpers.export(exports, "mul", ()=>mul
+);
+parcelHelpers.export(exports, "divideScalar", ()=>divideScalar
+);
+parcelHelpers.export(exports, "normalise", ()=>normalise
+);
+parcelHelpers.export(exports, "distanceBetween", ()=>distanceBetween
+);
+parcelHelpers.export(exports, "prettyPrint", ()=>prettyPrint
+);
+let TileColour;
+(function(TileColour1) {
+    TileColour1["Yellow"] = "a";
+    TileColour1["Red"] = "b";
+    TileColour1["Purple"] = "c";
+    TileColour1["Orange"] = "d";
+    TileColour1["Green"] = "e";
+    TileColour1["Blue"] = "f";
+})(TileColour || (TileColour = {
+}));
+function allTileColours() {
+    return [
+        TileColour.Yellow,
+        TileColour.Red,
+        TileColour.Purple,
+        TileColour.Orange,
+        TileColour.Green,
+        TileColour.Blue, 
+    ];
+}
+let TileShape;
+(function(TileShape1) {
+    TileShape1["One"] = "1";
+    TileShape1["Two"] = "2";
+    TileShape1["Three"] = "3";
+    TileShape1["Four"] = "4";
+    TileShape1["Five"] = "5";
+    TileShape1["Six"] = "6";
+})(TileShape || (TileShape = {
+}));
+function allTileShapes() {
+    return [
+        TileShape.One,
+        TileShape.Two,
+        TileShape.Three,
+        TileShape.Four,
+        TileShape.Five,
+        TileShape.Six, 
+    ];
+}
+function below(pos) {
+    return {
+        ...pos,
+        y: pos.y - 1
+    };
+}
+function above(pos) {
+    return {
+        ...pos,
+        y: pos.y + 1
+    };
+}
+function left(pos) {
+    return {
+        ...pos,
+        x: pos.x - 1
+    };
+}
+function right(pos) {
+    return {
+        ...pos,
+        x: pos.x + 1
+    };
+}
+function minus(a, b) {
+    return {
+        x: a.x - b.x,
+        y: a.y - b.y
+    };
+}
+function plus(a, b) {
+    return {
+        x: a.x + b.x,
+        y: a.y + b.y
+    };
+}
+function mul(p, n) {
+    return {
+        x: p.x * n,
+        y: p.y * n
+    };
+}
+function divideScalar(p, n) {
+    return {
+        x: p.x / n,
+        y: p.y / n
+    };
+}
+function normalise(p) {
+    const length = Math.sqrt(Math.pow(p.x, 2) + Math.pow(p.y, 2));
+    return {
+        x: p.x / length,
+        y: p.y / length
+    };
+}
+function distanceBetween(a, b) {
+    const xDistance = a.x - b.x;
+    const yDistance = a.y - b.y;
+    return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
+}
+function prettyPrint(placementResult) {
+    switch(placementResult.type){
+        case "Success":
+            return `${placementResult.type} (tile grid size ${placementResult.tileGrid.size})`;
+        case "PlacingOverCurrentlyPlacedTiles":
+            return `${placementResult.type} (${placementResult.tiles})`;
+        case "PlacementOnEmptyGridMustBeAtOrigin":
+            return `${placementResult.type}`;
+        case "DuplicatePlacement":
+            return `${placementResult.type} (${placementResult.tiles})`;
+        case "CreatesInvalidLines":
+            return `${placementResult.type} (${JSON.stringify(placementResult.lines)})`;
+        case "AllPlacedTilesMustBeInALine":
+            return `${placementResult.type}`;
+    }
+}
+
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"9PSfn":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
@@ -68787,15 +69167,12 @@ var _sounds = require("./Sounds");
 var _tileGraphics = require("../graphics/TileGraphics");
 var _tileGridGraphics = require("../graphics/TileGridGraphics");
 var _domain = require("../graphics/domain");
-var _mouse = require("./Mouse");
-var _domain1 = require("../../../shared/Domain");
 async function loadGameDependencies(user, gameKey, document) {
     const canvas = document.querySelector("#game");
     const context = canvas.getContext("2d");
     const mainArea = document.querySelector("#mainArea");
     const tileGraphics = await _tileGraphics.loadTileGraphics(context);
     const socket = _socketIoClient.io("http://192.168.0.16:3000");
-    const mouseUpdater = _mouse.registerMouseUpdater(document, _domain1.mul(_domain.middle(_domain.rectFromElement(mainArea)), -1));
     const firstTileImage = await _domain.loadImage("./images/first-tile.png");
     const tileGrid = new _tileGridGraphics.TileGridGraphics(tileGraphics, firstTileImage);
     const fireworks = new _fireworks.Fireworks();
@@ -68806,18 +69183,18 @@ async function loadGameDependencies(user, gameKey, document) {
         context,
         mainArea,
         tileGrid,
-        mouseUpdater,
         fireworks,
         socket,
         user,
         network: new _network.Network(socket, user, gameKey),
         sounds,
         gameLogic: new _gameLogic.GameLogic(),
-        fireworkUpdater
+        fireworkUpdater,
+        mouseUpdater: undefined
     };
 }
 
-},{"socket.io-client":"8HBJR","../fireworks/Fireworks":"evkZJ","../fireworks/FireworkUpdater":"5Bc4C","./GameLogic":"48mBC","./Network":"4f7Bn","./Sounds":"eB3xr","../graphics/TileGraphics":"jbJGn","../graphics/TileGridGraphics":"lTls6","../graphics/domain":"5in7n","./Mouse":"57eqU","../../../shared/Domain":"2iCCP","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"8HBJR":[function(require,module,exports) {
+},{"socket.io-client":"8HBJR","../fireworks/Fireworks":"evkZJ","../fireworks/FireworkUpdater":"5Bc4C","./GameLogic":"48mBC","./Network":"4f7Bn","./Sounds":"eB3xr","../graphics/TileGraphics":"jbJGn","../graphics/TileGridGraphics":"lTls6","../graphics/domain":"5in7n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"8HBJR":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 /**
@@ -71891,157 +72268,7 @@ class Firework {
     }
 }
 
-},{"../../../shared/Domain":"2iCCP","../game/utility":"gzmt1","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"2iCCP":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "TileColour", ()=>TileColour
-);
-parcelHelpers.export(exports, "allTileColours", ()=>allTileColours
-);
-parcelHelpers.export(exports, "TileShape", ()=>TileShape
-);
-parcelHelpers.export(exports, "allTileShapes", ()=>allTileShapes
-);
-parcelHelpers.export(exports, "below", ()=>below
-);
-parcelHelpers.export(exports, "above", ()=>above
-);
-parcelHelpers.export(exports, "left", ()=>left
-);
-parcelHelpers.export(exports, "right", ()=>right
-);
-parcelHelpers.export(exports, "minus", ()=>minus
-);
-parcelHelpers.export(exports, "plus", ()=>plus
-);
-parcelHelpers.export(exports, "mul", ()=>mul
-);
-parcelHelpers.export(exports, "divideScalar", ()=>divideScalar
-);
-parcelHelpers.export(exports, "normalise", ()=>normalise
-);
-parcelHelpers.export(exports, "distanceBetween", ()=>distanceBetween
-);
-parcelHelpers.export(exports, "prettyPrint", ()=>prettyPrint
-);
-let TileColour;
-(function(TileColour1) {
-    TileColour1["Yellow"] = "yellow";
-    TileColour1["Red"] = "red";
-    TileColour1["Purple"] = "purple";
-    TileColour1["Orange"] = "orange";
-    TileColour1["Green"] = "green";
-    TileColour1["Blue"] = "blue";
-})(TileColour || (TileColour = {
-}));
-function allTileColours() {
-    return [
-        TileColour.Yellow,
-        TileColour.Red,
-        TileColour.Purple,
-        TileColour.Orange,
-        TileColour.Green,
-        TileColour.Blue, 
-    ];
-}
-let TileShape;
-(function(TileShape1) {
-    TileShape1["One"] = "one";
-    TileShape1["Two"] = "two";
-    TileShape1["Three"] = "three";
-    TileShape1["Four"] = "four";
-    TileShape1["Five"] = "five";
-    TileShape1["Six"] = "six";
-})(TileShape || (TileShape = {
-}));
-function allTileShapes() {
-    return [
-        TileShape.One,
-        TileShape.Two,
-        TileShape.Three,
-        TileShape.Four,
-        TileShape.Five,
-        TileShape.Six, 
-    ];
-}
-function below(pos) {
-    return {
-        ...pos,
-        y: pos.y - 1
-    };
-}
-function above(pos) {
-    return {
-        ...pos,
-        y: pos.y + 1
-    };
-}
-function left(pos) {
-    return {
-        ...pos,
-        x: pos.x - 1
-    };
-}
-function right(pos) {
-    return {
-        ...pos,
-        x: pos.x + 1
-    };
-}
-function minus(a, b) {
-    return {
-        x: a.x - b.x,
-        y: a.y - b.y
-    };
-}
-function plus(a, b) {
-    return {
-        x: a.x + b.x,
-        y: a.y + b.y
-    };
-}
-function mul(p, n) {
-    return {
-        x: p.x * n,
-        y: p.y * n
-    };
-}
-function divideScalar(p, n) {
-    return {
-        x: p.x / n,
-        y: p.y / n
-    };
-}
-function normalise(p) {
-    const length = Math.sqrt(Math.pow(p.x, 2) + Math.pow(p.y, 2));
-    return {
-        x: p.x / length,
-        y: p.y / length
-    };
-}
-function distanceBetween(a, b) {
-    const xDistance = a.x - b.x;
-    const yDistance = a.y - b.y;
-    return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
-}
-function prettyPrint(placementResult) {
-    switch(placementResult.type){
-        case "Success":
-            return `${placementResult.type} (tile grid size ${placementResult.tileGrid.size})`;
-        case "PlacingOverCurrentlyPlacedTiles":
-            return `${placementResult.type} (${placementResult.tiles})`;
-        case "PlacementOnEmptyGridMustBeAtOrigin":
-            return `${placementResult.type}`;
-        case "DuplicatePlacement":
-            return `${placementResult.type} (${placementResult.tiles})`;
-        case "CreatesInvalidLines":
-            return `${placementResult.type} (${JSON.stringify(placementResult.lines)})`;
-        case "AllPlacedTilesMustBeInALine":
-            return `${placementResult.type}`;
-    }
-}
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"1NFev":[function(require,module,exports) {
+},{"../../../shared/Domain":"2iCCP","../game/utility":"gzmt1","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"1NFev":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Particle", ()=>Particle
@@ -72242,68 +72469,7 @@ class GameLogic {
     }
 }
 
-},{"../state/GameState":"fRKfr","immutable":"iIkjt","../../../shared/Domain":"2iCCP","../../../shared/TileGrid":"3gXtu","../component/Button":"hdTPe","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fRKfr":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "capScale", ()=>capScale
-);
-parcelHelpers.export(exports, "singleActiveTile", ()=>singleActiveTile
-);
-parcelHelpers.export(exports, "initialGameState", ()=>initialGameState
-);
-var _immutable = require("immutable");
-function capScale(scale) {
-    return Math.min(Math.max(scale, 0.25), 2);
-}
-function singleActiveTile(gameState) {
-    if (gameState.panelActiveTileIndicies.size === 1) {
-        const index = gameState.panelActiveTileIndicies.toArray().at(0);
-        const tile = index != undefined ? gameState.hand.get(index) : undefined;
-        if (index != undefined && tile) return [
-            index,
-            tile
-        ];
-    }
-    return undefined;
-}
-function initialGameState(gameKey, user, mainAreaBounds) {
-    return {
-        gameKey: gameKey,
-        isStarted: false,
-        isConnected: false,
-        hand: _immutable.List.of(),
-        tilesToDisplay: [],
-        tilesApplied: [],
-        tilesLastPlaced: _immutable.Set(),
-        tilesToApply: undefined,
-        tilesToSwap: undefined,
-        tilePositionsPressed: [],
-        pressedButtonTags: _immutable.Set(),
-        enabledButtonTags: _immutable.Set(),
-        visibleButtonTags: _immutable.Set(),
-        panelActiveTileIndicies: _immutable.Set(),
-        scoreJustAchieved: 0,
-        fireworkTilePositions: _immutable.List.of(),
-        currentPlacement: {
-            placedTiles: _immutable.Set(),
-            tiles: [],
-            score: 0,
-            lines: _immutable.Set.of()
-        },
-        mainAreaBounds,
-        currentUser: user,
-        userList: _immutable.Map(),
-        userInControl: undefined,
-        setUsername: undefined,
-        winner: undefined,
-        turnTimerSelected: undefined,
-        turnTimer: undefined,
-        turnStartTime: undefined,
-        newUserInControl: undefined
-    };
-}
-
-},{"immutable":"iIkjt","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3gXtu":[function(require,module,exports) {
+},{"../state/GameState":"fRKfr","immutable":"iIkjt","../../../shared/Domain":"2iCCP","../../../shared/TileGrid":"3gXtu","../component/Button":"hdTPe","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3gXtu":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "allLines", ()=>allLines
@@ -91236,33 +91402,33 @@ TileGraphicElements.shapes = _immutable.Map([
     ],
     [
         _domain.TileShape.Six,
-        new Path2D("M 16 0 L 32 16 L 17 32 L 0 16 L 16 0")
+        new Path2D("M 16 0 L 28 16 L 17 32 L 4 16 L 16 0")
     ]
 ]);
 TileGraphicElements.colours = _immutable.Map([
     [
         _domain.TileColour.Blue,
-        "#009fd4"
+        "#f56600"
     ],
     [
         _domain.TileColour.Green,
-        "#00aa55"
+        "#e60d2e"
     ],
     [
         _domain.TileColour.Orange,
-        "#d47500"
+        "#00abc9"
     ],
     [
         _domain.TileColour.Purple,
-        "#b381b3"
+        "#e026a3"
     ],
     [
         _domain.TileColour.Red,
-        "#f64747"
+        "#ffffff"
     ],
     [
         _domain.TileColour.Yellow,
-        "#fdb81e"
+        "#e6b012"
     ]
 ]);
 class TileGraphics {
@@ -91336,260 +91502,7 @@ class TileGraphics {
 }
 TileGraphics.PADDING = 10;
 
-},{"../game/Mouse":"57eqU","../../../shared/Domain":"2iCCP","./domain":"5in7n","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","immutable":"iIkjt"}],"57eqU":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "registerMouseUpdater", ()=>registerMouseUpdater
-);
-parcelHelpers.export(exports, "worldToScreen", ()=>worldToScreen
-);
-parcelHelpers.export(exports, "screenToWorld", ()=>screenToWorld
-);
-parcelHelpers.export(exports, "MouseUpdater", ()=>MouseUpdater
-);
-var _gameState = require("../state/GameState");
-var _domain = require("../../../shared/Domain");
-function registerMouseUpdater(document, initialOffset) {
-    const touchEnabled = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-    const mouseUpdater = new MouseUpdater(initialOffset);
-    if (touchEnabled) {
-        document.addEventListener("touchmove", (e)=>mouseUpdater.touchEvent(e)
-        );
-        document.addEventListener("touchcancel", (e)=>mouseUpdater.touchEvent(e)
-        );
-        document.addEventListener("touchend", (e)=>mouseUpdater.touchEvent(e)
-        );
-        document.addEventListener("touchstart", (e)=>mouseUpdater.touchEvent(e)
-        );
-    } else {
-        document.addEventListener("mousemove", (e)=>mouseUpdater.mouseEvent(e)
-        );
-        document.addEventListener("mousedown", (e)=>mouseUpdater.mouseEvent(e)
-        );
-        document.addEventListener("mouseup", (e)=>mouseUpdater.mouseEvent(e)
-        );
-        document.addEventListener("wheel", (e)=>mouseUpdater.wheelEvent(e)
-        );
-    }
-    return mouseUpdater;
-}
-function worldToScreen(world, state) {
-    return {
-        x: (world.x - state.offset.x) * state.scale,
-        y: (world.y - state.offset.y) * state.scale
-    };
-}
-function screenToWorld(screen, state) {
-    return {
-        x: screen.x / state.scale + state.offset.x,
-        y: screen.y / state.scale + state.offset.y
-    };
-}
-class MouseUpdater {
-    constructor(initialOffset){
-        this.initialOffset = initialOffset;
-        this.DRAG_TOLERANCE = 3;
-        this.NULL_TIME_POSITION = [
-            -1,
-            {
-                x: 0,
-                y: 0
-            }
-        ];
-        this.TOUCH_CLICK_LAG = 150;
-        this.TOUCH_ZOOM_DELTA = 1.07;
-        this.DRIFT_AMOUNT = 100;
-        this.DRIFT_DECELERATION = 0.9;
-        this.state = {
-            mousePosition: {
-                x: 0,
-                y: 0
-            },
-            primaryDown: false,
-            multiDown: false,
-            offset: {
-                ...this.initialOffset
-            },
-            startPan: {
-                x: 0,
-                y: 0
-            },
-            scale: 1,
-            touchPinchDiff: -1,
-            clicks: [],
-            dragStart: this.NULL_TIME_POSITION,
-            lastPotentialTouchClick: this.NULL_TIME_POSITION,
-            touchClickEnabled: true,
-            driftDirection: {
-                x: 0,
-                y: 0
-            },
-            driftAcceleration: -1,
-            lastFrame: -1
-        };
-    }
-    wheelEvent(e) {
-        const beforeZoom = screenToWorld(this.state.mousePosition, this.state);
-        if (e.deltaY > 0) this.state.scale = _gameState.capScale(this.state.scale * 1.01);
-        else this.state.scale = _gameState.capScale(this.state.scale * 0.99);
-        const afterZoom = screenToWorld(this.state.mousePosition, this.state);
-        this.state.offset = {
-            x: this.state.offset.x + (beforeZoom.x - afterZoom.x),
-            y: this.state.offset.y + (beforeZoom.y - afterZoom.y)
-        };
-    }
-    mouseEvent(e) {
-        this.state.mousePosition = {
-            x: e.pageX,
-            y: e.pageY
-        };
-        const flags = e.buttons !== undefined ? e.buttons : e.which;
-        const downBefore = this.state.primaryDown;
-        this.state.primaryDown = (flags & 1) === 1;
-        if (!downBefore && this.state.primaryDown) this.state.startPan = {
-            ...this.state.mousePosition
-        };
-        if (downBefore && this.state.primaryDown && _domain.distanceBetween(this.state.startPan, this.state.mousePosition) > this.DRAG_TOLERANCE) {
-            this.state.offset = {
-                x: this.state.offset.x - (this.state.mousePosition.x - this.state.startPan.x) / this.state.scale,
-                y: this.state.offset.y - (this.state.mousePosition.y - this.state.startPan.y) / this.state.scale
-            };
-            this.state.startPan = {
-                ...this.state.mousePosition
-            };
-            if (this.state.dragStart[0] === -1) {
-                this.state.dragStart = [
-                    performance.now(),
-                    {
-                        ...this.state.mousePosition
-                    }
-                ];
-                this.state.driftAcceleration = 0;
-            }
-        }
-        if (downBefore && !this.state.primaryDown) {
-            if (this.state.dragStart[0] > 0) {
-                const dragTime = performance.now() - this.state.dragStart[0];
-                const dragDistance = _domain.distanceBetween(this.state.dragStart[1], this.state.mousePosition);
-                this.state.driftDirection = _domain.normalise({
-                    x: this.state.mousePosition.x - this.state.dragStart[1].x,
-                    y: this.state.mousePosition.y - this.state.dragStart[1].y
-                });
-                this.state.driftAcceleration = dragDistance / dragTime;
-                this.state.driftAcceleration = this.state.driftAcceleration > 1.1 ? this.state.driftAcceleration : 0;
-                this.state.dragStart = this.NULL_TIME_POSITION;
-                console.log(`${dragDistance} in ${dragTime} gives acceleration of ${this.state.driftAcceleration}. driftDirection: ${JSON.stringify(this.state.driftDirection)}`);
-            } else this.state.clicks.push({
-                ...this.state.mousePosition
-            });
-        }
-    }
-    touchEvent(e) {
-        const singleFingerDown = e.touches.length === 1;
-        const multiFingersDown = e.touches.length === 2;
-        const downBefore = this.state.primaryDown;
-        this.state.primaryDown = singleFingerDown;
-        if (singleFingerDown) {
-            this.state.mousePosition = {
-                x: e.touches.item(0)?.pageX ?? 0,
-                y: e.touches.item(0)?.pageY ?? 0
-            };
-            if (!downBefore) {
-                this.state.startPan = {
-                    ...this.state.mousePosition
-                };
-                if (this.state.touchClickEnabled) this.state.lastPotentialTouchClick = [
-                    performance.now(),
-                    {
-                        ...this.state.mousePosition
-                    }
-                ];
-            } else if (_domain.distanceBetween(this.state.startPan, this.state.mousePosition) > this.DRAG_TOLERANCE) {
-                this.state.offset = {
-                    x: this.state.offset.x - (this.state.mousePosition.x - this.state.startPan.x) / this.state.scale,
-                    y: this.state.offset.y - (this.state.mousePosition.y - this.state.startPan.y) / this.state.scale
-                };
-                this.state.startPan = {
-                    ...this.state.mousePosition
-                };
-                this.state.lastPotentialTouchClick = this.NULL_TIME_POSITION;
-                this.state.touchClickEnabled = false;
-                if (this.state.dragStart[0] === -1) {
-                    this.state.dragStart = [
-                        performance.now(),
-                        {
-                            ...this.state.mousePosition
-                        }
-                    ];
-                    this.state.driftAcceleration = 0;
-                }
-            }
-        }
-        if (multiFingersDown) {
-            this.state.lastPotentialTouchClick = this.NULL_TIME_POSITION;
-            this.state.touchClickEnabled = false;
-            const x1 = e.touches.item(0)?.pageX ?? 0;
-            const y1 = e.touches.item(0)?.pageY ?? 0;
-            const x2 = e.touches.item(1)?.pageX ?? 0;
-            const y2 = e.touches.item(1)?.pageY ?? 0;
-            const prevTouchPinchDiff = this.state.touchPinchDiff;
-            this.state.touchPinchDiff = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-            this.state.mousePosition = {
-                x: (x1 + x2) / 2,
-                y: (y1 + y2) / 2
-            };
-            if (prevTouchPinchDiff > 0 && this.state.touchPinchDiff != prevTouchPinchDiff) {
-                const beforeZoom = screenToWorld(this.state.mousePosition, this.state);
-                if (this.state.touchPinchDiff > prevTouchPinchDiff) this.state.scale = _gameState.capScale(this.state.scale * this.TOUCH_ZOOM_DELTA);
-                else this.state.scale = _gameState.capScale(this.state.scale / this.TOUCH_ZOOM_DELTA);
-                const afterZoom = screenToWorld(this.state.mousePosition, this.state);
-                this.state.offset = {
-                    x: this.state.offset.x + (beforeZoom.x - afterZoom.x),
-                    y: this.state.offset.y + (beforeZoom.y - afterZoom.y)
-                };
-            }
-        }
-        if (e.touches.length === 0) {
-            this.state.touchClickEnabled = true;
-            if (this.state.dragStart[0] > 0) {
-                const dragTime = performance.now() - this.state.dragStart[0];
-                const dragDistance = _domain.distanceBetween(this.state.dragStart[1], this.state.mousePosition);
-                this.state.driftDirection = _domain.normalise({
-                    x: this.state.mousePosition.x - this.state.dragStart[1].x,
-                    y: this.state.mousePosition.y - this.state.dragStart[1].y
-                });
-                this.state.driftAcceleration = dragDistance / dragTime;
-                this.state.dragStart = this.NULL_TIME_POSITION;
-                console.log(`${dragDistance} in ${dragTime} gives acceleration of ${this.state.driftAcceleration}. driftDirection: ${JSON.stringify(this.state.driftDirection)}`);
-            }
-        }
-    }
-    update(time) {
-        if (this.state.lastFrame === -1) this.state.lastFrame = time;
-        const timeSinceLastFrame = time - this.state.lastFrame;
-        this.state.lastFrame = time;
-        if (this.state.touchClickEnabled && this.state.lastPotentialTouchClick != this.NULL_TIME_POSITION && time - this.state.lastPotentialTouchClick[0] > this.TOUCH_CLICK_LAG) {
-            this.state.clicks.push({
-                ...this.state.lastPotentialTouchClick[1]
-            });
-            this.state.lastPotentialTouchClick = this.NULL_TIME_POSITION;
-        }
-        if (this.state.driftAcceleration > 0) {
-            const delta = {
-                x: this.state.driftDirection.x * this.DRIFT_AMOUNT * (timeSinceLastFrame / 1000) * this.state.driftAcceleration,
-                y: this.state.driftDirection.y * this.DRIFT_AMOUNT * (timeSinceLastFrame / 1000) * this.state.driftAcceleration
-            };
-            this.state.offset = {
-                x: this.state.offset.x - delta.x / this.state.scale,
-                y: this.state.offset.y - delta.y / this.state.scale
-            };
-            this.state.driftAcceleration *= this.DRIFT_DECELERATION;
-        }
-        if (this.state.driftAcceleration < 0.001) this.state.driftAcceleration = 0;
-    }
-}
-
-},{"../state/GameState":"fRKfr","../../../shared/Domain":"2iCCP","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"lTls6":[function(require,module,exports) {
+},{"../game/Mouse":"57eqU","../../../shared/Domain":"2iCCP","./domain":"5in7n","immutable":"iIkjt","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"lTls6":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "TileGridGraphics", ()=>TileGridGraphics
@@ -91631,7 +91544,7 @@ class TileGridGraphics {
             context.globalAlpha = 0.5;
             this.tileGraphics.drawInactiveTile(context, screenCoords, singleActive[1], mouseState.scale);
             context.restore();
-        } else context.fillRect(screenCoords.x, screenCoords.y, this.tileGraphics.tileSize * mouseState.scale, this.tileGraphics.tileSize * mouseState.scale);
+        } else if (state.isStarted) context.fillRect(screenCoords.x, screenCoords.y, this.tileGraphics.tileSize * mouseState.scale, this.tileGraphics.tileSize * mouseState.scale);
         for (const pt of state.tilesToDisplay){
             const coords = this.tileGraphics.screenCoords(pt.position, mouseState);
             if (state.currentPlacement.placedTiles.contains(pt)) this.tileGraphics.drawHoverTile(context, coords, pt, mouseState.scale);
@@ -91660,7 +91573,7 @@ var _reactDefault = parcelHelpers.interopDefault(_react);
 var _dateUtils = require("../../../shared/DateUtils");
 function GameStatus(props) {
     let status = "";
-    if (!props.isStarted) status = "Invite 2-4 players and press start!";
+    if (!props.isStarted) status = "Welcome to Qwirks";
     else if (props.winningUsername) status = `Well done ${props.winningUsername}`;
     else if (props.userIsInControl) {
         status = "It's your go!";
@@ -91807,7 +91720,7 @@ $RefreshReg$(_c1, "HandTile");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","../graphics/TileGraphics":"jbJGn"}],"hhkeo":[function(require,module,exports) {
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","../graphics/TileGraphics":"jbJGn","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"hhkeo":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$fad8 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -91823,8 +91736,17 @@ var _immutable = require("immutable");
 var _react = require("react");
 var _reactDefault = parcelHelpers.interopDefault(_react);
 var _userListUser = require("./UserListUser");
+var _s = $RefreshSig$();
 function UserList(props) {
+    _s();
     const users = _immutable.List(props.userList.values());
+    const userListDiv = /*#__PURE__*/ _react.createRef();
+    _react.useEffect(()=>{
+        const userList = userListDiv.current;
+        if (userList && props.isStarted) userList.className = "userListVisible";
+    }, [
+        props.userInControl
+    ]);
     const userListItems = Array.from(users.sortBy((u)=>-u.score
     )).map((user)=>{
         return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV(_userListUser.UserListUser, {
@@ -91832,18 +91754,49 @@ function UserList(props) {
             userInControl: props.userInControl
         }, user.userId, false, {
             fileName: "src/component/UserList.tsx",
-            lineNumber: 16,
+            lineNumber: 26,
             columnNumber: 9
         }, this));
     });
+    const onAnimationEnd = ()=>{
+        const userList = userListDiv.current;
+        if (userList) userList.className = "";
+    };
     return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-        children: userListItems
+        ref: userListDiv,
+        id: "userList",
+        onAnimationEnd: ()=>onAnimationEnd()
+        ,
+        children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+            className: "userListContents",
+            children: [
+                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("h1", {
+                    children: "Scores"
+                }, void 0, false, {
+                    fileName: "src/component/UserList.tsx",
+                    lineNumber: 43,
+                    columnNumber: 7
+                }, this),
+                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                    children: userListItems
+                }, void 0, false, {
+                    fileName: "src/component/UserList.tsx",
+                    lineNumber: 44,
+                    columnNumber: 7
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "src/component/UserList.tsx",
+            lineNumber: 42,
+            columnNumber: 5
+        }, this)
     }, void 0, false, {
         fileName: "src/component/UserList.tsx",
-        lineNumber: 24,
+        lineNumber: 41,
         columnNumber: 10
     }, this));
 }
+_s(UserList, "OD7bBpZva5O2jO+Puf00hKivP7c=");
 _c = UserList;
 var _c;
 $RefreshReg$(_c, "UserList");
@@ -91867,16 +91820,8 @@ parcelHelpers.export(exports, "UserListUser", ()=>UserListUser
 var _jsxDevRuntime = require("react/jsx-dev-runtime");
 var _react = require("react");
 var _reactDefault = parcelHelpers.interopDefault(_react);
-var _user = require("../../../shared/User");
+var _onlineStatusView = require("./OnlineStatusView");
 function UserListUser(props) {
-    function onlineStatusClassName(onlineStatus) {
-        switch(onlineStatus){
-            case _user.OnlineStatus.online:
-                return "onlineStatus onlineStatus-Online";
-            case _user.OnlineStatus.offline:
-                return "onlineStatus onlineStatus-Offline";
-        }
-    }
     const userInControlClassName = props.userInControl === props.user.userId ? "username user-incontrol" : "username user-normal";
     return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
         className: "userListUser",
@@ -91884,11 +91829,11 @@ function UserListUser(props) {
             /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
                 className: "userListUsername",
                 children: [
-                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV("span", {
-                        className: onlineStatusClassName(props.user.onlineStatus)
+                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_onlineStatusView.OnlineStatusView, {
+                        value: props.user.onlineStatus
                     }, void 0, false, {
                         fileName: "src/component/UserListUser.tsx",
-                        lineNumber: 27,
+                        lineNumber: 19,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ _jsxDevRuntime.jsxDEV("span", {
@@ -91896,13 +91841,13 @@ function UserListUser(props) {
                         children: props.user.username
                     }, void 0, false, {
                         fileName: "src/component/UserListUser.tsx",
-                        lineNumber: 28,
+                        lineNumber: 20,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/component/UserListUser.tsx",
-                lineNumber: 26,
+                lineNumber: 18,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -91912,18 +91857,18 @@ function UserListUser(props) {
                     children: props.user.score
                 }, void 0, false, {
                     fileName: "src/component/UserListUser.tsx",
-                    lineNumber: 31,
+                    lineNumber: 23,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "src/component/UserListUser.tsx",
-                lineNumber: 30,
+                lineNumber: 22,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "src/component/UserListUser.tsx",
-        lineNumber: 25,
+        lineNumber: 17,
         columnNumber: 5
     }, this));
 }
@@ -91932,6 +91877,47 @@ var _c;
 $RefreshReg$(_c, "UserListUser");
 
   $parcel$ReactRefreshHelpers$d4ed.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","./OnlineStatusView":"WreOS","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"WreOS":[function(require,module,exports) {
+var $parcel$ReactRefreshHelpers$fdd2 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+$parcel$ReactRefreshHelpers$fdd2.prelude(module);
+
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "OnlineStatusView", ()=>OnlineStatusView
+);
+var _jsxDevRuntime = require("react/jsx-dev-runtime");
+var _react = require("react");
+var _reactDefault = parcelHelpers.interopDefault(_react);
+var _user = require("../../../shared/User");
+function OnlineStatusView(props) {
+    function onlineStatusClassName(onlineStatus) {
+        switch(onlineStatus){
+            case _user.OnlineStatus.online:
+                return "onlineStatus onlineStatus-Online";
+            case _user.OnlineStatus.offline:
+                return "onlineStatus onlineStatus-Offline";
+        }
+    }
+    return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV("span", {
+        className: onlineStatusClassName(props.value)
+    }, void 0, false, {
+        fileName: "src/component/OnlineStatusView.tsx",
+        lineNumber: 18,
+        columnNumber: 12
+    }, this));
+}
+_c = OnlineStatusView;
+var _c;
+$RefreshReg$(_c, "OnlineStatusView");
+
+  $parcel$ReactRefreshHelpers$fdd2.postlude(module);
 } finally {
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
@@ -91956,7 +91942,174 @@ let UserType;
 })(UserType || (UserType = {
 }));
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"1yLaa":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"sjZ3Z":[function(require,module,exports) {
+var $parcel$ReactRefreshHelpers$479d = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+$parcel$ReactRefreshHelpers$479d.prelude(module);
+
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Lobby", ()=>Lobby
+);
+var _jsxDevRuntime = require("react/jsx-dev-runtime");
+var _react = require("react");
+var _reactDefault = parcelHelpers.interopDefault(_react);
+var _lobbyUserList = require("./LobbyUserList");
+var _usernamePanel = require("./UsernamePanel");
+var _button = require("./Button");
+function Lobby(props) {
+    const inviteUrlRef = /*#__PURE__*/ _reactDefault.default.createRef();
+    function onInviteUrlClick() {
+        const inviteUrl = inviteUrlRef.current;
+        if (inviteUrl) inviteUrl.select();
+    }
+    return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV(_jsxDevRuntime.Fragment, {
+        children: [
+            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("h2", {
+                children: "1. Invite some mates"
+            }, void 0, false, {
+                fileName: "src/component/Lobby.tsx",
+                lineNumber: 28,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("p", {
+                children: "Here's a link to send them:"
+            }, void 0, false, {
+                fileName: "src/component/Lobby.tsx",
+                lineNumber: 29,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("input", {
+                ref: inviteUrlRef,
+                type: "text",
+                value: window.location.toString(),
+                className: "lobbyInviteInput",
+                onClick: ()=>onInviteUrlClick()
+            }, void 0, false, {
+                fileName: "src/component/Lobby.tsx",
+                lineNumber: 30,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("h2", {
+                children: "2. Set your username"
+            }, void 0, false, {
+                fileName: "src/component/Lobby.tsx",
+                lineNumber: 31,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_usernamePanel.UsernamePanel, {
+                currentUser: props.currentUser,
+                onChangeUsername: props.onChangeUsername
+            }, void 0, false, {
+                fileName: "src/component/Lobby.tsx",
+                lineNumber: 32,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("h2", {
+                children: "3. Wait for your buddies to join"
+            }, void 0, false, {
+                fileName: "src/component/Lobby.tsx",
+                lineNumber: 33,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_lobbyUserList.LobbyUserList, {
+                users: props.users
+            }, void 0, false, {
+                fileName: "src/component/Lobby.tsx",
+                lineNumber: 34,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("h2", {
+                children: "4. Let's play"
+            }, void 0, false, {
+                fileName: "src/component/Lobby.tsx",
+                lineNumber: 35,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                className: "lobbyStart",
+                children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_button.Button, {
+                    visible: true,
+                    onClick: ()=>props.onStartClick()
+                    ,
+                    text: "Start",
+                    enabled: props.startButtonEnabled
+                }, void 0, false, {
+                    fileName: "src/component/Lobby.tsx",
+                    lineNumber: 37,
+                    columnNumber: 13
+                }, this)
+            }, void 0, false, {
+                fileName: "src/component/Lobby.tsx",
+                lineNumber: 36,
+                columnNumber: 9
+            }, this)
+        ]
+    }, void 0, true));
+}
+_c = Lobby;
+var _c;
+$RefreshReg$(_c, "Lobby");
+
+  $parcel$ReactRefreshHelpers$479d.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","./LobbyUserList":"l9TTY","./UsernamePanel":"1yLaa","./Button":"hdTPe","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"l9TTY":[function(require,module,exports) {
+var $parcel$ReactRefreshHelpers$86a1 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+$parcel$ReactRefreshHelpers$86a1.prelude(module);
+
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "LobbyUserList", ()=>LobbyUserList
+);
+var _jsxDevRuntime = require("react/jsx-dev-runtime");
+var _react = require("react");
+var _reactDefault = parcelHelpers.interopDefault(_react);
+var _onlineStatusView = require("./OnlineStatusView");
+function LobbyUserList(props) {
+    return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+        className: "lobbyUserList",
+        children: props.users.toArray().map(([userId, user])=>/*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                className: "lobbyUser",
+                children: [
+                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_onlineStatusView.OnlineStatusView, {
+                        value: user.onlineStatus
+                    }, void 0, false, {
+                        fileName: "src/component/LobbyUserList.tsx",
+                        lineNumber: 12,
+                        columnNumber: 96
+                    }, this),
+                    user.username
+                ]
+            }, userId, true, {
+                fileName: "src/component/LobbyUserList.tsx",
+                lineNumber: 12,
+                columnNumber: 56
+            }, this)
+        )
+    }, void 0, false, {
+        fileName: "src/component/LobbyUserList.tsx",
+        lineNumber: 11,
+        columnNumber: 12
+    }, this));
+}
+_c = LobbyUserList;
+var _c;
+$RefreshReg$(_c, "LobbyUserList");
+
+  $parcel$ReactRefreshHelpers$86a1.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","./OnlineStatusView":"WreOS","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"1yLaa":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$2ccb = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -91973,104 +92126,63 @@ var _reactDefault = parcelHelpers.interopDefault(_react);
 var _s = $RefreshSig$();
 function UsernamePanel(props) {
     _s();
-    const [isEditing, setIsEditing] = _react.useState(false);
     const username = props.currentUser.username;
     const [inputValue, setInputValue] = _react.useState(username);
     const onKeyPress = (ev)=>{
         if (ev.key === "Enter" && inputValue.length > 0) {
+            ev.preventDefault();
             props.onChangeUsername(inputValue);
             setInputValue(username);
-            setIsEditing(false);
         }
     };
-    const textbox = /*#__PURE__*/ _jsxDevRuntime.jsxDEV("input", {
-        autoFocus: true,
-        onFocus: (e)=>e.target.select()
-        ,
-        type: "text",
-        onChange: (e)=>setInputValue(e.target.value)
-        ,
-        defaultValue: username,
-        onKeyPress: onKeyPress
-    }, void 0, false, {
-        fileName: "src/component/UsernamePanel.tsx",
-        lineNumber: 25,
-        columnNumber: 5
-    }, this);
-    const label = /*#__PURE__*/ _jsxDevRuntime.jsxDEV("span", {
-        onClick: ()=>setIsEditing(true)
-        ,
-        children: username
-    }, void 0, false, {
-        fileName: "src/component/UsernamePanel.tsx",
-        lineNumber: 34,
-        columnNumber: 17
-    }, this);
     return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-        id: "usernamePanel",
-        children: isEditing ? textbox : label
+        className: "lobbyUsername",
+        children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("form", {
+            children: [
+                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("input", {
+                    autoFocus: true,
+                    onFocus: (e)=>e.target.select()
+                    ,
+                    type: "text",
+                    onChange: (e)=>setInputValue(e.target.value)
+                    ,
+                    defaultValue: username,
+                    onKeyPress: onKeyPress
+                }, void 0, false, {
+                    fileName: "src/component/UsernamePanel.tsx",
+                    lineNumber: 23,
+                    columnNumber: 7
+                }, this),
+                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("input", {
+                    type: "submit",
+                    onSubmit: (e)=>{
+                        e.preventDefault();
+                        props.onChangeUsername(inputValue);
+                    },
+                    value: "Change"
+                }, void 0, false, {
+                    fileName: "src/component/UsernamePanel.tsx",
+                    lineNumber: 31,
+                    columnNumber: 7
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "src/component/UsernamePanel.tsx",
+            lineNumber: 22,
+            columnNumber: 5
+        }, this)
     }, void 0, false, {
         fileName: "src/component/UsernamePanel.tsx",
-        lineNumber: 35,
+        lineNumber: 21,
         columnNumber: 10
     }, this));
 }
-_s(UsernamePanel, "xA4vKjEcYnaYluewVwtdu8nP0eQ=");
+_s(UsernamePanel, "djk6BBs2qNCtqIW4UPEQr1V/wlw=");
 _c = UsernamePanel;
 var _c;
 $RefreshReg$(_c, "UsernamePanel");
 
   $parcel$ReactRefreshHelpers$2ccb.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"4E4gg":[function(require,module,exports) {
-var $parcel$ReactRefreshHelpers$0e92 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-$parcel$ReactRefreshHelpers$0e92.prelude(module);
-
-try {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "ZoomControls", ()=>ZoomControls
-);
-var _jsxDevRuntime = require("react/jsx-dev-runtime");
-var _react = require("react");
-var _reactDefault = parcelHelpers.interopDefault(_react);
-function ZoomControls(props) {
-    return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-        className: "zoom-controls",
-        children: [
-            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("img", {
-                src: "./images/zoom-in-line.png",
-                onClick: ()=>props.zoomIn()
-            }, void 0, false, {
-                fileName: "src/component/ZoomControls.tsx",
-                lineNumber: 11,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("img", {
-                src: "./images/zoom-out-line.png",
-                onClick: ()=>props.zoomOut()
-            }, void 0, false, {
-                fileName: "src/component/ZoomControls.tsx",
-                lineNumber: 12,
-                columnNumber: 7
-            }, this)
-        ]
-    }, void 0, true, {
-        fileName: "src/component/ZoomControls.tsx",
-        lineNumber: 10,
-        columnNumber: 5
-    }, this));
-}
-_c = ZoomControls;
-var _c;
-$RefreshReg$(_c, "ZoomControls");
-
-  $parcel$ReactRefreshHelpers$0e92.postlude(module);
 } finally {
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
