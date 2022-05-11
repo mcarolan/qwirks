@@ -1,5 +1,6 @@
 import React from "react";
-import { OnlineStatus, UserWithStatus } from "../../../shared/User";
+import { UserWithStatus } from "../../../shared/User";
+import { OnlineStatusView } from "./OnlineStatusView";
 
 interface UserListUserProps {
   user: UserWithStatus;
@@ -7,15 +8,6 @@ interface UserListUserProps {
 }
 
 export function UserListUser(props: UserListUserProps) {
-  function onlineStatusClassName(onlineStatus: OnlineStatus): string {
-    switch (onlineStatus) {
-      case OnlineStatus.online:
-        return "onlineStatus onlineStatus-Online";
-      case OnlineStatus.offline:
-        return "onlineStatus onlineStatus-Offline";
-    }
-  }
-
   const userInControlClassName: string =
     props.userInControl === props.user.userId
       ? "username user-incontrol"
@@ -24,7 +16,7 @@ export function UserListUser(props: UserListUserProps) {
   return (
     <div className="userListUser">
       <div className="userListUsername">
-        <span className={onlineStatusClassName(props.user.onlineStatus)}></span>
+        <OnlineStatusView value={props.user.onlineStatus} />
         <span className={userInControlClassName}>{props.user.username}</span>
       </div>
       <div className="userListScore">

@@ -16,7 +16,7 @@ export interface GameDependencies {
   context: CanvasRenderingContext2D;
   mainArea: HTMLElement;
   tileGrid: TileGridGraphics;
-  mouseUpdater: MouseUpdater;
+  mouseUpdater: MouseUpdater | undefined;
   fireworks: Fireworks;
   socket: Socket;
   user: User;
@@ -39,8 +39,6 @@ export async function loadGameDependencies(
 
   const socket = io("http://192.168.0.16:3000");
 
-  const mouseUpdater = registerMouseUpdater(document, mul(middle(rectFromElement(mainArea)), -1));
-
   const firstTileImage = await loadImage("./images/first-tile.png");
 
   const tileGrid = new TileGridGraphics(tileGraphics, firstTileImage);
@@ -59,7 +57,6 @@ export async function loadGameDependencies(
     context,
     mainArea,
     tileGrid,
-    mouseUpdater,
     fireworks,
     socket,
     user,
@@ -67,5 +64,6 @@ export async function loadGameDependencies(
     sounds,
     gameLogic: new GameLogic(),
     fireworkUpdater,
+    mouseUpdater: undefined,
   };
 }

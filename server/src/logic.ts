@@ -1,17 +1,20 @@
 import { Map, List, Set } from "immutable";
 import { PositionedTile, Tile } from "../../shared/Domain";
 import { TileGrid } from "../../shared/TileGrid";
-import { User, UserType, OnlineStatus } from "../../shared/User";
-import { Game } from "./game";
+import { User, UserType, OnlineStatus, UserWithStatus } from "../../shared/User";
+import { Game, initialGame } from "./game";
 import { removeFromHand, TileBag } from "./TileBag";
 
 export function onUserJoin(user: User, game: Game): Game {
+  const prevUser = game.users.get(user.userId);
+  const newlyJoiningUserType = game.isStarted || game.isOver ? UserType.Spectator : UserType.Player;
+  const userType: UserType = prevUser ? prevUser.userType : newlyJoiningUserType;
+
   const users = game.users.set(user.userId, {
     ...user,
     onlineStatus: OnlineStatus.online,
-    userType:
-      game.isStarted || game.isOver ? UserType.Spectator : UserType.Player,
-    score: game.users.get(user.userId)?.score ?? 0,
+    userType,
+    score: prevUser ? prevUser.score : 0,
   });
 
   return {
@@ -51,11 +54,12 @@ export function onUpdateUsername(
 }
 
 export function onStart(
-  game: Game,
+  users: Map<string, UserWithStatus>,
   firstUserSelector: (game: Game) => string,
   clock: () => number,
   turnTimer: number | undefined
 ): Game {
+  const game = { ...initialGame, users };
   const initialReduction: [TileBag, Map<string, List<Tile>>] = [
     game.tileBag,
     Map<string, List<Tile>>(),

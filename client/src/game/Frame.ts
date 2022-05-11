@@ -3,8 +3,10 @@ import {
   MainCompmonentState,
   syncReactAndGameState,
 } from "../state/MainComponentState";
-import { rectFromElement } from "../graphics/domain";
+import { middle, rectFromElement } from "../graphics/domain";
 import { GameState } from "~/state/GameState";
+import { MouseUpdater, registerMouseUpdater } from "./Mouse";
+import { mul } from "../../../shared/Domain";
 
 export interface MainStateFunctions {
   state: MainCompmonentState;
@@ -20,7 +22,13 @@ export function frame(
   mainState: MainStateFunctions
 ): (time: DOMHighResTimeStamp) => void {
   return (time) => {
+    deps.network.update(gameState);
     gameState.mainAreaBounds = rectFromElement(deps.mainArea);
+
+    if (gameState.isStarted && !deps.mouseUpdater) {
+      deps.mouseUpdater = new MouseUpdater(mul(middle(gameState.mainAreaBounds), -1));
+      registerMouseUpdater(deps.mouseUpdater);
+    }
 
     deps.context.save();
     deps.canvas.width = gameState.mainAreaBounds.width;
@@ -32,18 +40,20 @@ export function frame(
       deps.context.canvas.height
     );
 
-    deps.network.update(gameState);
-    deps.mouseUpdater.update(time);
+    const mouseUpdater = deps.mouseUpdater;
+    if (mouseUpdater) {
+      mouseUpdater.update(time);
+      const mouseState = { ...mouseUpdater.state };
 
-    const mouseState = { ...deps.mouseUpdater.state };
-    deps.mouseUpdater.state.clicks = [];
+      deps.tileGrid.update(gameState, mouseState);
+      deps.fireworkUpdater.update(gameState, mouseState);
+      deps.tileGrid.draw(deps.context, gameState, mouseState);
+      mouseUpdater.state.clicks = [];
+    }
 
-    deps.tileGrid.update(gameState, mouseState);
     deps.gameLogic.update(gameState);
-    deps.fireworkUpdater.update(gameState, mouseState);
     deps.sounds.update(gameState);
 
-    deps.tileGrid.draw(deps.context, gameState, mouseState);
     deps.fireworks.updateAndDraw(deps.context);
 
     deps.context.restore();

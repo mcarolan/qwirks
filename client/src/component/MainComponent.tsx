@@ -14,8 +14,7 @@ import { rectFromElement } from "../graphics/domain";
 import { initialGameState } from "../state/GameState";
 import { UserHand } from "./UserHand";
 import { UserList } from "./UserList";
-import { UsernamePanel } from "./UsernamePanel";
-import { ZoomControls } from "./ZoomControls";
+import { Lobby } from "./Lobby";
 
 interface MainProps {
   gameKey: string;
@@ -32,13 +31,14 @@ export class MainComponent extends React.Component<
   }
 
   onClickButton(buttonTag: ButtonTag): () => void {
-    return () =>
+    return () => {
       this.setState((s: MainCompmonentState) => {
         return {
           ...s,
           ui: { ...s.ui, buttonsClicked: s.ui.buttonsClicked.add(buttonTag) },
         };
-      });
+      })
+    };
   }
 
   onHandTileClicked(i: number): void {
@@ -101,6 +101,8 @@ export class MainComponent extends React.Component<
     const isVisible = (tag: ButtonTag) =>
       this.state.game.visibleButtonTags.contains(tag);
 
+    const isStarted = this.state.game.isStarted;
+
     const bottomClasses = this.state.game.isStarted
       ? "bottom-expand"
       : "bottom-contracted";
@@ -133,28 +135,14 @@ export class MainComponent extends React.Component<
             turnStartTime={this.state.game.turnStartTime}
           />
           <div id="buttonsContainer">
-            <ZoomControls
-              zoomIn={() => (this.state.ui.zoomInPressed += 1)}
-              zoomOut={() => (this.state.ui.zoomOutPressed += 1)}
-            />
-            <div className="main-buttons">
-              <select
-                className={isVisible(ButtonTag.Start) ? "" : "displayNone"}
-                onChange={(e) => this.onSelectedTurnTimerChanged(e)}
-              >
-                <option value={undefined}>No round timer</option>
-                <option value={10000}>10 seconds</option>
-                <option value={20000}>20 seconds</option>
-                <option value={30000}>30 seconds</option>
-                <option value={60000}>1 minute</option>
-                <option value={120000}>2 minutes</option>
-              </select>
-              <Button
-                visible={isVisible(ButtonTag.Start)}
-                onClick={this.onClickButton(ButtonTag.Start)}
-                text="Start"
-                enabled={isEnabled(ButtonTag.Start)}
-              />
+            <div className="main-area">
+              { !isStarted ? 
+                <Lobby 
+                  currentUser={this.state.game.currentUser} 
+                  onChangeUsername={(newName) => this.onChangeUsername(newName)}
+                  users={this.state.game.userList}
+                  startButtonEnabled={!this.state.game.isStarted && this.state.game.userList.size > 1 }
+                  onStartClick={this.onClickButton(ButtonTag.Start) } /> : <></> }
             </div>
             <div className="right-side-buttons">
               <div>
@@ -189,21 +177,13 @@ export class MainComponent extends React.Component<
                   {108 - this.state.game.tilesPlaced} tiles to place
                 </div>
               </div>
-            </div>
           </div>
         </div>
-        <div id="sidebarRight">
-          <UsernamePanel
-            currentUser={this.state.game.currentUser}
-            onChangeUsername={this.onChangeUsername}
-          />
-          <div id="userList">
-            <UserList
+        <UserList
               userList={this.state.game.userList}
               userInControl={this.state.game.userInControl}
+              isStarted={this.state.game.isStarted}
             />
-          </div>
-        </div>
         <div id="bottom" className={bottomClasses}>
           <div id="bottomPanel">
             <UserHand
@@ -219,6 +199,7 @@ export class MainComponent extends React.Component<
         </div>
         <ConnectionStatus isConnected={this.state.game.isConnected} />
       </div>
+    </div>
     );
   }
 }

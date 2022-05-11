@@ -75,7 +75,7 @@ export class TileGridGraphics {
         mouseState.scale
       );
       context.restore();
-    } else {
+    } else if (state.isStarted) {
       context.fillRect(
         screenCoords.x,
         screenCoords.y,

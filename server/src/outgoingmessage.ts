@@ -1,4 +1,4 @@
-import { List, Set } from "immutable";
+import { List, Set, Map } from "immutable";
 import { PositionedTile, Tile } from "../../shared/Domain";
 import { UserWithStatus } from "../../shared/User";
 import { Game } from "./game";
@@ -44,6 +44,14 @@ export type OutgoingMessage =
   | UpdateTiles
   | UpdateUserList
   | UpdateUserHand;
+
+export function afterLobbyChange(users: Map<string, UserWithStatus>): Set<OutgoingMessage> {
+  const userListUpdate: UpdateUserList = {
+    type: "UpdateUserList",
+    users: users.toArray()
+  };
+  return Set.of(userListUpdate);
+}
 
 export function afterUserJoin(
   game: Game,

@@ -90,9 +90,8 @@ body {
   ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
   display: grid;
   grid-template-areas:
-    "main sidebar"
-    "bottom bottom";
-  grid-template-columns: 4fr 1fr;
+    "main"
+    "bottom";
   gap: 10px;
 }
 
@@ -120,6 +119,7 @@ body {
   position: relative;
 
   margin-left: 10px;
+  margin-right: 10px;
   margin-top: 10px;
 
   border-radius: 15px;
@@ -152,6 +152,66 @@ body {
   to {
     opacity: 1;
   }
+}
+
+#userList {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40vw;
+  z-index: 2;
+  opacity: 0.95;
+
+  background: #feac5e; /* fallback for old browsers */
+  background: -webkit-linear-gradient(
+    to right,
+    #4bc0c8,
+    #c779d0,
+    #feac5e
+  ); /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(
+    to right,
+    #4bc0c8,
+    #c779d0,
+    #feac5e
+  ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  padding: 10px;
+  -webkit-box-shadow: 0px 0px 15px 5px #666666; 
+  box-shadow: 0px 0px 15px 5px #666666;
+  display: none;
+}
+
+.userListVisible {
+  display: block !important;
+  animation: fadeInUserList 5s;
+}
+
+@keyframes fadeInUserList {
+  0%,90% { opacity: 0; }
+  100% { opacity: 0; }
+  25% { opacity: 1; }
+  60% { opacity: 1; }
+}
+
+#userList .userListContents {
+  background-color: white;
+}
+
+#userList h1 {
+  display: inline-block;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 0px;
+  margin-bottom: 5px;
+  font-size: 22px;
+  font-family: "Rock Salt", cursive;
+}
+
+h2 {
+  font-size: 28px;
+  font-family: "Rock Salt", cursive;
 }
 
 .userListUser {
@@ -197,6 +257,25 @@ body {
   float: right;
 }
 
+.lobbyStart {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.lobbyUserList {
+  display: inline-block;
+  width: 100%;
+}
+
+.lobbyUser {
+  margin-right: 10px;
+  border: solid 3px #666666;
+  border-radius: 10px;
+  padding: 10px;
+  float: left;
+}
+
 .connectionStatusContainer {
   background-color: rgba(0, 0, 0, 0.9);
   z-index: 4;
@@ -226,12 +305,65 @@ body {
   height: 100%;
 }
 
-.main-buttons {
-  flex: 1 1 auto;
+.lobbyInviteInput {
+  width: 100%;
+  border: solid 3px #666666;
+  border-radius: 25px;
+  padding: 10px;
+  font-size: 18px;
+}
+
+
+.lobbyUsername {
+  width: 100%;
+}
+
+.lobbyUsername form {
+  width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
+}
+
+.lobbyUsername input[type=submit] {
+  float:left;
+  position: relative;
   z-index: 2;
+  background: #feac5e; /* fallback for old browsers */
+  background: -webkit-linear-plagradient(
+    to right,
+    #4bc0c8,
+    #c779d0,
+    #feac5e
+  ); /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(
+    to right,
+    #4bc0c8,
+    #c779d0,
+    #feac5e
+  ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  border: 2px solid #666666;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  color: #ffffff;
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
+  border-left: none;
+}
+
+.lobbyUsername input[type=text] {
+  float:left;
+  flex-grow: 1;
+  border: solid 3px #666666;
+  border-top-left-radius: 25px;
+  border-bottom-left-radius: 25px;
+  padding: 10px;
+  font-size: 18px;
+}
+
+.main-area {
+  width: 100%;
+  z-index: 2;
+  padding: 30px;
 }
 
 .right-side-buttons {
@@ -296,6 +428,7 @@ button {
   padding: 10px;
   border-radius: 10px;
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  color: #ffffff;
 }
 
 .squareButton {

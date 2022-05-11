@@ -1,6 +1,5 @@
 import React, { KeyboardEventHandler, useState } from "react";
 import { User } from "../../../shared/User";
-import { Button } from "./Button";
 
 interface UsernamePanelProps {
   currentUser: User;
@@ -8,29 +7,31 @@ interface UsernamePanelProps {
 }
 
 export function UsernamePanel(props: UsernamePanelProps) {
-  const [isEditing, setIsEditing] = useState(false);
   const username = props.currentUser.username;
 
   const [inputValue, setInputValue] = useState(username);
 
   const onKeyPress: KeyboardEventHandler = (ev) => {
     if (ev.key === "Enter" && inputValue.length > 0) {
+      ev.preventDefault();
       props.onChangeUsername(inputValue);
       setInputValue(username);
-      setIsEditing(false);
     }
   };
-
-  const textbox = (
-    <input
+  return <div className="lobbyUsername">
+    <form>
+      <input
       autoFocus
       onFocus={(e) => e.target.select()}
       type="text"
       onChange={(e) => setInputValue(e.target.value)}
       defaultValue={username}
       onKeyPress={onKeyPress}
-    />
-  );
-  const label = <span onClick={() => setIsEditing(true)}>{username}</span>;
-  return <div id="usernamePanel">{isEditing ? textbox : label}</div>;
+      />
+      <input type="submit" onSubmit={(e) => {
+        e.preventDefault();
+        props.onChangeUsername(inputValue);
+      }} value="Change" />
+    </form>
+  </div>;
 }

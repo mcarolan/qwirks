@@ -55,15 +55,15 @@ class TileGraphicElements {
     [TileShape.Three, new Path2D("M 16 0 L 32 12 L 28 32 L 4 32 L 0 12 L 16 0")],
     [TileShape.Four, new Path2D("M 16 0 A 1 1 0 0 0 16 32 A 1 1 0 0 0 16 0")],
     [TileShape.Five, new Path2D("M 16 0 L 19 3 L 19 13 L 29 13 L 32 16 L 29 19 L 19 19 L 19 29 L 16 32 L 13 29 L 13 19 L 3 19 L 0 16 L 3 13 L 13 13 L 13 3 L 16 0")],
-    [TileShape.Six, new Path2D("M 16 0 L 32 16 L 17 32 L 0 16 L 16 0")]
+    [TileShape.Six, new Path2D("M 16 0 L 28 16 L 17 32 L 4 16 L 16 0")]
   ]);
   public static colours: Map<TileColour, string> = Map([
-    [TileColour.Blue, "#009fd4"],
-    [TileColour.Green, "#00aa55"],
-    [TileColour.Orange, "#d47500"],
-    [TileColour.Purple, "#b381b3"],
-    [TileColour.Red, "#f64747"],
-    [TileColour.Yellow, "#fdb81e"]
+    [TileColour.Blue, "#f56600"],
+    [TileColour.Green, "#e60d2e"],
+    [TileColour.Orange, "#00abc9"],
+    [TileColour.Purple, "#e026a3"],
+    [TileColour.Red, "#ffffff"],
+    [TileColour.Yellow, "#e6b012"]
   ]);
   public static lastPlacementTileImage: HTMLImageElement;
 }

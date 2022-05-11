@@ -21,6 +21,7 @@ import {
   TileShape,
 } from "../../shared/Domain";
 import { TileBag } from "../src/TileBag";
+import { updateSetAccessor } from "typescript";
 
 describe("onUserJoin", () => {
   test("no pre-existing user", () => {
@@ -51,6 +52,27 @@ describe("onUserJoin", () => {
     expect(after.users.size).toBe(1);
     const userValue = after.users.get(user.userId);
     expect(userValue?.userType).toBe(UserType.Spectator);
+  });
+
+
+  test("joins as a player when initially a player", () => {
+    const user: User = {
+      userId: "userid",
+      username: "username",
+    };
+    const initialUser: UserWithStatus = {
+      onlineStatus: OnlineStatus.offline,
+      userType: UserType.Player,
+      score: 0,
+      userId: "userid",
+      username: "username"
+    }
+    const game: Game = { ...initialGame, isStarted: true, users: Map([[initialUser.userId, initialUser]]) };
+    const after = onUserJoin(user, game);
+
+    expect(after.users.size).toBe(1);
+    const userValue = after.users.get(user.userId);
+    expect(userValue?.userType).toBe(UserType.Player);
   });
 
   test("joins as a spectator when over", () => {
@@ -184,23 +206,25 @@ describe("onStart", () => {
       username: "username2",
     };
 
+    const users = Map([
+      [existingUser1.userId, existingUser1],
+      [existingUser2.userId, existingUser2],
+    ])
+
     const game: Game = {
       ...initialGame,
-      users: Map([
-        [existingUser1.userId, existingUser1],
-        [existingUser2.userId, existingUser2],
-      ]),
     };
 
     const turnTimer = 10000;
     const time = 1;
     const after = onStart(
-      game,
+      users,
       (_) => existingUser1.userId,
       () => time,
       turnTimer
     );
 
+    expect(after.users).toBe(users);
     expect(after.isStarted).toBe(true);
     expect(after.hands.get(existingUser1.userId)).toStrictEqual(
       game.tileBag.contents.take(6)

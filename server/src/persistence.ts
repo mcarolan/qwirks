@@ -11,6 +11,7 @@ const redis_host = process.env.REDIS_HOST ?? "localhost";
 export interface Persistence {
   persist(gameKey: string, game: Game): Promise<boolean>;
   get(gameKey: string): Promise<Game | null>;
+  hasGameStarted(gameKey: string): Promise<boolean>;
 }
 
 class DummyPersistence implements Persistence {
@@ -48,9 +49,12 @@ class DummyPersistence implements Persistence {
     },
   ];
 
-  private gameWithTiles: Game = { ...initialGame, tiles: this.tiles }
+  private games: Map<string, Game> = Map();
 
-  private games: Map<string, Game> = Map()
+  hasGameStarted(gameKey: string): Promise<boolean> {
+    const game = this.games.get(gameKey);
+    return Promise.resolve(game ? game.isStarted : false);
+  }
 
   persist(gameKey: string, game: Game): Promise<boolean> {
     this.games = this.games.set(gameKey, game);
@@ -58,7 +62,7 @@ class DummyPersistence implements Persistence {
   }
 
   get(gameKey: string): Promise<Game | null> {
-    return Promise.resolve(this.games.get(gameKey, this.gameWithTiles));
+    return Promise.resolve(this.games.get(gameKey) ?? null);
   }
   
 }
@@ -188,6 +192,11 @@ class RedisPersistence implements Persistence {
       ),
       lastWrite,
     };
+  }
+
+
+  async hasGameStarted(gameKey: string): Promise<boolean> {
+    return this.readBool(this.client, this.keyIsStarted(gameKey));
   }
 
   async get(gameKey: string): Promise<Game | null> {

@@ -18,9 +18,8 @@ export interface MouseState {
   lastFrame: DOMHighResTimeStamp;
 }
 
-export function registerMouseUpdater(document: Document, initialOffset: Position): MouseUpdater {
+export function registerMouseUpdater(mouseUpdater: MouseUpdater): void {
   const touchEnabled = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-  const mouseUpdater = new MouseUpdater(initialOffset);
   if (touchEnabled) {
     document.addEventListener("touchmove", (e) => mouseUpdater.touchEvent(e));
     document.addEventListener("touchcancel", (e) => mouseUpdater.touchEvent(e));
@@ -32,7 +31,6 @@ export function registerMouseUpdater(document: Document, initialOffset: Position
     document.addEventListener("mouseup", (e) => mouseUpdater.mouseEvent(e));
     document.addEventListener("wheel", (e) => mouseUpdater.wheelEvent(e));
   }
-  return mouseUpdater;
 }
 
 

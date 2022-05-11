@@ -2,12 +2,12 @@ import { is, hash, Set, List } from "immutable";
 import { TileGrid } from "./TileGrid";
 
 export enum TileColour {
-  Yellow = "yellow",
-  Red = "red",
-  Purple = "purple",
-  Orange = "orange",
-  Green = "green",
-  Blue = "blue",
+  Yellow = "a",
+  Red = "b",
+  Purple = "c",
+  Orange = "d",
+  Green = "e",
+  Blue = "f",
 }
 
 export function allTileColours(): TileColour[] {
@@ -22,12 +22,12 @@ export function allTileColours(): TileColour[] {
 }
 
 export enum TileShape {
-  One = "one",
-  Two = "two",
-  Three = "three",
-  Four = "four",
-  Five = "five",
-  Six = "six",
+  One = "1",
+  Two = "2",
+  Three = "3",
+  Four = "4",
+  Five = "5",
+  Six = "6",
 }
 
 export function allTileShapes(): TileShape[] {
