@@ -24925,8 +24925,8 @@ exports.pipeline = require('./lib/internal/streams/pipeline.js');
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;
@@ -26674,8 +26674,8 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
     this.chunk = chunk;
@@ -40583,8 +40583,8 @@ exports.pipeline = require('./lib/internal/streams/pipeline.js');
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;
@@ -41986,8 +41986,8 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
     this.chunk = chunk;
@@ -69038,44 +69038,40 @@ parcelHelpers.export(exports, "prettyPrint", ()=>prettyPrint
 );
 let TileColour;
 (function(TileColour1) {
-    TileColour1["Yellow"] = "a";
-    TileColour1["Red"] = "b";
-    TileColour1["Purple"] = "c";
-    TileColour1["Orange"] = "d";
-    TileColour1["Green"] = "e";
-    TileColour1["Blue"] = "f";
+    TileColour1[TileColour1["Yellow"] = 0] = "Yellow";
+    TileColour1[TileColour1["Red"] = 1] = "Red";
+    TileColour1[TileColour1["Purple"] = 2] = "Purple";
+    TileColour1[TileColour1["Orange"] = 3] = "Orange";
+    TileColour1[TileColour1["Green"] = 4] = "Green";
+    TileColour1[TileColour1["Blue"] = 5] = "Blue";
 })(TileColour || (TileColour = {
 }));
-function allTileColours() {
-    return [
-        TileColour.Yellow,
-        TileColour.Red,
-        TileColour.Purple,
-        TileColour.Orange,
-        TileColour.Green,
-        TileColour.Blue, 
-    ];
-}
+const allTileColours = [
+    TileColour.Yellow,
+    TileColour.Red,
+    TileColour.Purple,
+    TileColour.Orange,
+    TileColour.Green,
+    TileColour.Blue, 
+];
 let TileShape;
 (function(TileShape1) {
-    TileShape1["One"] = "1";
-    TileShape1["Two"] = "2";
-    TileShape1["Three"] = "3";
-    TileShape1["Four"] = "4";
-    TileShape1["Five"] = "5";
-    TileShape1["Six"] = "6";
+    TileShape1[TileShape1["One"] = 0] = "One";
+    TileShape1[TileShape1["Two"] = 1] = "Two";
+    TileShape1[TileShape1["Three"] = 2] = "Three";
+    TileShape1[TileShape1["Four"] = 3] = "Four";
+    TileShape1[TileShape1["Five"] = 4] = "Five";
+    TileShape1[TileShape1["Six"] = 5] = "Six";
 })(TileShape || (TileShape = {
 }));
-function allTileShapes() {
-    return [
-        TileShape.One,
-        TileShape.Two,
-        TileShape.Three,
-        TileShape.Four,
-        TileShape.Five,
-        TileShape.Six, 
-    ];
-}
+const allTileShapes = [
+    TileShape.One,
+    TileShape.Two,
+    TileShape.Three,
+    TileShape.Four,
+    TileShape.Five,
+    TileShape.Six, 
+];
 function below(pos) {
     return {
         ...pos,
@@ -72325,8 +72321,8 @@ class FireworkUpdater {
         if (!gameState.fireworkTilePositions.isEmpty()) {
             console.log("fire in the hole");
             const tileOffset = {
-                x: this.tileGraphics.tileWidth / 2,
-                y: this.tileGraphics.tileHeight / 2
+                x: this.tileGraphics.tileSize / 2,
+                y: this.tileGraphics.tileSize / 2
             };
             const fireFrom = {
                 x: mouseState.mousePosition.x,
@@ -91403,7 +91399,7 @@ TileGraphicElements.shapes = _immutable.Map([
     [
         _domain.TileShape.Six,
         new Path2D("M 16 0 L 28 16 L 17 32 L 4 16 L 16 0")
-    ]
+    ] // diamond
 ]);
 TileGraphicElements.colours = _immutable.Map([
     [

@@ -9,7 +9,7 @@ export interface Game {
   isOver: boolean;
   tileBag: TileBag;
   hands: Map<string, List<Tile>>;
-  tiles: PositionedTile[];
+  tiles: List<PositionedTile>;
   tilesLastPlaced: Set<PositionedTile>;
   userInControl: string | undefined;
   turnStartTime: number | undefined;
@@ -23,7 +23,7 @@ export const initialGame: Game = {
   isOver: false,
   tileBag: TileBag.full(),
   hands: Map(),
-  tiles: [],
+  tiles: List(),
   tilesLastPlaced: Set(),
   userInControl: undefined,
   turnStartTime: undefined,

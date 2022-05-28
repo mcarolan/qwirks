@@ -50,12 +50,12 @@ class TileGraphicElements {
   public static tileBorderActive: CanvasGradient;
   public static tileBorderLastPlay: CanvasGradient;
   public static shapes: Map<TileShape, Path2D> = Map([
-    [TileShape.One, new Path2D("M 9.877 30.782 L 10.343 21.657 L 1.218 22.123 L 8 16 L 1.218 9.877 L 10.343 10.343 L 9.877 1.218 L 16 8 L 22.123 1.218 L 21.657 10.343 L 30.782 9.877 L 24 16 L 30.782 22.123 L 21.657 21.657 L 22.123 30.782 L 16 24 Z")],
-    [TileShape.Two, new Path2D("M 0 0 L 32 0 L 32 32 L 0 32 L 0 0")],
-    [TileShape.Three, new Path2D("M 16 0 L 32 12 L 28 32 L 4 32 L 0 12 L 16 0")],
-    [TileShape.Four, new Path2D("M 16 0 A 1 1 0 0 0 16 32 A 1 1 0 0 0 16 0")],
-    [TileShape.Five, new Path2D("M 16 0 L 19 3 L 19 13 L 29 13 L 32 16 L 29 19 L 19 19 L 19 29 L 16 32 L 13 29 L 13 19 L 3 19 L 0 16 L 3 13 L 13 13 L 13 3 L 16 0")],
-    [TileShape.Six, new Path2D("M 16 0 L 28 16 L 17 32 L 4 16 L 16 0")]
+    [TileShape.One, new Path2D("M 9.877 30.782 L 10.343 21.657 L 1.218 22.123 L 8 16 L 1.218 9.877 L 10.343 10.343 L 9.877 1.218 L 16 8 L 22.123 1.218 L 21.657 10.343 L 30.782 9.877 L 24 16 L 30.782 22.123 L 21.657 21.657 L 22.123 30.782 L 16 24 Z")], //star
+    [TileShape.Two, new Path2D("M 0 0 L 32 0 L 32 32 L 0 32 L 0 0")], // square
+    [TileShape.Three, new Path2D("M 16 0 L 32 12 L 28 32 L 4 32 L 0 12 L 16 0")], // pentagon
+    [TileShape.Four, new Path2D("M 16 0 A 1 1 0 0 0 16 32 A 1 1 0 0 0 16 0")], // circle
+    [TileShape.Five, new Path2D("M 16 0 L 19 3 L 19 13 L 29 13 L 32 16 L 29 19 L 19 19 L 19 29 L 16 32 L 13 29 L 13 19 L 3 19 L 0 16 L 3 13 L 13 13 L 13 3 L 16 0")], // cross thing
+    [TileShape.Six, new Path2D("M 16 0 L 28 16 L 17 32 L 4 16 L 16 0")] // diamond
   ]);
   public static colours: Map<TileColour, string> = Map([
     [TileColour.Blue, "#f56600"],

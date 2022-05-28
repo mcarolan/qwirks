@@ -2,16 +2,16 @@ import { is, hash, Set, List } from "immutable";
 import { TileGrid } from "./TileGrid";
 
 export enum TileColour {
-  Yellow = "a",
-  Red = "b",
-  Purple = "c",
-  Orange = "d",
-  Green = "e",
-  Blue = "f",
+  Yellow,
+  Red,
+  Purple,
+  Orange,
+  Green,
+  Blue,
 }
 
-export function allTileColours(): TileColour[] {
-  return [
+export const allTileColours: TileColour[] =
+  [
     TileColour.Yellow,
     TileColour.Red,
     TileColour.Purple,
@@ -19,19 +19,18 @@ export function allTileColours(): TileColour[] {
     TileColour.Green,
     TileColour.Blue,
   ];
-}
 
 export enum TileShape {
-  One = "1",
-  Two = "2",
-  Three = "3",
-  Four = "4",
-  Five = "5",
-  Six = "6",
+  One,
+  Two,
+  Three,
+  Four,
+  Five,
+  Six,
 }
 
-export function allTileShapes(): TileShape[] {
-  return [
+export const allTileShapes: TileShape[] =
+  [
     TileShape.One,
     TileShape.Two,
     TileShape.Three,
@@ -39,7 +38,6 @@ export function allTileShapes(): TileShape[] {
     TileShape.Five,
     TileShape.Six,
   ];
-}
 
 export interface Tile {
   colour: TileColour;

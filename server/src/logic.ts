@@ -82,6 +82,8 @@ export function onStart(
     turnStartTime: clock(),
   };
 
+  console.log(`start with tilebag size ${withoutUserInControl.tileBag.contents.size}`)
+
   return {
     ...withoutUserInControl,
     userInControl: firstUserSelector(withoutUserInControl),
@@ -129,9 +131,10 @@ export function onApplyTiles(
   const user = game.users.get(userId);
   if (hand && user) {
     const [newTiles, newTileBag] = game.tileBag.take(toPlace.size);
+    console.log(`new tile bag has size ${newTileBag.contents.size}`);
     const newHand = removeFromHand(hand, toPlace).concat(newTiles);
 
-    const res = new TileGrid(game.tiles).place(toPlace);
+    const res = new TileGrid(game.tiles.toArray()).place(toPlace);
     if (res.type === "Success") {
       const isGameOver = newHand.size === 0;
       const newScore = user.score + res.score + (isGameOver ? 6 : 0);
@@ -140,7 +143,7 @@ export function onApplyTiles(
         ...game,
         hands: game.hands.set(userId, newHand),
         tileBag: newTileBag,
-        tiles: res.tileGrid.tiles,
+        tiles: List<PositionedTile>(res.tileGrid.tiles),
         tilesLastPlaced: toPlace,
         users: game.users.set(userId, {
           ...user,

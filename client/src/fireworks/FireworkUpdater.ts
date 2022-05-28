@@ -15,8 +15,8 @@ export class FireworkUpdater {
     if (!gameState.fireworkTilePositions.isEmpty()) {
       console.log("fire in the hole");
       const tileOffset = {
-        x: this.tileGraphics.tileWidth / 2,
-        y: this.tileGraphics.tileHeight / 2,
+        x: this.tileGraphics.tileSize / 2,
+        y: this.tileGraphics.tileSize / 2,
       };
       const fireFrom = {
         x: mouseState.mousePosition.x,

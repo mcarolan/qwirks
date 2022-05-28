@@ -1,4 +1,4 @@
-import { List } from "immutable";
+import { is, List } from "immutable";
 import { allTileColours, allTileShapes, Tile } from "../../shared/Domain";
 
 export function removeFromHand<T extends Tile>(
@@ -17,6 +17,29 @@ export function removeFromHand<T extends Tile>(
   return removed;
 }
 
+export function serializeTileBag(tileBag: TileBag): Uint8Array {
+  const counts: number[] = [];
+  allTileColours.forEach((colour) => {
+    allTileShapes.forEach((shape) => {
+      counts.push(tileBag.count({ colour, shape }))
+    });
+  });
+  return new Uint8Array(counts);
+}
+
+export function deserializeTileBag(arr: Uint8Array): TileBag {
+  const contents: Tile[] = [];
+  for (const [i, count] of arr.entries()) {
+    for (var j = 0; j < count; ++j) {
+      const colour = allTileColours[Math.floor(i / allTileColours.length)];
+      const shape = allTileShapes[Math.floor(i % allTileShapes.length)];
+      const tile: Tile = { colour, shape };
+      contents.push(tile);
+    }
+  }
+  return new TileBag(List(contents).sortBy(Math.random));
+}
+
 export class TileBag {
   constructor(readonly contents: List<Tile>) {}
 
@@ -29,10 +52,14 @@ export class TileBag {
     return new TileBag(this.contents.concat(tiles).sortBy(Math.random));
   }
 
+  count(tile: Tile): number {
+    return this.contents.count((t) => is(t.colour, tile.colour) && is(t.shape, tile.shape));
+  }
+
   private static everyTile(): List<Tile> {
     return List<Tile>().withMutations((mutable) => {
-      allTileColours().forEach((colour) => {
-        allTileShapes().forEach((shape) => {
+      allTileColours.forEach((colour) => {
+        allTileShapes.forEach((shape) => {
           mutable.push({ colour, shape });
         });
       });

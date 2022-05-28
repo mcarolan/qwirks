@@ -82,10 +82,10 @@ export function afterUserJoin(
     messages = messages.add(gameOver);
   }
 
-  if (game.tiles.length > 0) {
+  if (game.tiles.size > 0) {
     const updateTiles: UpdateTiles = {
       type: "UpdateTiles",
-      allTiles: game.tiles,
+      allTiles: game.tiles.toArray(),
       tilesLastPlaced: game.tilesLastPlaced.toArray(),
     };
     messages = messages.add(updateTiles);
@@ -193,10 +193,10 @@ export function afterTilesApplied(
     messages = messages.add(handUpdate);
   }
 
-  if (game.tiles.length > 0) {
+  if (game.tiles.size > 0) {
     const updateTiles: UpdateTiles = {
       type: "UpdateTiles",
-      allTiles: game.tiles,
+      allTiles: game.tiles.toArray(),
       tilesLastPlaced: game.tilesLastPlaced.toArray(),
     };
     messages = messages.add(updateTiles);

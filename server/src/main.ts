@@ -44,9 +44,13 @@ function main(persistence: Persistence) {
   async function upsert(key: string, f: (v: Game) => Game): Promise<Game> {
     const game = (await persistence.get(key)) ?? initialGame;
     const nextGame = f(game);
-    const result = await persistence.persist(key, nextGame);
-    console.log(`persistence result for ${key} is ${result}`);
-    return nextGame;
+    const [result, lastWrite] = await persistence.persist(key, nextGame);
+    if (lastWrite) {
+      return { ...nextGame, lastWrite };
+    }
+    else {
+      return { ...nextGame };
+    }
   }
 
   function clock(): number {
@@ -64,7 +68,6 @@ function main(persistence: Persistence) {
   }
 
   function send(message: OutgoingMessage, gameKey: string) {
-    console.log(`sending ${JSON.stringify(message)}`);
     switch (message.type) {
       case "GameOver":
         io.to(gameKey).emit("game.over", message.winningUserId);
@@ -108,7 +111,6 @@ function main(persistence: Persistence) {
   io.on("connection", (s) => {
     var userId: string | undefined;
     var gameKey: string | undefined;
-    console.log("a user connected");
 
     s.on("user.identity", async (user: User, joiningGameKey: string) => {
       gameKey = joiningGameKey;
