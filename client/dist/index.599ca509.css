@@ -190,8 +190,8 @@ body {
 @keyframes fadeInUserList {
   0%,90% { opacity: 0; }
   100% { opacity: 0; }
-  25% { opacity: 1; }
-  60% { opacity: 1; }
+  25% { opacity: 0.8; }
+  60% { opacity: 0.8; }
 }
 
 #userList .userListContents {

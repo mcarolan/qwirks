@@ -8,7 +8,7 @@ import { deserializeGame, serializeGame } from "./bsonCodec";
 import { Game, initialGame } from "./game";
 import { deserializeTileBag, serializeTileBag, TileBag } from "./TileBag";
 
-const redis_host = process.env.REDIS_HOST ?? "localhost";
+const redis_host = process.env.REDIS_HOST ?? "redis";
 
 export interface Persistence {
   persist(gameKey: string, game: Game): Promise<[boolean, number?]>;
