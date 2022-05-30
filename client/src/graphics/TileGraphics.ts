@@ -1,3 +1,4 @@
+import { MouseState, screenToWorld, worldToScreen } from "../game/Mouse";
 import {
   allTileColours,
   allTileShapes,
@@ -7,149 +8,158 @@ import {
   TileShape,
 } from "../../../shared/Domain";
 import { loadImage } from "./domain";
+import { Map } from "immutable";
 
-async function loadImageCache(): Promise<
-  Map<TileColour, Map<TileShape, HTMLImageElement>>
-> {
-  const colours: Map<TileColour, Map<TileShape, HTMLImageElement>> = new Map();
+export async function loadTileGraphics(context: CanvasRenderingContext2D): Promise<TileGraphics> {
+  if (!TileGraphicElements.tileBackgroundGradient) {
+    TileGraphicElements.tileBackgroundGradient = context.createRadialGradient(300, 100, 0, 300, 100, 316.23);
+    TileGraphicElements.tileBackgroundGradient.addColorStop(0.82, 'rgba(0, 0, 0, 1)');
+    TileGraphicElements.tileBackgroundGradient.addColorStop(1, 'rgba(102, 102, 102, 1)');
 
-  for (const colour of allTileColours()) {
-    const shapes: Map<TileShape, HTMLImageElement> = new Map();
-    for (const shape of allTileShapes()) {
-      const src = `./images/${shape.toString()}-${colour.toString()}.png`;
-      shapes.set(shape, await loadImage(src));
-    }
-    colours.set(colour, shapes);
+    TileGraphicElements.tileBackgroundPath = new Path2D("M 8 0 L 56 0 C 64 0 64 0 64 8 L 64 56 C 64 64 64 64 56 64 L 8 64 C 0 64 0 64 0 56 L 0 8 C 0 0 0 0 8 0");
+    
+    TileGraphicElements.tileBorderHover = context.createLinearGradient(0, 100, 600, 100);
+    TileGraphicElements.tileBorderHover.addColorStop(0.77, 'rgba(211, 84, 0, 1)');
+    TileGraphicElements.tileBorderHover.addColorStop(1, 'rgba(0, 0, 0, 1)');
+
+    TileGraphicElements.tileBorderInactive = context.createLinearGradient(0, 100, 600, 100);
+    TileGraphicElements.tileBorderInactive.addColorStop(0.77, 'rgba(42, 42, 42, 1)');
+    TileGraphicElements.tileBorderInactive.addColorStop(1, 'rgba(0, 0, 0, 1)');
+
+    TileGraphicElements.tileBorderActive = context.createLinearGradient(0, 100, 600, 100);
+    TileGraphicElements.tileBorderActive.addColorStop(0.77, 'rgba(0, 159, 212, 1)');
+    TileGraphicElements.tileBorderActive.addColorStop(1, 'rgba(0, 0, 0, 1)');
+
+    TileGraphicElements.tileBorderLastPlay = context.createLinearGradient(0, 100, 600, 100);
+    TileGraphicElements.tileBorderLastPlay.addColorStop(0.77, 'rgba(0, 170, 0, 1)');
+    TileGraphicElements.tileBorderLastPlay.addColorStop(1, 'rgba(0, 0, 0, 1)');
+
+    TileGraphicElements.lastPlacementTileImage = await loadImage(
+      "./images/lastplacement-tile.png"
+    );
   }
 
-  return colours;
+  return new TileGraphics();
 }
 
-export async function loadTileGraphics(): Promise<TileGraphics> {
-  const imageCache = await loadImageCache();
-  const emptyTileImage = await loadImage("./images/empty-tile.png");
-  const blankTileImage = await loadImage("./images/blank-tile.png");
-  const hoverTileImage = await loadImage("./images/hover-tile.png");
-  const activeTileImage = await loadImage("./images/active-tile.png");
-  const lastPlacementTileImage = await loadImage(
-    "./images/lastplacement-tile.png"
-  );
-  const symWidth = emptyTileImage.width / 2;
-  const symHeight = emptyTileImage.height / 2;
-
-  return new TileGraphics(
-    imageCache,
-    emptyTileImage,
-    blankTileImage,
-    hoverTileImage,
-    activeTileImage,
-    lastPlacementTileImage,
-    symWidth,
-    symHeight
-  );
+class TileGraphicElements {
+  public static tileBackgroundGradient: CanvasGradient;
+  public static tileBackgroundPath: Path2D;
+  public static tileBorderInactive: CanvasGradient;
+  public static tileBorderHover: CanvasGradient;
+  public static tileBorderActive: CanvasGradient;
+  public static tileBorderLastPlay: CanvasGradient;
+  public static shapes: Map<TileShape, Path2D> = Map([
+    [TileShape.One, new Path2D("M 9.877 30.782 L 10.343 21.657 L 1.218 22.123 L 8 16 L 1.218 9.877 L 10.343 10.343 L 9.877 1.218 L 16 8 L 22.123 1.218 L 21.657 10.343 L 30.782 9.877 L 24 16 L 30.782 22.123 L 21.657 21.657 L 22.123 30.782 L 16 24 Z")], //star
+    [TileShape.Two, new Path2D("M 0 0 L 32 0 L 32 32 L 0 32 L 0 0")], // square
+    [TileShape.Three, new Path2D("M 16 0 L 32 12 L 28 32 L 4 32 L 0 12 L 16 0")], // pentagon
+    [TileShape.Four, new Path2D("M 16 0 A 1 1 0 0 0 16 32 A 1 1 0 0 0 16 0")], // circle
+    [TileShape.Five, new Path2D("M 16 0 L 19 3 L 19 13 L 29 13 L 32 16 L 29 19 L 19 19 L 19 29 L 16 32 L 13 29 L 13 19 L 3 19 L 0 16 L 3 13 L 13 13 L 13 3 L 16 0")], // cross thing
+    [TileShape.Six, new Path2D("M 16 0 L 28 16 L 17 32 L 4 16 L 16 0")] // diamond
+  ]);
+  public static colours: Map<TileColour, string> = Map([
+    [TileColour.Blue, "#f56600"],
+    [TileColour.Green, "#e60d2e"],
+    [TileColour.Orange, "#00abc9"],
+    [TileColour.Purple, "#e026a3"],
+    [TileColour.Red, "#ffffff"],
+    [TileColour.Yellow, "#e6b012"]
+  ]);
+  public static lastPlacementTileImage: HTMLImageElement;
 }
 
 export class TileGraphics {
   static PADDING = 10;
-  constructor(
-    readonly imageCache: Map<string, Map<string, HTMLImageElement>>,
-    readonly emptyTileImage: HTMLImageElement,
-    readonly blankTileImage: HTMLImageElement,
-    readonly hoverTileImage: HTMLImageElement,
-    readonly activeTileImage: HTMLImageElement,
-    readonly lastPlacementTileImage: HTMLImageElement,
-    readonly symWidth: number,
-    readonly symHeight: number
-  ) {}
-  drawEmptyTile(context: CanvasRenderingContext2D, position: Position): void {
-    context.drawImage(
-      this.emptyTileImage,
-      position.x,
-      position.y,
-      this.emptyTileImage.width,
-      this.emptyTileImage.height
-    );
-  }
 
-  get tileWidth(): number {
-    return this.emptyTileImage.width;
-  }
+  public readonly tileSize = 64;
 
-  get tileHeight(): number {
-    return this.emptyTileImage.height;
-  }
+  private readonly tileStrokeSolid: number[] = [];
+  private readonly tileStrokeDashed: number[] = [8, 4]
 
   drawHoverTile(
     context: CanvasRenderingContext2D,
     position: Position,
-    tile: Tile
+    tile: Tile,
+    scale: number
   ): void {
-    this.drawTile(context, position, tile, this.hoverTileImage);
+    this.drawTile(context, position, tile, TileGraphicElements.tileBorderHover, this.tileStrokeSolid, scale);
   }
 
   drawInactiveTile(
     context: CanvasRenderingContext2D,
     position: Position,
-    tile: Tile
+    tile: Tile,
+    scale: number
   ): void {
-    this.drawTile(context, position, tile, this.blankTileImage);
+    this.drawTile(context, position, tile, TileGraphicElements.tileBorderInactive, this.tileStrokeSolid, scale);
   }
 
   drawActiveTile(
     context: CanvasRenderingContext2D,
     position: Position,
-    tile: Tile
+    tile: Tile,
+    scale: number
   ): void {
-    this.drawTile(context, position, tile, this.activeTileImage);
+    this.drawTile(context, position, tile, TileGraphicElements.tileBorderActive, this.tileStrokeSolid, scale);
   }
 
   drawLastPlacementTile(
     context: CanvasRenderingContext2D,
     position: Position,
-    tile: Tile
+    tile: Tile,
+    scale: number
   ): void {
-    this.drawTile(context, position, tile, this.lastPlacementTileImage);
+    this.drawTile(context, position, tile, TileGraphicElements.tileBorderLastPlay, this.tileStrokeDashed, scale);
+  }
+
+  private drawBackground(context: CanvasRenderingContext2D, stroke: CanvasGradient, strokeDash: number[], position: Position, scale: number): void {
+    context.save();
+    context.fillStyle = TileGraphicElements.tileBackgroundGradient;
+    context.translate(position.x, position.y);
+    context.scale(scale, scale);
+    context.fill(TileGraphicElements.tileBackgroundPath);
+    context.strokeStyle = stroke;
+    context.setLineDash(strokeDash);
+    context.lineWidth = 5;
+    context.stroke(TileGraphicElements.tileBackgroundPath);
+    context.restore();
+  }
+
+  private drawInner(context: CanvasRenderingContext2D, tile: Tile, position: Position, scale: number): void {
+    const colour = TileGraphicElements.colours.get(tile.colour);
+    const shape = TileGraphicElements.shapes.get(tile.shape);
+
+    if (colour && shape) {
+      context.save();
+      context.fillStyle = TileGraphicElements.colours.get(tile.colour) ?? "black";
+      context.translate(position.x, position.y);
+      context.scale(scale, scale);
+      context.fill(shape);
+      context.restore();
+    }
   }
 
   private drawTile(
     context: CanvasRenderingContext2D,
     position: Position,
     tile: Tile,
-    tileBackground: HTMLImageElement
+    stroke: CanvasGradient,
+    strokeDash: number[],
+    scale: number
   ): void {
-    context.drawImage(
-      tileBackground,
-      position.x,
-      position.y,
-      this.blankTileImage.width,
-      this.blankTileImage.height
-    );
-    const inner = this.imageCache
-      .get(tile.colour)
-      ?.get(tile.shape) as HTMLImageElement;
-
-    if (inner) {
-      context.drawImage(
-        inner,
-        position.x + this.symWidth / 2,
-        position.y + this.symHeight / 2,
-        this.symWidth,
-        this.symHeight
-      );
-    }
+    this.drawBackground(context, stroke, strokeDash, position, scale);
+    const innerPosition: Position = { x: position.x + ((this.tileSize * scale) / 2 / 2), y: position.y + ((this.tileSize * scale) / 2 / 2)};
+    this.drawInner(context, tile, innerPosition, scale);
   }
 
-  screenCoords(pos: Position, mid: Position): Position {
-    const tileX = pos.x * this.tileWidth + pos.x * TileGraphics.PADDING;
-    const tileY = pos.y * this.tileHeight + pos.y * TileGraphics.PADDING;
-    return { x: mid.x + tileX, y: mid.y + tileY };
+  screenCoords(pos: Position, mouseState: MouseState): Position {
+    const tileX = pos.x * this.tileSize + pos.x * TileGraphics.PADDING;
+    const tileY = pos.y * this.tileSize + pos.y * TileGraphics.PADDING;
+    return worldToScreen({ x: tileX, y: tileY }, mouseState);
   }
 
-  positionFromScreen(screen: Position, mid: Position, scale: number): Position {
-    const tileX =
-      (screen.x / scale - mid.x) / (this.tileWidth + TileGraphics.PADDING);
-    const tileY =
-      (screen.y / scale - mid.y) / (this.tileHeight + TileGraphics.PADDING);
-    return { x: Math.floor(tileX), y: Math.floor(tileY) };
+  positionFromScreen(screen: Position, mouseState: MouseState): Position {
+    const world = screenToWorld(screen, mouseState);
+    return { x: Math.floor(world.x / (this.tileSize + TileGraphics.PADDING)), y: Math.floor(world.y / (this.tileSize + TileGraphics.PADDING)) };
   }
 }

@@ -1,0 +1,16 @@
+services:
+  node:
+    build: 
+      context: .
+      dockerfile: Dockerfile.node
+    volumes:
+      - ./:/home/node/app
+      - ../shared:/home/node/shared
+    ports:
+      - "3000:3000"
+  redis:
+    build: 
+      context: .
+      dockerfile: Dockerfile.redis
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis-custom.conf

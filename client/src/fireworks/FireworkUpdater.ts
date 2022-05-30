@@ -1,35 +1,30 @@
 import { List } from "immutable";
 import { plus } from "../../../shared/Domain";
-import { IGameStateUpdater } from "~/game/IGameStateUpdater";
 import { GameState } from "~/state/GameState";
 import { TileGraphics } from "~/graphics/TileGraphics";
-import { TileGridGraphics } from "~/graphics/TileGridGraphics";
 import { Fireworks } from "./Fireworks";
+import { MouseState } from "../game/Mouse";
 
-export class FireworkUpdater implements IGameStateUpdater {
+export class FireworkUpdater {
   constructor(
     private tileGraphics: TileGraphics,
-    private tileGrid: TileGridGraphics,
     private fireworks: Fireworks
   ) {}
 
-  update(gameState: GameState): void {
+  update(gameState: GameState, mouseState: MouseState): void {
     if (!gameState.fireworkTilePositions.isEmpty()) {
       console.log("fire in the hole");
       const tileOffset = {
-        x: this.tileGraphics.tileWidth / 2,
-        y: this.tileGraphics.tileHeight / 2,
+        x: this.tileGraphics.tileSize / 2,
+        y: this.tileGraphics.tileSize / 2,
       };
       const fireFrom = {
-        x: gameState.mousePosition.x,
-        y: gameState.mousePosition.y,
+        x: mouseState.mousePosition.x,
+        y: mouseState.mousePosition.y,
       };
 
       gameState.fireworkTilePositions.forEach((tp) => {
-        const p = plus(
-          this.tileGrid.tilePositionToScreenCoords(tp, gameState),
-          tileOffset
-        );
+        const p = plus(this.tileGraphics.screenCoords(tp, mouseState), tileOffset);
         this.fireworks.create(fireFrom, p);
       });
       gameState.fireworkTilePositions = List();

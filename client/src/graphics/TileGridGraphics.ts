@@ -1,96 +1,48 @@
 import { fromJS } from "immutable";
-import { minus, plus, Position, Tile } from "../../../shared/Domain";
-import { IGameStateUpdater } from "../game/IGameStateUpdater";
-import { MouseDrag } from "../game/Mouse";
+import { MouseState } from "~/game/Mouse";
+import { Position, Tile } from "../../../shared/Domain";
 import { GameState, singleActiveTile } from "../state/GameState";
-import { middle, rectContains } from "./domain";
+import { rectContains } from "./domain";
 import { TileGraphics } from "./TileGraphics";
 
-export class TileGridGraphics implements IGameStateUpdater {
-  private offset: Position;
-  private effectiveOffset: Position;
+export class TileGridGraphics {
 
   constructor(
     private tileGraphics: TileGraphics,
     private firstTileImage: HTMLImageElement
-  ) {
-    this.offset = { x: 0, y: 0 };
-    this.effectiveOffset = { x: 0, y: 0 };
-  }
+  ) {}
 
-  private updateDragging(gameState: GameState): void {
-    const delta = (e: MouseDrag) => minus(e.from, e.to);
-    gameState.mouseEvents.forEach((e) => {
-      if (e.type == "MouseDrag") {
-        this.offset = minus(this.offset, delta(e));
-      }
-    });
-
-    this.effectiveOffset = this.offset;
-
-    if (gameState.mouseDragInProgress) {
-      this.effectiveOffset = minus(
-        this.offset,
-        delta(gameState.mouseDragInProgress)
-      );
-    }
-  }
-
-  private mid(state: GameState): Position {
-    return plus(middle(state.mainAreaBounds), this.effectiveOffset);
-  }
-
-  private updatePressedPositions(gameState: GameState): void {
+  update(gameState: GameState, mouseState: MouseState): void {
     if (gameState.tilePositionsPressed.length > 0) {
       gameState.tilePositionsPressed = new Array<Position>();
     }
-
-    gameState.mouseEvents.forEach((e) => {
-      if (e.type == "MouseClick") {
-        if (rectContains(gameState.mainAreaBounds, e.position)) {
+    if (gameState.userInControl === gameState.currentUser.userId) {
+      mouseState.clicks.forEach((c) => {
+        if (rectContains(gameState.mainAreaBounds, c)) {
           const xy = this.tileGraphics.positionFromScreen(
-            e.position,
-            this.mid(gameState),
-            gameState.scale
-          );
+            c,
+            mouseState
+          )
           gameState.tilePositionsPressed.push(xy);
         }
-      }
-    });
-  }
-
-  update(gameState: GameState): void {
-    if (gameState.tilesToDisplay.length > 0) {
-      this.updateDragging(gameState);
-    }
-    if (gameState.userInControl === gameState.currentUser.userId) {
-      this.updatePressedPositions(gameState);
+      });
     }
   }
 
-  tilePositionToScreenCoords(
-    tilePosition: Position,
-    gameState: GameState
-  ): Position {
-    return this.tileGraphics.screenCoords(tilePosition, this.mid(gameState));
-  }
-
-  draw(context: CanvasRenderingContext2D, state: GameState): void {
-    const mid = this.mid(state);
-
+  draw(context: CanvasRenderingContext2D, state: GameState, mouseState: MouseState): void {
     if (
       state.tilesToDisplay.length === 0 &&
       state.userInControl === state.currentUser.userId
     ) {
       const firstTilePosition = this.tileGraphics.screenCoords(
         { x: 0, y: 0 },
-        mid
+        mouseState
       );
       const firstTilePositionX = firstTilePosition.x;
       const firstTilePositionY =
         firstTilePosition.y -
         this.firstTileImage.height +
-        this.tileGraphics.tileHeight;
+        this.tileGraphics.tileSize;
       context.drawImage(
         this.firstTileImage,
         firstTilePositionX,
@@ -101,15 +53,14 @@ export class TileGridGraphics implements IGameStateUpdater {
     context.save();
 
     const hoveringTilePosition = this.tileGraphics.positionFromScreen(
-      state.mousePosition,
-      mid,
-      state.scale
+      mouseState.mousePosition,
+      mouseState
     );
 
     context.fillStyle = "#eeeeee";
     const screenCoords = this.tileGraphics.screenCoords(
       hoveringTilePosition,
-      mid
+      mouseState
     );
 
     var singleActive: [number, Tile] | undefined = singleActiveTile(state);
@@ -120,28 +71,29 @@ export class TileGridGraphics implements IGameStateUpdater {
       this.tileGraphics.drawInactiveTile(
         context,
         screenCoords,
-        singleActive[1]
+        singleActive[1],
+        mouseState.scale
       );
       context.restore();
-    } else {
+    } else if (state.isStarted) {
       context.fillRect(
         screenCoords.x,
         screenCoords.y,
-        this.tileGraphics.tileWidth,
-        this.tileGraphics.tileHeight
+        this.tileGraphics.tileSize * mouseState.scale,
+        this.tileGraphics.tileSize * mouseState.scale
       );
     }
 
     for (const pt of state.tilesToDisplay) {
-      const coords = this.tileGraphics.screenCoords(pt.position, mid);
+      const coords = this.tileGraphics.screenCoords(pt.position, mouseState);
       if (state.currentPlacement.placedTiles.contains(pt)) {
-        this.tileGraphics.drawHoverTile(context, coords, pt);
+        this.tileGraphics.drawHoverTile(context, coords, pt, mouseState.scale);
       } else if (
         state.tilesLastPlaced.map((x) => fromJS(x)).contains(fromJS(pt))
       ) {
-        this.tileGraphics.drawLastPlacementTile(context, coords, pt);
+        this.tileGraphics.drawLastPlacementTile(context, coords, pt, mouseState.scale);
       } else {
-        this.tileGraphics.drawInactiveTile(context, coords, pt);
+        this.tileGraphics.drawInactiveTile(context, coords, pt, mouseState.scale);
       }
     }
     context.restore();

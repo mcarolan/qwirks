@@ -2,16 +2,16 @@ import { is, hash, Set, List } from "immutable";
 import { TileGrid } from "./TileGrid";
 
 export enum TileColour {
-  Yellow = "yellow",
-  Red = "red",
-  Purple = "purple",
-  Orange = "orange",
-  Green = "green",
-  Blue = "blue",
+  Yellow,
+  Red,
+  Purple,
+  Orange,
+  Green,
+  Blue,
 }
 
-export function allTileColours(): TileColour[] {
-  return [
+export const allTileColours: TileColour[] =
+  [
     TileColour.Yellow,
     TileColour.Red,
     TileColour.Purple,
@@ -19,19 +19,18 @@ export function allTileColours(): TileColour[] {
     TileColour.Green,
     TileColour.Blue,
   ];
-}
 
 export enum TileShape {
-  One = "one",
-  Two = "two",
-  Three = "three",
-  Four = "four",
-  Five = "five",
-  Six = "six",
+  One,
+  Two,
+  Three,
+  Four,
+  Five,
+  Six,
 }
 
-export function allTileShapes(): TileShape[] {
-  return [
+export const allTileShapes: TileShape[] =
+  [
     TileShape.One,
     TileShape.Two,
     TileShape.Three,
@@ -39,7 +38,6 @@ export function allTileShapes(): TileShape[] {
     TileShape.Five,
     TileShape.Six,
   ];
-}
 
 export interface Tile {
   colour: TileColour;
@@ -108,6 +106,11 @@ export function divideScalar(p: Position, n: number): Position {
     x: p.x / n,
     y: p.y / n,
   };
+}
+
+export function normalise(p: Position): Position {
+  const length = Math.sqrt(Math.pow(p.x, 2) + Math.pow(p.y, 2));
+  return { x: p.x / length, y: p.y / length };
 }
 
 export function distanceBetween(a: Position, b: Position): number {

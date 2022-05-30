@@ -3,19 +3,20 @@ import { User } from "../../../shared/User";
 import { Fireworks } from "../fireworks/Fireworks";
 import { FireworkUpdater } from "../fireworks/FireworkUpdater";
 import { GameLogic } from "./GameLogic";
-import { Mouse } from "./Mouse";
 import { Network } from "./Network";
 import { Sounds } from "./Sounds";
 import { loadTileGraphics } from "../graphics/TileGraphics";
 import { TileGridGraphics } from "../graphics/TileGridGraphics";
-import { loadImage } from "../graphics/domain";
+import { loadImage, middle, rectFromElement } from "../graphics/domain";
+import { MouseUpdater, registerMouseUpdater } from "./Mouse";
+import { mul } from "../../../shared/Domain";
 
 export interface GameDependencies {
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
   mainArea: HTMLElement;
   tileGrid: TileGridGraphics;
-  mouse: Mouse;
+  mouseUpdater: MouseUpdater | undefined;
   fireworks: Fireworks;
   socket: Socket;
   user: User;
@@ -27,16 +28,16 @@ export interface GameDependencies {
 
 export async function loadGameDependencies(
   user: User,
-  gameKey: string
+  gameKey: string,
+  document: Document
 ): Promise<GameDependencies> {
   const canvas = document.querySelector("#game") as HTMLCanvasElement;
+  const context = canvas.getContext("2d") as CanvasRenderingContext2D;
   const mainArea = document.querySelector("#mainArea") as HTMLElement;
 
-  const tileGraphics = await loadTileGraphics();
+  const tileGraphics = await loadTileGraphics(context);
 
-  const socket = io("https://qwirksbackend.mcarolan.net");
-
-  const mouse = new Mouse();
+  const socket = io("http://192.168.0.16:3000");
 
   const firstTileImage = await loadImage("./images/first-tile.png");
 
@@ -48,16 +49,14 @@ export async function loadGameDependencies(
 
   const fireworkUpdater = new FireworkUpdater(
     tileGraphics,
-    tileGrid,
     fireworks
   );
 
   return {
     canvas,
-    context: canvas.getContext("2d") as CanvasRenderingContext2D,
+    context,
     mainArea,
     tileGrid,
-    mouse,
     fireworks,
     socket,
     user,
@@ -65,5 +64,6 @@ export async function loadGameDependencies(
     sounds,
     gameLogic: new GameLogic(),
     fireworkUpdater,
+    mouseUpdater: undefined,
   };
 }

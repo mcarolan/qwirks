@@ -25,13 +25,15 @@ export class Network implements IGameStateUpdater {
       this.socket.emit("user.identity", this.user, gameKey);
 
       this.socket.on("user.list", (users: [[string, UserWithStatus]]) => {
-        console.log("user list update");
+        console.log(`user list update ${JSON.stringify(users)}`);
         this.setUserList = Map(users);
       });
 
-      this.socket.on("user.hand", (tiles: Tile[]) => {
-        console.log("hand update");
-        this.hand = List(tiles);
+      this.socket.on("user.hand", (userId: string, tiles: Tile[]) => {
+        console.log(`hand update for ${userId}`);
+        if (userId === user.userId) {
+          this.hand = List(tiles);
+        }
       });
 
       this.socket.on("game.started", (turnTimer: number | undefined) => {

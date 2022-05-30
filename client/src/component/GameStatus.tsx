@@ -14,7 +14,7 @@ export function GameStatus(props: GameStatusProps) {
   let status = "";
 
   if (!props.isStarted) {
-    status = "Invite 2-4 players and press start!";
+    status = "Welcome to Qwirks";
   } else if (props.winningUsername) {
     status = `Well done ${props.winningUsername}`;
   } else if (props.userIsInControl) {

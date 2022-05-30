@@ -1,6 +1,7 @@
 import { List, Set } from "immutable";
 import { Tile } from "../../../shared/Domain";
 import React, { useState } from "react";
+import { loadTileGraphics } from "../graphics/TileGraphics";
 
 interface UserHandProps {
   hand: List<Tile>;
@@ -12,15 +13,17 @@ interface UserHandProps {
 export function UserHand(props: UserHandProps) {
   return (
     <div className="hand">
-      {props.hand.toArray().map((t, i) => (
-        <HandTile
-          isEnabled={props.isEnabled}
-          tile={t}
-          key={i}
-          onPressed={() => props.onPressed(i)}
-          isActive={props.activeIndicies.contains(i)}
-        />
-      ))}
+      <div className="handTiles">
+          {props.hand.toArray().map((t, i) => (
+            <HandTile
+              isEnabled={props.isEnabled}
+              tile={t}
+              key={i}
+              onPressed={() => props.onPressed(i)}
+              isActive={props.activeIndicies.contains(i)}
+            />
+          ))}
+        </div>
     </div>
   );
 }
@@ -35,14 +38,38 @@ interface HandTileProps {
 function HandTile(props: HandTileProps) {
   const [isHovering, setHovering] = useState(false);
 
-  const imageUrl = `./images/${props.tile.shape.toString()}-${props.tile.colour.toString()}.png`;
-  const tileBackground = props.isActive
-    ? "./images/active-tile.png"
-    : isHovering
-    ? "./images/hover-tile.png"
-    : "./images/blank-tile.png";
-
   const tileClassName = `tile${props.isEnabled ? "" : " tile-disabled"}`;
+
+  const canvas: React.RefObject<HTMLCanvasElement> = React.createRef();
+
+  React.useEffect(() => {
+    const can = canvas.current;
+    const context = canvas.current?.getContext('2d');
+    const width = canvas.current?.clientWidth;
+
+    if (can && context && width) {
+      (async () => {
+        can.width = can.offsetWidth;
+        can.height = can.offsetHeight;
+
+        const tileGraphics = await loadTileGraphics(context);
+        const scale = width / tileGraphics.tileSize;
+
+        if (props.isActive) {
+          tileGraphics.drawActiveTile(context, { x: 0, y: 0}, props.tile, scale);
+        }
+        else {
+          if (isHovering) {
+            tileGraphics.drawHoverTile(context, { x: 0, y: 0 }, props.tile, scale);
+          }
+          else { 
+            tileGraphics.drawInactiveTile(context, { x: 0, y: 0 }, props.tile, scale);
+          }
+        }
+      })();
+    }
+  });
+  
   return (
     <div
       className={tileClassName}
@@ -62,8 +89,7 @@ function HandTile(props: HandTileProps) {
         }
       }}
     >
-      <img src={tileBackground} className="background" />
-      <img src={imageUrl} className="emblem" />
+      <canvas ref={canvas} />
     </div>
   );
 }

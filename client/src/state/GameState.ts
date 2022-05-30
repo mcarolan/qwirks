@@ -1,7 +1,6 @@
 import { List, Set as ImmSet, Map } from "immutable";
 import { User, UserWithStatus } from "~/../../shared/User";
 import { Rect } from "../graphics/domain";
-import { MouseClickOrDrag, MouseDrag } from "../game/Mouse";
 import { Tile, PositionedTile, Position } from "../../../shared/Domain";
 import { ButtonTag } from "~/component/Button";
 
@@ -13,7 +12,6 @@ export interface CurrentPlacementState {
 }
 
 export interface GameState {
-  scale: number;
   gameKey: string;
   isStarted: boolean;
   isConnected: boolean;
@@ -23,8 +21,6 @@ export interface GameState {
   tilesLastPlaced: ImmSet<PositionedTile>;
   tilesToApply: PositionedTile[] | undefined;
   tilesToSwap: Tile[] | undefined;
-  mousePosition: Position;
-  mouseEvents: Array<MouseClickOrDrag>;
   tilePositionsPressed: Array<Position>;
   pressedButtonTags: ImmSet<ButtonTag>;
   enabledButtonTags: ImmSet<ButtonTag>;
@@ -37,7 +33,6 @@ export interface GameState {
   currentUser: User;
   userList: Map<string, UserWithStatus>;
   userInControl: string | undefined;
-  mouseDragInProgress: MouseDrag | undefined;
   setUsername: string | undefined;
   winner: string | undefined;
   turnTimerSelected: number | undefined;
@@ -71,7 +66,6 @@ export function initialGameState(
   mainAreaBounds: Rect
 ): GameState {
   return {
-    scale: 1,
     gameKey: gameKey,
     isStarted: false,
     isConnected: false,
@@ -81,8 +75,6 @@ export function initialGameState(
     tilesLastPlaced: ImmSet(),
     tilesToApply: undefined,
     tilesToSwap: undefined,
-    mousePosition: { x: 0, y: 0 },
-    mouseEvents: [],
     tilePositionsPressed: [],
     pressedButtonTags: ImmSet(),
     enabledButtonTags: ImmSet(),
@@ -100,12 +92,11 @@ export function initialGameState(
     currentUser: user,
     userList: Map(),
     userInControl: undefined,
-    mouseDragInProgress: undefined,
     setUsername: undefined,
     winner: undefined,
     turnTimerSelected: undefined,
     turnTimer: undefined,
     turnStartTime: undefined,
-    newUserInControl: undefined,
+    newUserInControl: undefined
   };
 }
