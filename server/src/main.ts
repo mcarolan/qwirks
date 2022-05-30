@@ -1,4 +1,4 @@
-import express from "express";
+const express = require("express");
 import http from "http";
 import { List, Set } from "immutable";
 import { Server } from "socket.io";
