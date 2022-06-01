@@ -29517,8 +29517,8 @@ Stream.prototype.pipe = function(dest, options) {
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;
@@ -40583,8 +40583,8 @@ exports.pipeline = require('./lib/internal/streams/pipeline.js');
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
 /*</replacement>*/ Readable.ReadableState = ReadableState;
@@ -69168,7 +69168,7 @@ async function loadGameDependencies(user, gameKey, document) {
     const context = canvas.getContext("2d");
     const mainArea = document.querySelector("#mainArea");
     const tileGraphics = await _tileGraphics.loadTileGraphics(context);
-    const socket = _socketIoClient.io("http://192.168.0.16:3000");
+    const socket = _socketIoClient.io("https://qwirks.mcarolan.net/");
     const firstTileImage = await _domain.loadImage("./images/first-tile.png");
     const tileGrid = new _tileGridGraphics.TileGridGraphics(tileGraphics, firstTileImage);
     const fireworks = new _fireworks.Fireworks();
