@@ -1,10 +1,10 @@
 FROM node:18
 USER node
 ENV NODE_ENV=production
-COPY --chown=node server/ /home/node/app
-COPY --chown=node shared/ /home/node/shared
+COPY --chown=node ./server/ /home/node/app
+COPY --chown=node ./shared/ /home/node/shared
 WORKDIR "/home/node/shared"
 RUN npm install
 WORKDIR "/home/node/app"
 RUN npm install
-CMD [ "npm", "start" ]
+CMD [ "npm", "run", "start" ]

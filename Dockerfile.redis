@@ -1,2 +1,3 @@
 FROM redis:7
+COPY ./server/redis.conf /usr/local/etc/redis/redis-custom.conf
 CMD [ "redis-server", "/usr/local/etc/redis/redis-custom.conf" ]
