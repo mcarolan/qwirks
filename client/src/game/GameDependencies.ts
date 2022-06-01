@@ -37,7 +37,7 @@ export async function loadGameDependencies(
 
   const tileGraphics = await loadTileGraphics(context);
 
-  const socket = io("http://192.168.0.16:3000");
+  const socket = io("https://qwirks.mcarolan.net/");
 
   const firstTileImage = await loadImage("./images/first-tile.png");
 
